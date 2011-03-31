@@ -242,6 +242,209 @@ class Redis
      */
     public function publish($channel, $message) {}
     
+    /**
+     * Verify if the specified key exists.
+     * 
+     * @param string $key 
+     * @return BOOL: If the key exists, return TRUE, otherwise return FALSE.
+     * @example
+     * $redis->set('key', 'value');
+     * $redis->exists('key'); //  TRUE 
+     * $redis->exists('NonExistingKey'); // FALSE
+     */
+    public function exists($key) {}
+    
+    /**
+     * Increment the number stored at key by one. 
+     * 
+     * @param type $key 
+     * @return INT the new value
+     * @example
+     * $redis->incr('key1'); // key1 didn't exists, set to 0 before the increment and now has the value 1 
+     * $redis->incr('key1'); // 2
+     * $redis->incr('key1'); // 3
+     * $redis->incr('key1'); // 4
+     */
+    public function incr($key) {}
+    
+    /**
+     * Increment the number stored at key by one. If the second argument is filled, it will be used as the integer value of the increment.
+     * 
+     * @param string    $key    key
+     * @param int       $value  value that will be added to key (only for incrBy)
+     * @return INT the new value
+     * @example
+     * $redis->incr('key1'); // key1 didn't exists, set to 0 before the increment and now has the value 1 
+     * $redis->incr('key1'); // 2
+     * $redis->incr('key1'); // 3
+     * $redis->incr('key1'); // 4
+     * $redis->incrBy('key1', 10); // 14
+     */
+    public function incrBy($key, $value) {}
+    
+    /**
+     * Decrement the number stored at key by one.
+     * 
+     * @param string $key 
+     * @return INT the new value
+     * @example
+     * $redis->decr('key1'); // key1 didn't exists, set to 0 before the increment and now has the value -1
+     * $redis->decr('key1'); // -2
+     * $redis->decr('key1'); // -3
+     */
+    public function decr($key) {}
+    
+    /**
+     * Decrement the number stored at key by one. If the second argument is filled, it will be used as the integer value of the decrement.
+     * 
+     * @param string    $key 
+     * @param int       $value  that will be substracted to key (only for decrBy)
+     * @return INT the new value
+     * @example
+     * $redis->decr('key1'); // key1 didn't exists, set to 0 before the increment and now has the value -1
+     * $redis->decr('key1'); // -2
+     * $redis->decr('key1'); // -3
+     * $redis->decrBy('key1', 10); // -13
+     */
+    public function decrBy($key, $value) {}
+    
+    /**
+     * Get the values of all the specified keys. If one or more keys dont exist, the array will contain FALSE at the position of the key.
+     * 
+     * @param array $keys Array containing the list of the keys
+     * @return Array: Array containing the values related to keys in argument
+     * @example
+     * $redis->set('key1', 'value1');
+     * $redis->set('key2', 'value2');
+     * $redis->set('key3', 'value3');
+     * $redis->getMultiple(array('key1', 'key2', 'key3')); // array('value1', 'value2', 'value3');
+     * $redis->getMultiple(array('key0', 'key1', 'key5')); // array(`FALSE`, 'value2', `FALSE`);
+     */
+    public function getMultiple(array $keys) {}
+    
+    /**
+     * Adds the string value to the head (left) of the list. Creates the list if the key didn't exist. If the key exists and is not a list, FALSE is returned.
+     * 
+     * @param string $key
+     * @param string $value String, value to push in key
+     * @return LONG The new length of the list in case of success, FALSE in case of Failure.
+     * @example 
+     * $redis->delete('key1');
+     * $redis->lPush('key1', 'C'); // returns 1
+     * $redis->lPush('key1', 'B'); // returns 2
+     * $redis->lPush('key1', 'A'); // returns 3
+     * // key1 now points to the following list: [ 'A', 'B', 'C' ]
+     */
+    public function lPush($key, $value) {}
+    
+    /**
+     * Adds the string value to the tail (right) of the list. Creates the list if the key didn't exist. If the key exists and is not a list, FALSE is returned.
+     * 
+     * @param string $key
+     * @param string $value String, value to push in key
+     * @return LONG The new length of the list in case of success, FALSE in case of Failure.
+     * @example 
+     * $redis->delete('key1');
+     * $redis->rPush('key1', 'A'); // returns 1
+     * $redis->rPush('key1', 'B'); // returns 2
+     * $redis->rPush('key1', 'C'); // returns 3
+     * // key1 now points to the following list: [ 'A', 'B', 'C' ]
+     */
+    public function rPush($key, $value) {}
+    
+    /**
+     * Adds the string value to the head (left) of the list if the list exists.
+     * 
+     * @param type $key
+     * @param type $value String, value to push in key
+     * @return LONG The new length of the list in case of success, FALSE in case of Failure.
+     * @example 
+     * $redis->delete('key1');
+     * $redis->lPushx('key1', 'A'); // returns 0
+     * $redis->lPush('key1', 'A'); // returns 1
+     * $redis->lPushx('key1', 'B'); // returns 2
+     * $redis->lPushx('key1', 'C'); // returns 3
+     * // key1 now points to the following list: [ 'A', 'B', 'C' ]
+     */
+    public function lPushx($key, $value) {}
+    
+    /**
+     * Adds the string value to the tail (right) of the list if the ist exists. FALSE in case of Failure.
+     * 
+     * @param string $key
+     * @param string $value String, value to push in key
+     * @return LONG The new length of the list in case of success, FALSE in case of Failure.
+     * @example
+     * $redis->delete('key1');
+     * $redis->rPushx('key1', 'A'); // returns 0
+     * $redis->rPush('key1', 'A'); // returns 1
+     * $redis->rPushx('key1', 'B'); // returns 2
+     * $redis->rPushx('key1', 'C'); // returns 3
+     * // key1 now points to the following list: [ 'A', 'B', 'C' ]
+     */
+    public function rPushx($key, $value) {}
+    
+    /**
+     * Returns and removes the first element of the list.
+     * 
+     * @param type $key 
+     * @return STRING if command executed successfully BOOL FALSE in case of failure (empty list)
+     * @example 
+     * $redis->rPush('key1', 'A');
+     * $redis->rPush('key1', 'B');
+     * $redis->rPush('key1', 'C'); // key1 => [ 'A', 'B', 'C' ]
+     * $redis->lPop('key1'); // key1 => [ 'B', 'C' ]
+     */
+    public function lPop($key) {}
+    
+    /**
+     * Returns and removes the last element of the list.
+     * 
+     * @param type $key 
+     * @return STRING if command executed successfully BOOL FALSE in case of failure (empty list)
+     * @example 
+     * $redis->rPush('key1', 'A');
+     * $redis->rPush('key1', 'B');
+     * $redis->rPush('key1', 'C'); // key1 => [ 'A', 'B', 'C' ]
+     * $redis->rPop('key1'); // key1 => [ 'A', 'B' ]
+     */
+    public function rPop($key) {}
+    
+    /**
+     * Is a blocking lPop(rPop) primitive. If at least one of the lists contains at least one element, the element will be popped from the head of the list and returned to the caller. Il all the list identified by the keys passed in arguments are empty, blPop will block during the specified timeout until an element is pushed to one of those lists. This element will be popped.
+     * 
+     * @param array $keys Array containing the keys of the lists INTEGER Timeout Or STRING Key1 STRING Key2 STRING Key3 ... STRING Keyn INTEGER Timeout
+     * @return ARRAY array('listName', 'element')
+     * @example
+     * // Non blocking feature
+     * $redis->lPush('key1', 'A');
+     * $redis->delete('key2');
+     * 
+     * $redis->blPop('key1', 'key2', 10); // array('key1', 'A')
+     * // OR
+     * $redis->blPop(array('key1', 'key2'), 10); // array('key1', 'A')
+     * 
+     * $redis->brPop('key1', 'key2', 10); // array('key1', 'A')
+     * // OR
+     * $redis->brPop(array('key1', 'key2'), 10); // array('key1', 'A')
+     * 
+     * // Blocking feature
+     * 
+     * // process 1
+     * $redis->delete('key1');
+     * $redis->blPop('key1', 10);
+     * // blocking for 10 seconds
+     * 
+     * // process 2
+     * $redis->lPush('key1', 'A');
+     * 
+     * // process 1
+     * // array('key1', 'A') is returned
+     */
+    public function blPop(array $keys) {}
+    
+    
+    
     
     
     
