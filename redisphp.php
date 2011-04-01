@@ -521,7 +521,7 @@ class Redis
     public function lIndex($key, $index) {}
 
     /**
-     * @see lIndex
+     * @see lIndex()
      */
     public function lGet($key, $index) {}
 
@@ -561,7 +561,7 @@ class Redis
     public function lRange($key, $start, $end) {}
 
     /**
-     * @see lRange
+     * @see lRange()
      */
     public function lGetRange($key, $start, $end) {}
 
@@ -585,7 +585,7 @@ class Redis
     public function lTrim($key, $start, $stop) {}
 
     /**
-     * @see lTrim
+     * @see lTrim()
      */
     public function listTrim($key, $start, $stop) {}
 
@@ -677,7 +677,7 @@ class Redis
     public function sRem($key, $member) {}
 
     /**
-     * @see sRem
+     * @see sRem()
      */
     public function sRemove($key, $member) {}
 
@@ -719,7 +719,7 @@ class Redis
     public function sIsMember($key, $value) {}
 
     /**
-     * @see sIsMember
+     * @see sIsMember()
      */
     public function sContains($key, $value) {}
 
@@ -901,18 +901,185 @@ class Redis
      */
     public function sUnionStore($dstKey, $key1, $key2, $keyN) {}
 
+    /**
+     * Performs the difference between N sets and returns it.
+     *
+     * @param string $key1 Any number of keys corresponding to sets in redis.
+     * @param string $key2 ...
+     * @param string $keyN ...
+     * @return Array of strings: The difference of the first set will all the others.
+     * @example
+     * $redis->delete('s0', 's1', 's2');
+     *
+     * $redis->sAdd('s0', '1');
+     * $redis->sAdd('s0', '2');
+     * $redis->sAdd('s0', '3');
+     * $redis->sAdd('s0', '4');
+     *
+     * $redis->sAdd('s1', '1');
+     * $redis->sAdd('s2', '3');
+     *
+     * var_dump($redis->sDiff('s0', 's1', 's2'));
+     *
+     * //array(2) {
+     * //  [0]=>
+     * //  string(1) "4"
+     * //  [1]=>
+     * //  string(1) "2"
+     * //}
+     */
+    public function sDiff($key1, $key2, $keyN) {}
+
+    /**
+     * Performs the same action as sDiff, but stores the result in the first key
+     *
+     * @param string $dstKey    the key to store the diff into.
+     * @param string $key1      Any number of keys corresponding to sets in redis
+     * @param string $key2      ...
+     * @param string $keyN      ...
+     * @return  INTEGER: The cardinality of the resulting set, or FALSE in case of a missing key.
+     * @example
+     * $redis->delete('s0', 's1', 's2');
+     *
+     * $redis->sAdd('s0', '1');
+     * $redis->sAdd('s0', '2');
+     * $redis->sAdd('s0', '3');
+     * $redis->sAdd('s0', '4');
+     *
+     * $redis->sAdd('s1', '1');
+     * $redis->sAdd('s2', '3');
+     *
+     * var_dump($redis->sDiffStore('dst', 's0', 's1', 's2'));
+     * var_dump($redis->sMembers('dst'));
+     *
+     * //int(2)
+     * //array(2) {
+     * //  [0]=>
+     * //  string(1) "4"
+     * //  [1]=>
+     * //  string(1) "2"
+     * //}
+     */
+    public function sDiffStore($dstKey, $key1, $key2, $keyN) {}
+
+    /**
+     * Returns the contents of a set.
+     *
+     * @param type $key
+     * @return An array of elements, the contents of the set.
+     * @example
+     * $redis->delete('s');
+     * $redis->sAdd('s', 'a');
+     * $redis->sAdd('s', 'b');
+     * $redis->sAdd('s', 'a');
+     * $redis->sAdd('s', 'c');
+     * var_dump($redis->sMembers('s'));
+     *
+     * //array(3) {
+     * //  [0]=>
+     * //  string(1) "c"
+     * //  [1]=>
+     * //  string(1) "a"
+     * //  [2]=>
+     * //  string(1) "b"
+     * //}
+     * // The order is random and corresponds to redis' own internal representation of the set structure.
+     */
+    public function sMembers($key) {}
+
+    /**
+     * @see sMembers()
+     */
+    public function sGetMembers($key) {}
+
+    /**
+     * Sets a value and returns the previous entry at that key.
+     *
+     * @param string $key
+     * @param string $value
+     * @return A string, the previous value located at this key.
+     * @example
+     * $redis->set('x', '42');
+     * $exValue = $redis->getSet('x', 'lol');   // return '42', replaces x by 'lol'
+     * $newValue = $redis->get('x')'            // return 'lol'
+     */
+    public function getSet($key, $value) {}
+
+    /**
+     * Returns a random key.
+     *
+     * @return STRING: an existing key in redis.
+     * @example
+     * $key = $redis->randomKey();
+     * $surprise = $redis->get($key);  // who knows what's in there.
+     */
+    public function randomKey() {}
 
 
+    /**
+     * Switches to a given database.
+     *
+     * @param int $dbindex
+     * @return TRUE in case of success, FALSE in case of failure.
+     * @example
+     * $redis->select(0);  // switch to DB 0
+     * $redis->set('x', '42'); // write 42 to x
+     * $redis->move('x', 1);   // move to DB 1
+     * $redis->select(1);  // switch to DB 1
+     * $redis->get('x');   // will return 42
+     */
+    public function select($dbindex) {}
 
+    /**
+     * Moves a key to a different database.
+     *
+     * @param string    $key
+     * @param int       $dbindex
+     * @return BOOL: TRUE in case of success, FALSE in case of failure.
+     * @example
+     * $redis->select(0);  // switch to DB 0
+     * $redis->set('x', '42'); // write 42 to x
+     * $redis->move('x', 1);   // move to DB 1
+     * $redis->select(1);  // switch to DB 1
+     * $redis->get('x');   // will return 42
+     */
+    public function move($key, $dbindex) {}
 
+    /**
+     * Renames a key.
+     *
+     * @param string $srcKey
+     * @param string $dstKey
+     * @return BOOL: TRUE in case of success, FALSE in case of failure.
+     * @example
+     * $redis->set('x', '42');
+     * $redis->rename('x', 'y');
+     * $redis->get('y');   // → 42
+     * $redis->get('x');   // → `FALSE`
+     */
+    public function rename($srcKey, $dstKey) {}
 
+    /**
+     * @see rename()
+     */
+    public function renameKey($srcKey, $dstKey) {}
 
-
-
-
-
-
-
+    /**
+     * Renames a key.
+     * 
+     * Same as rename, but will not replace a key if the destination already exists.
+     * This is the same behaviour as setNx.
+     *
+     * @param string $srcKey
+     * @param string $dstKey
+     * @return BOOL: TRUE in case of success, FALSE in case of failure.
+     * @example
+     * $redis->set('x', '42');
+     * $redis->rename('x', 'y');
+     * $redis->get('y');   // → 42
+     * $redis->get('x');   // → `FALSE`
+     */
+    public function renameNx($srcKey, $dstKey) {}
 
 
 
