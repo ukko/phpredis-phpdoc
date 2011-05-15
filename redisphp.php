@@ -1176,15 +1176,15 @@ class Redis
      * - "refcount"
      * - "idletime"
      * 
+     * @param string $string
      * @param string $key
-     * @param string $value
      * @return STRING for "encoding", LONG for "refcount" and "idletime", FALSE if the key doesn't exist.
      * @example
      * $redis->object("encoding", "l"); // → ziplist
      * $redis->object("refcount", "l"); // → 1
      * $redis->object("idletime", "l"); // → 400 (in seconds, with a precision of 10 seconds).
      */
-    public function object($key = '', $value = '') {}
+    public function object($string = '', $key = '') {}
     
     /**
      * Performs a synchronous save.
@@ -1227,7 +1227,7 @@ class Redis
      * @example
      * $redis->type('key');
      */
-    public function type() {}
+    public function type($key) {}
     
     /**
      * Append specified string to the string stored in specified key.
