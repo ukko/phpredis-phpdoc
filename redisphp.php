@@ -1066,7 +1066,7 @@ class Redis
 
     /**
      * Renames a key.
-     * 
+     *
      * Same as rename, but will not replace a key if the destination already exists.
      * This is the same behaviour as setNx.
      *
@@ -1080,7 +1080,7 @@ class Redis
      * $redis->get('x');   // → `FALSE`
      */
     public function renameNx($srcKey, $dstKey) {}
-    
+
     /**
      * Sets an expiration date (a timeout) on an item.
      * @param string    $key    The key that will disappear.
@@ -1093,12 +1093,12 @@ class Redis
      * $redis->get('x');            // will return `FALSE`, as 'x' has expired.
      */
     public function setTimeout($key, $ttl) {}
-    
+
     /**
      * @see setTimeout()
      */
     public function expire($key, $ttl) {}
-    
+
     /**
      * Sets an expiration date (a timestamp) on an item.
      * @param strin     $key        The key that will disappear.
@@ -1112,7 +1112,7 @@ class Redis
      * $redis->get('x');                // will return `FALSE`, as 'x' has expired.
      */
     public function expireAt($key, $timestamp) {}
-    
+
     /**
      * Returns the keys that match a certain pattern.
      * @param string $pattern pattern, using '*' as a wildcard.
@@ -1122,7 +1122,7 @@ class Redis
      * $keyWithUserPrefix = $redis->keys('user*');
      */
     public function keys($pattern) {}
-    
+
     /**
      * @see keys()
      */
@@ -1136,9 +1136,9 @@ class Redis
      * echo "Redis has $count keys\n";
      */
     public function dbSize() {}
-    
+
     /**
-     * Authenticate the connection using a password. 
+     * Authenticate the connection using a password.
      * Warning: The password is sent in plain-text over the network.
      * @param string $password
      * @return BOOL: TRUE if the connection is authenticated, FALSE otherwise.
@@ -1146,7 +1146,7 @@ class Redis
      * $redis->auth('foobared');
      */
     public function auth($password) {}
-    
+
     /**
      * Starts the background rewrite of AOF (Append-Only File)
      * @return BOOL: TRUE in case of success, FALSE in case of failure.
@@ -1154,7 +1154,7 @@ class Redis
      * $redis->bgrewriteaof();
      */
     public function bgrewriteaof() {}
-    
+
     /**
      * Changes the slave status
      * Either host and port, or no parameter to stop being a slave.
@@ -1163,19 +1163,19 @@ class Redis
      * @return BOOL: TRUE in case of success, FALSE in case of failure.
      * @example
      * $redis->slaveof('10.0.1.7', 6379);
-     * // ... 
+     * // ...
      * $redis->slaveof();
      */
     public function slaveof($host = '', $port = '') {}
-    
+
     /**
      * Describes the object pointed to by a key.
-     * The information to retrieve (string) and the key (string). 
+     * The information to retrieve (string) and the key (string).
      * Info can be one of the following:
      * - "encoding"
      * - "refcount"
      * - "idletime"
-     * 
+     *
      * @param string $string
      * @param string $key
      * @return STRING for "encoding", LONG for "refcount" and "idletime", FALSE if the key doesn't exist.
@@ -1185,25 +1185,25 @@ class Redis
      * $redis->object("idletime", "l"); // → 400 (in seconds, with a precision of 10 seconds).
      */
     public function object($string = '', $key = '') {}
-    
+
     /**
      * Performs a synchronous save.
-     * @return BOOL: TRUE in case of success, FALSE in case of failure. 
+     * @return BOOL: TRUE in case of success, FALSE in case of failure.
      * If a save is already running, this command will fail and return FALSE.
      * @example
      * $redis->save();
      */
     public function save() {}
-    
+
     /**
      * Performs a background save.
-     * @return BOOL: TRUE in case of success, FALSE in case of failure. 
+     * @return BOOL: TRUE in case of success, FALSE in case of failure.
      * If a save is already running, this command will fail and return FALSE.
      * @example
      * $redis->bgSave();
      */
     public function bgsave() {}
-    
+
     /**
      * Returns the timestamp of the last disk save.
      * @return INT: timestamp.
@@ -1211,27 +1211,27 @@ class Redis
      * $redis->lastSave();
      */
     public function lastSave() {}
-    
-    
+
+
     /**
      * Returns the type of data pointed by a given key.
      * @param string $key
-     * @return Depending on the type of the data pointed by the key, 
+     * @return Depending on the type of the data pointed by the key,
      * this method will return the following value:
      * - string: Redis::REDIS_STRING
      * - set: Redis::REDIS_SET
      * - list: Redis::REDIS_LIST
      * - zset: Redis::REDIS_ZSET
      * - hash: Redis::REDIS_HASH
-     * - other: Redis::REDIS_NOT_FOUND 
+     * - other: Redis::REDIS_NOT_FOUND
      * @example
      * $redis->type('key');
      */
     public function type($key) {}
-    
+
     /**
      * Append specified string to the string stored in specified key.
-     * @param string $key 
+     * @param string $key
      * @param string $value
      * @return INTEGER: Size of the value after the append
      * @example
@@ -1240,6 +1240,159 @@ class Redis
      * $redis->get('key');              // 'value1value2'
      */
     public function append() {}
+
+
+    /**
+     * Return a substring of a larger string
+     * @param string    $key
+     * @param int       $start
+     * @param int       $end
+     * @return STRING: the substring
+     * @example
+     * $redis->set('key', 'string value');
+     * $redis->getRange('key', 0, 5); // 'string'
+     * $redis->getRange('key', -5, -1); // 'value'
+     */
+    public function getRange($key, $start, $end) {}
+
+    /**
+     * Return a substring of a larger string
+     * @deprecated
+     * @param type $key
+     * @param type $start
+     * @param type $end
+     */
+    public function substr($key, $start, $end) {}
+
+
+    /**
+     * Changes a substring of a larger string.
+     * @param string    $key
+     * @param int       $offset
+     * @param string    $value
+     * @return STRING: the length of the string after it was modified.
+     * @example
+     * $redis->set('key', 'Hello world');
+     * $redis->setRange('key', 6, "redis"); // returns 11
+     * $redis->get('key'); // "Hello redis"
+     */
+    public function setRange($key, $offset, $value) {}
+
+    /**
+     * Get the length of a string value.
+     * @param type $key
+     * @return INTEGER
+     * @example
+     * $redis->set('key', 'value');
+     * $redis->strlen('key'); // 5
+     */
+    public function strlen($key) {}
+
+    /**
+     * Return a single bit out of a larger string
+     * @param string    $key
+     * @param int       $offset
+     * @return LONG: the bit value (0 or 1)
+     * @example
+     * $redis->set('key', "\x7f");  // this is 0111 1111
+     * $redis->getBit('key', 0);    // 0
+     * $redis->getBit('key', 1);    // 1
+     */
+    public function getBit($key, $offset) {}
+
+    /**
+     * Changes a single bit of a string.
+     * @param string    $key
+     * @param int       $offset
+     * @param bool||int $value bool or int (1 or 0)
+     * @return LONG: 0 or 1, the value of the bit before it was set.
+     * @example
+     * $redis->set('key', "*");     // ord("*") = 42 = 0x2f = "0010 1010"
+     * $redis->setBit('key', 5, 1); // returns 0
+     * $redis->setBit('key', 7, 1); // returns 0
+     * $redis->get('key');          // chr(0x2f) = "/" = b("0010 1111")
+     */
+    public function setBit($key, $offset, $value) {}
+
+
+    /**
+     * Removes all entries from the current database.
+     * @return BOOL: Always TRUE.
+     * @example $redis->flushDB();
+     */
+    public function flushDB() {}
+
+    /**
+     * Removes all entries from all databases.
+     * @return BOOL: Always TRUE.
+     * @example $redis->flushAll();
+     */
+    public function flushAll() {}
+
+
+
+    /**
+     * Sort
+     * @param string    $key
+     * @param array     $option array(key => value, ...) - optional, with the following keys and values:
+     * - 'by' => 'some_pattern_*',
+     * - 'limit' => array(0, 1),
+     * - 'get' => 'some_other_pattern_*' or an array of patterns,
+     * - 'sort' => 'asc' or 'desc',
+     * - 'alpha' => TRUE,
+     * - 'store' => 'external-key'
+     * @return
+     * An array of values, or a number corresponding to the number of elements stored if that was used.
+     * @example
+     * $redis->delete('s');
+     * $redis->sadd('s', 5);
+     * $redis->sadd('s', 4);
+     * $redis->sadd('s', 2);
+     * $redis->sadd('s', 1);
+     * $redis->sadd('s', 3);
+     *
+     * var_dump($redis->sort('s')); // 1,2,3,4,5
+     * var_dump($redis->sort('s', array('sort' => 'desc'))); // 5,4,3,2,1
+     * var_dump($redis->sort('s', array('sort' => 'desc', 'store' => 'out'))); // (int)5
+     */
+    public function sort($key, $option = null) {}
+
+
+    /**
+     * Returns an associative array of strings and integers, with the following keys:
+     * - redis_version
+     * - arch_bits
+     * - uptime_in_seconds
+     * - uptime_in_days
+     * - connected_clients
+     * - connected_slaves
+     * - used_memory
+     * - changes_since_last_save
+     * - bgsave_in_progress
+     * - last_save_time
+     * - total_connections_received
+     * - total_commands_processed
+     * - role
+     * @example $redis->info();
+     */
+    public function info() {}
+
+    /**
+     * Returns the time to live left for a given key, in seconds. If the key doesn't exist, FALSE is returned.
+     * @param string $key
+     * @return Long, the time left to live in seconds.
+     * @example $redis->ttl('key');
+     */
+    public function ttl($key) {}
+
+    /**
+     * Remove the expiration timer from a key.
+     * @param string $key
+     * @return BOOL: TRUE if a timeout was removed, FALSE if the key didn’t exist or didn’t have an expiration timer.
+     * @example $redis->persist('key');
+     */
+    public function persist($key) {}
+
 
 
 
