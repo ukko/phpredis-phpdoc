@@ -1393,9 +1393,182 @@ class Redis
      */
     public function persist($key) {}
 
+    /**
+     * Sets multiple key-value pairs in one atomic command.
+     * MSETNX only returns TRUE if all the keys were set (see SETNX).
+     * @param array(key => value) $array Pairs: array(key => value, ...)
+     * @return Bool TRUE in case of success, FALSE in case of failure.
+     * @example
+     * $redis->mset(array('key0' => 'value0', 'key1' => 'value1'));
+     * var_dump($redis->get('key0'));
+     * var_dump($redis->get('key1'));
+     * // Output:
+     * // string(6) "value0"
+     * // string(6) "value1"
+     */
+    public function mset($array) {}
 
+    /**
+     * @see mset()
+     */
+    public function msetnx($array) {}
 
+    /**
+     * Pops a value from the tail of a list, and pushes it to the front of another list.
+     * Also return this value.
+     * @since redis >= 1.1
+     * @param string $srcKey
+     * @param string $dstKey
+     * @return STRING The element that was moved in case of success, FALSE in case of failure.
+     * @example
+     * $redis->delete('x', 'y');
+     *
+     * $redis->lPush('x', 'abc');
+     * $redis->lPush('x', 'def');
+     * $redis->lPush('y', '123');
+     * $redis->lPush('y', '456');
+     *
+     * // move the last of x to the front of y.
+     * var_dump($redis->rpoplpush('x', 'y'));
+     * var_dump($redis->lRange('x', 0, -1));
+     * var_dump($redis->lRange('y', 0, -1));
+     *
+     * //Output:
+     * //
+     * //string(3) "abc"
+     * //array(1) {
+     * //  [0]=>
+     * //  string(3) "def"
+     * //}
+     * //array(3) {
+     * //  [0]=>
+     * //  string(3) "abc"
+     * //  [1]=>
+     * //  string(3) "456"
+     * //  [2]=>
+     * //  string(3) "123"
+     * //}
+     */
+    public function rpoplpush($srcKey, $dstKey) {}
 
+    /**
+     * A blocking version of rpoplpush, with an integral timeout in the third parameter.
+     * @param string    $srcKey
+     * @param string    $dstKey
+     * @param long      $timeout
+     * @return STRING The element that was moved in case of success, FALSE in case of timeout.
+     */
+    public function brpoplpush($srcKey, $dstKey, $timeout) {}
+
+    /**
+     * Adds the specified member with a given score to the sorted set stored at key.
+     * @param string $key
+     * @param double $score
+     * @param string $value
+     * @return Long 1 if the element is added. 0 otherwise.
+     * @example
+     * $redis->zAdd('key', 1, 'val1');
+     * $redis->zAdd('key', 0, 'val0');
+     * $redis->zAdd('key', 5, 'val5');
+     * $redis->zRange('key', 0, -1); // array(val0, val1, val5)
+     */
+    public function zAdd($key, $score, $value) {}
+
+    /**
+     * Returns a range of elements from the ordered set stored at the specified key,
+     * with values in the range [start, end]. start and stop are interpreted as zero-based indices:
+     * 0 the first element,
+     * 1 the second ...
+     * -1 the last element,
+     * -2 the penultimate ...
+     * @param string $key
+     * @param long $start
+     * @param long $end
+     * @param bool $withscores
+     * @return Array containing the values in specified range.
+     * @example
+     * $redis->zAdd('key1', 0, 'val0');
+     * $redis->zAdd('key1', 2, 'val2');
+     * $redis->zAdd('key1', 10, 'val10');
+     * $redis->zRange('key1', 0, -1); // array('val0', 'val2', 'val10')
+     * // with scores
+     * $redis->zRange('key1', 0, -1, true); // array('val0' => 0, 'val2' => 2, 'val10' => 10)
+     */
+    public function zRange($key, $start, $end, $withscores = false) {}
+
+    /**
+     * Deletes a specified member from the ordered set.
+     * @param string $key
+     * @param string $member
+     * @return LONG 1 on success, 0 on failure.
+     * @example
+     * $redis->zAdd('key', 0, 'val0');
+     * $redis->zAdd('key', 2, 'val2');
+     * $redis->zAdd('key', 10, 'val10');
+     * $redis->zDelete('key', 'val2');
+     * $redis->zRange('key', 0, -1); // array('val0', 'val10')
+     */
+    public function zDelete($key, $member) {}
+
+    /**
+     * @see zDelete()
+     */
+    public function zRem($key, $member) {}
+
+    /**
+     * Returns the elements of the sorted set stored at the specified key in the range [start, end]
+     * in reverse order. start and stop are interpretated as zero-based indices:
+     * 0 the first element,
+     * 1 the second ...
+     * -1 the last element,
+     * -2 the penultimate ...
+     * @param string $key
+     * @param long $start
+     * @param long $end
+     * @param bool $withscore
+     * @return Array containing the values in specified range.
+     * @example
+     * $redis->zAdd('key', 0, 'val0');
+     * $redis->zAdd('key', 2, 'val2');
+     * $redis->zAdd('key', 10, 'val10');
+     * $redis->zRevRange('key', 0, -1); // array('val10', 'val2', 'val0')
+     *
+     * // with scores
+     * $redis->zRevRange('key', 0, -1, true); // array('val10' => 10, 'val2' => 2, 'val0' => 0)
+     */
+    public function zRevRange($key, $start, $end, $withscore = false) {}
+
+    /**
+     * Returns the elements of the sorted set stored at the specified key which have scores in the
+     * range [start,end]. Adding a parenthesis before start or end excludes it from the range.
+     * +inf and -inf are also valid limits.
+     *
+     * zRevRangeByScore returns the same items in reverse order, when the start and end parameters are swapped.
+     * @param string $key
+     * @param long $start
+     * @param long $end
+     * @param array $options Two options are available: withscores => TRUE, and limit => array($offset, $count)
+     * @return Array containing the values in specified range.
+     * @example
+     * $redis->zAdd('key', 0, 'val0');
+     * $redis->zAdd('key', 2, 'val2');
+     * $redis->zAdd('key', 10, 'val10');
+     * $redis->zRangeByScore('key', 0, 3); // array('val0', 'val2')
+     * $redis->zRangeByScore('key', 0, 3, array('withscores' => TRUE); // array('val0' => 0, 'val2' => 2)
+     * $redis->zRangeByScore('key', 0, 3, array('limit' => array(1, 1)); // array('val2' => 2)
+     * $redis->zRangeByScore('key', 0, 3, array('limit' => array(1, 1)); // array('val2')
+     * $redis->zRangeByScore('key', 0, 3, array('withscores' => TRUE, 'limit' => array(1, 1)); // array('val2' => 2)
+     */
+    public function zRangeByScore($key, $start, $end, array $options) {}
+
+    /**
+     * @see zRangeByScore()
+     * @param type $key
+     * @param type $start
+     * @param type $end
+     * @param array $options
+     */
+    public function zRevRangeByScore($key, $start, $end, array $options) {}
 
 
 }
