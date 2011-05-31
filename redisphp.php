@@ -1763,5 +1763,197 @@ class Redis
      */
     public function zInter($Output, $ZSetKeys, $Weights, $aggregateFunction) {}
 
+    /**
+     * Adds a value to the hash stored at key. If this value is already in the hash, FALSE is returned.
+     * @param string $key
+     * @param string $hashKey
+     * @param string $value
+     * @return LONG
+     * 1 if value didn't exist and was added successfully,
+     * 0 if the value was already present and was replaced, FALSE if there was an error.
+     * @example
+     * $redis->delete('h')
+     * $redis->hSet('h', 'key1', 'hello');  // 1, 'key1' => 'hello' in the hash at "h"
+     * $redis->hGet('h', 'key1');           // returns "hello"
+     *
+     * $redis->hSet('h', 'key1', 'plop');   // 0, value was replaced.
+     * $redis->hGet('h', 'key1');           // returns "plop"
+     */
+    public function hSet($key, $hashKey, $value) {}
+
+    /**
+     * Adds a value to the hash stored at key only if this field isn't already in the hash.
+     * @param string $key
+     * @param string $hashKey
+     * @param string $value
+     * @return BOOL TRUE if the field was set, FALSE if it was already present.
+     * @example
+     * $redis->delete('h')
+     * $redis->hSetNx('h', 'key1', 'hello'); // TRUE, 'key1' => 'hello' in the hash at "h"
+     * $redis->hSetNx('h', 'key1', 'world'); // FALSE, 'key1' => 'hello' in the hash at "h". No change since the field wasn't replaced.
+     */
+    public function hSetNx($key, $hashKey, $value) {}
+
+    /**
+     * Gets a value from the hash stored at key. If the hash table doesn't exist, or the key doesn't exist, FALSE is returned.
+     * @param string $key
+     * @param string $hashKey
+     * @return STRING The value, if the command executed successfully BOOL FALSE in case of failure
+     * @example
+     */
+    public function hGet($key, $hash) {}
+
+    /**
+     * Returns the length of a hash, in number of items
+     * @param string $key
+     * @return LONG the number of items in a hash, FALSE if the key doesn't exist or isn't a hash.
+     * @example
+     * $redis->delete('h')
+     * $redis->hSet('h', 'key1', 'hello');
+     * $redis->hSet('h', 'key2', 'plop');
+     * $redis->hLen('h'); // returns 2
+     */
+    public function hLen($key) {}
+
+    /**
+     * Removes a value from the hash stored at key. If the hash table doesn't exist, or the key doesn't exist, FALSE is returned.
+     * @param type $key
+     * @param type $hashKey
+     * @return BOOL TRUE in case of success, FALSE in case of failure
+     * @example
+     */
+    public function hDel($key, $hashKey) {}
+
+    /**
+     * Returns the keys in a hash, as an array of strings.
+     * @param type $key
+     * @return An array of elements, the keys of the hash. This works like PHP's array_keys().
+     * @example
+     * $redis->delete('h');
+     * $redis->hSet('h', 'a', 'x');
+     * $redis->hSet('h', 'b', 'y');
+     * $redis->hSet('h', 'c', 'z');
+     * $redis->hSet('h', 'd', 't');
+     * var_dump($redis->hKeys('h'));
+     *
+     * // Output:
+     * // array(4) {
+     * // [0]=>
+     * // string(1) "a"
+     * // [1]=>
+     * // string(1) "b"
+     * // [2]=>
+     * // string(1) "c"
+     * // [3]=>
+     * // string(1) "d"
+     * // }
+     * // The order is random and corresponds to redis' own internal representation of the set structure.
+     */
+    public function hKeys($key) {}
+
+    /**
+     * Returns the values in a hash, as an array of strings.
+     * @param string $key
+     * @return An array of elements, the values of the hash. This works like PHP's array_values().
+     * @example
+     * $redis->delete('h');
+     * $redis->hSet('h', 'a', 'x');
+     * $redis->hSet('h', 'b', 'y');
+     * $redis->hSet('h', 'c', 'z');
+     * $redis->hSet('h', 'd', 't');
+     * var_dump($redis->hVals('h'));
+     *
+     * // Output
+     * // array(4) {
+     * //   [0]=>
+     * //   string(1) "x"
+     * //   [1]=>
+     * //   string(1) "y"
+     * //   [2]=>
+     * //   string(1) "z"
+     * //   [3]=>
+     * //   string(1) "t"
+     * // }
+     * // The order is random and corresponds to redis' own internal representation of the set structure.
+     */
+    public function hVals($key) {}
+
+
+    /**
+     * Returns the whole hash, as an array of strings indexed by strings.
+     * @param type $key
+     * @return An array of elements, the contents of the hash.
+     * @example
+     * $redis->delete('h');
+     * $redis->hSet('h', 'a', 'x');
+     * $redis->hSet('h', 'b', 'y');
+     * $redis->hSet('h', 'c', 'z');
+     * $redis->hSet('h', 'd', 't');
+     * var_dump($redis->hGetAll('h'));
+     *
+     * // Output:
+     * // array(4) {
+     * //   ["a"]=>
+     * //   string(1) "x"
+     * //   ["b"]=>
+     * //   string(1) "y"
+     * //   ["c"]=>
+     * //   string(1) "z"
+     * //   ["d"]=>
+     * //   string(1) "t"
+     * // }
+     * // The order is random and corresponds to redis' own internal representation of the set structure.
+     */
+    public function hGetAll($key) {}
+
+    /**
+     * Verify if the specified member exists in a key.
+     * @param string $key
+     * @param string $hashKey
+     * @return BOOL: If the member exists in the hash table, return TRUE, otherwise return FALSE.
+     * @example
+     * $redis->hSet('h', 'a', 'x');
+     * $redis->hExists('h', 'a');               //  TRUE
+     * $redis->hExists('h', 'NonExistingKey');  // FALSE
+     */
+    public function hExists($key, $hashKey) {}
+
+    /**
+     * Increments the value of a member from a hash by a given amount.
+     * @param string $key
+     * @param string $hashKey
+     * @param integer $value (integer) value that will be added to the member's value
+     * @return LONG the new value
+     * @example
+     * $redis->delete('h');
+     * $redis->hIncrBy('h', 'x', 2); // returns 2: h[x] = 2 now.
+     * $redis->hIncrBy('h', 'x', 1); // h[x] ← 2 + 1. Returns 3
+     */
+    public function hIncrBy($key, $hashKey, $value) {}
+
+    /**
+     * Fills in a whole hash. Non-string values are converted to string, using the standard (string) cast.
+     * NULL values are stored as empty strings
+     * @param string    $key
+     * @param array     $hashKeys key → value array
+     * @return BOOL
+     * @example
+     * $redis->delete('user:1');
+     * $redis->hMset('user:1', array('name' => 'Joe', 'salary' => 2000));
+     * $redis->hIncrBy('user:1', 'salary', 100); // Joe earns 100 more now.
+     */
+    public function hMset($key, $hashKeys) {}
+
+    /**
+     * Retirieve the values associated to the specified fields in the hash.
+     * @param string    $key
+     * @param array     $hashKeys
+     * @return Array An array of elements, the values of the specified fields in the hash, with the hash keys as array keys.
+     * @example $redis->delete('h');
+     * $redis->hSet('h', 'field1', 'value1');
+     * $redis->hSet('h', 'field2', 'value2');
+     * $redis->hmGet('h', array('field1', 'field2')); // returns array('field1' => 'value1', 'field2' => 'value2')
+     */
+    public function hMGet($key, $hashKeys) {}
 
 }
