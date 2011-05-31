@@ -6,6 +6,8 @@
  */
 class Redis
 {
+    const AFTER  = '';
+    const BEFORE = '';
     /**
      * Creates a Redis client
      *
@@ -161,7 +163,7 @@ class Redis
      * Enter and exit transactional mode.
      *
      * @param Redis::MULTI | Redis::PIPELINE Defaults to Redis::MULTI. A Redis::MULTI block of commands runs as a single transaction; a Redis::PIPELINE block is simply transmitted faster to the server, but without any guarantee of atomicity. discard cancels a transaction.
-     * @return multi() returns the Redis instance and enters multi-mode. Once in multi-mode, all subsequent method calls return the same object until exec() is called.
+     * @return Redis returns the Redis instance and enters multi-mode. Once in multi-mode, all subsequent method calls return the same object until exec() is called.
      * @example
      * $ret = $redis->multi()
      *      ->set('key1', 'val1')
@@ -1569,6 +1571,197 @@ class Redis
      * @param array $options
      */
     public function zRevRangeByScore($key, $start, $end, array $options) {}
+
+    /**
+     * Returns the number of elements of the sorted set stored at the specified key which have
+     * scores in the range [start,end]. Adding a parenthesis before start or end excludes it
+     * from the range. +inf and -inf are also valid limits.
+     * @param string $key
+     * @param string $start
+     * @param string $end
+     * @return LONG the size of a corresponding zRangeByScore.
+     * @example
+     * $redis->zAdd('key', 0, 'val0');
+     * $redis->zAdd('key', 2, 'val2');
+     * $redis->zAdd('key', 10, 'val10');
+     * $redis->zCount('key', 0, 3); // 2, corresponding to array('val0', 'val2')
+     */
+    public function zCount($key, $start, $end) {}
+
+    /**
+     * Deletes the elements of the sorted set stored at the specified key which have scores in the range [start,end].
+     * @param string $key
+     * @param double|string $start double or "+inf" or "-inf" string
+     * @param double|string $end double or "+inf" or "-inf" string
+     * @returnLONG The number of values deleted from the sorted set
+     * @example
+     * $redis->zAdd('key', 0, 'val0');
+     * $redis->zAdd('key', 2, 'val2');
+     * $redis->zAdd('key', 10, 'val10');
+     * $redis->zRemRangeByScore('key', 0, 3); // 2
+     */
+    public function zRemRangeByScore($key, $start, $end) {}
+
+    /**
+     * @see zRemRangeByScore()
+     */
+    public function zDeleteRangeByScore($key, $start, $end) {}
+
+    /**
+     * Deletes the elements of the sorted set stored at the specified key which have rank in the range [start,end].
+     * @param string $key
+     * @param long $start
+     * @param long $end
+     * @return LONG The number of values deleted from the sorted set
+     * @example
+     * $redis->zAdd('key', 1, 'one');
+     * $redis->zAdd('key', 2, 'two');
+     * $redis->zAdd('key', 3, 'three');
+     * $redis->zRemRangeByRank('key', 0, 1); // 2
+     * $redis->zRange('key', 0, -1, array('withscores' => TRUE)); // array('three' => 3)
+     */
+    public function zRemRangeByRank($key, $start, $end) {}
+
+    /**
+     * @see zRemRangeByRank()
+     */
+    public function zDeleteRangeByRank($key, $start, $end) {}
+
+    /**
+     * Returns the cardinality of an ordered set.
+     * @param string $key
+     * @return Long, the set's cardinality
+     * @example
+     * $redis->zAdd('key', 0, 'val0');
+     * $redis->zAdd('key', 2, 'val2');
+     * $redis->zAdd('key', 10, 'val10');
+     * $redis->zSize('key'); // 3
+     */
+    public function zSize($key) {}
+
+    /**
+     * @see zSize()
+     */
+    public function zCard($key) {}
+
+    /**
+     * Returns the score of a given member in the specified sorted set.
+     * @param string $key
+     * @param string $member
+     * @return Double
+     * @example
+     * $redis->zAdd('key', 2.5, 'val2');
+     * $redis->zScore('key', 'val2'); // 2.5
+     */
+    public function zScore($key, $member) {}
+
+    /**
+     * Returns the rank of a given member in the specified sorted set, starting at 0 for the item
+     * with the smallest score. zRevRank starts at 0 for the item with the largest score.
+     * @param string $key
+     * @param string $member
+     * @return Long, the item's score.
+     * @example
+     * $redis->delete('z');
+     * $redis->zAdd('key', 1, 'one');
+     * $redis->zAdd('key', 2, 'two');
+     * $redis->zRank('key', 'one');     // 0
+     * $redis->zRank('key', 'two');     // 1
+     * $redis->zRevRank('key', 'one');  // 1
+     * $redis->zRevRank('key', 'two');  // 0
+     */
+    public function zRank($key, $member) {}
+
+    /**
+     * @see zRank()
+     */
+    public function zRevRank($key, $member) {}
+
+    /**
+     * Increments the score of a member from a sorted set by a given amount.
+     * @param string $key
+     * @param double $value (double) value that will be added to the member's score
+     * @param string $member
+     * @return DOUBLE the new value
+     * @example
+     * $redis->delete('key');
+     * $redis->zIncrBy('key', 2.5, 'member1');  // key or member1 didn't exist, so member1's score is to 0
+     *                                          // before the increment and now has the value 2.5
+     * $redis->zIncrBy('key', 1, 'member1');    // 3.5
+     */
+    public function zIncrBy($key, $value, $member) {}
+
+    /**
+     * Creates an union of sorted sets given in second argument.
+     * The result of the union will be stored in the sorted set defined by the first argument.
+     * The third optionnel argument defines weights to apply to the sorted sets in input.
+     * In this case, the weights will be multiplied by the score of each element in the sorted set
+     * before applying the aggregation. The forth argument defines the AGGREGATE option which
+     * specify how the results of the union are aggregated.
+     * @param string    $Output
+     * @param array     $ZSetKeys
+     * @param array     $Weights
+     * @param type      $aggregateFunction  Either "SUM", "MIN", or "MAX": defines the behaviour to use on duplicate entries during the zUnion.
+     * @return LONG The number of values in the new sorted set.
+     * @example
+     * $redis->delete('k1');
+     * $redis->delete('k2');
+     * $redis->delete('k3');
+     * $redis->delete('ko1');
+     * $redis->delete('ko2');
+     * $redis->delete('ko3');
+     *
+     * $redis->zAdd('k1', 0, 'val0');
+     * $redis->zAdd('k1', 1, 'val1');
+     *
+     * $redis->zAdd('k2', 2, 'val2');
+     * $redis->zAdd('k2', 3, 'val3');
+     *
+     * $redis->zUnion('ko1', array('k1', 'k2')); // 4, 'ko1' => array('val0', 'val1', 'val2', 'val3')
+     *
+     * // Weighted zUnion
+     * $redis->zUnion('ko2', array('k1', 'k2'), array(1, 1)); // 4, 'ko1' => array('val0', 'val1', 'val2', 'val3')
+     * $redis->zUnion('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko1' => array('val0', 'val2', 'val3', 'val1')
+     */
+    public function zUnion($Output, $ZSetKeys, $Weights, $aggregateFunction) {}
+
+    /**
+     * Creates an intersection of sorted sets given in second argument.
+     * The result of the union will be stored in the sorted set defined by the first argument.
+     * The third optionnel argument defines weights to apply to the sorted sets in input.
+     * In this case, the weights will be multiplied by the score of each element in the sorted set
+     * before applying the aggregation. The forth argument defines the AGGREGATE option which
+     * specify how the results of the union are aggregated.
+     * @param string $Output
+     * @param array $ZSetKeys
+     * @param array $Weights
+     * @param string $aggregateFunction Either "SUM", "MIN", or "MAX": defines the behaviour to use on duplicate entries during the zInter.
+     * @return LONG The number of values in the new sorted set.
+     * @example
+     * $redis->delete('k1');
+     * $redis->delete('k2');
+     * $redis->delete('k3');
+     *
+     * $redis->delete('ko1');
+     * $redis->delete('ko2');
+     * $redis->delete('ko3');
+     * $redis->delete('ko4');
+     *
+     * $redis->zAdd('k1', 0, 'val0');
+     * $redis->zAdd('k1', 1, 'val1');
+     * $redis->zAdd('k1', 3, 'val3');
+     *
+     * $redis->zAdd('k2', 2, 'val1');
+     * $redis->zAdd('k2', 3, 'val3');
+     *
+     * $redis->zInter('ko1', array('k1', 'k2'));               // 2, 'ko1' => array('val1', 'val3')
+     * $redis->zInter('ko2', array('k1', 'k2'), array(1, 1));  // 2, 'ko2' => array('val1', 'val3')
+     *
+     * // Weighted zInter
+     * $redis->zInter('ko3', array('k1', 'k2'), array(1, 5), 'min'); // 2, 'ko3' => array('val1', 'val3')
+     * $redis->zInter('ko4', array('k1', 'k2'), array(1, 5), 'max'); // 2, 'ko4' => array('val3', 'val1')
+     */
+    public function zInter($Output, $ZSetKeys, $Weights, $aggregateFunction) {}
 
 
 }
