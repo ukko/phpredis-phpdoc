@@ -16,4 +16,4 @@ Do not forget to declare a variable type $ redis
 	 */
 	public $redis = null;
 
-![Example of use](./phpredis.png)
+![Example of use](https://github.com/ukko/phpredis-phpdoc/blob/master/redisphp.png)
