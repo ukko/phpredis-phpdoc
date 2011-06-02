@@ -10,9 +10,10 @@ h3. For example:
 h3. Warning:
 
 Do not forget to declare a variable type $ redis
+
 	/**
 	 * @ Var Redis
 	 */
 	public $redis = null;
 
-(phpredis.png "Example use")
+!([]./phpredis.png "Example use")
