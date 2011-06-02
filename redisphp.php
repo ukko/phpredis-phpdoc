@@ -1949,10 +1949,13 @@ class Redis
      * @param string    $key
      * @param array     $hashKeys
      * @return Array An array of elements, the values of the specified fields in the hash, with the hash keys as array keys.
-     * @example $redis->delete('h');
+     * @example
+     * <pre>
+     * $redis->delete('h');
      * $redis->hSet('h', 'field1', 'value1');
      * $redis->hSet('h', 'field2', 'value2');
      * $redis->hmGet('h', array('field1', 'field2')); // returns array('field1' => 'value1', 'field2' => 'value2')
+     * </pre>
      */
     public function hMGet($key, $hashKeys) {}
 
