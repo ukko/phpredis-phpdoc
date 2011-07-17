@@ -1,13 +1,44 @@
 <?php
-
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
+/**
+ * Helper autocomplete for php redis extension
+ * @author Max Kamashev <max.kamashev@gmail.com>
+ * @link https://github.com/ukko/phpredis-phpdoc
  */
 class Redis
 {
     const AFTER  = '';
     const BEFORE = '';
+
+    /**
+     * Options
+     */
+    const OPT_SERIALIZER    = 1;
+    const OPT_PREFIX        = 2;
+
+    /**
+     * Serializers
+     */
+    const SERIALIZER_NONE   = 0;
+    const SERIALIZER_PHP    = 1;
+    const SERIALIZER_IGBINARY = 2;
+
+    /**
+     * Multi
+     */
+    const MULTI             = '';
+    const PIPELINE          = '';
+
+    /**
+     * Type
+     */
+    const REDIS_NOT_FOUND   = 0;
+    const REDIS_STRING      = 1;
+    const REDIS_SET         = 2;
+    const REDIS_LIST        = 3;
+    const REDIS_ZSET        = 4;
+    const REDIS_HASH        = 5;
+
+
     /**
      * Creates a Redis client
      *
