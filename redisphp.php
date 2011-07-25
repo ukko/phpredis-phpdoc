@@ -915,7 +915,7 @@ class Redis
 
     /**
      * Returns the cardinality of the set identified by key.
-     * 
+     *
      * @param   string  $key
      * @return  int     the cardinality of the set identified by key, 0 if the set doesn't exist.
      * @link    http://redis.io/commands/scard
@@ -1416,7 +1416,7 @@ class Redis
 
     /**
      * Starts the background rewrite of AOF (Append-Only File)
-     * 
+     *
      * @return  bool:   TRUE in case of success, FALSE in case of failure.
      * @link    http://redis.io/commands/bgrewriteaof
      * @example $redis->bgrewriteaof();
@@ -1544,7 +1544,7 @@ class Redis
 
     /**
      * Return a substring of a larger string
-     * 
+     *
      * @deprecated
      * @param type $key
      * @param type $start
@@ -1691,6 +1691,21 @@ class Redis
     public function info() {}
 
     /**
+     * Resets the statistics reported by Redis using the INFO command (`info()` function).
+     * These are the counters that are reset:
+     *      - Keyspace hits
+     *      - Keyspace misses
+     *      - Number of commands processed
+     *      - Number of connections received
+     *      - Number of expired keys
+     *
+     * @return bool: `TRUE` in case of success, `FALSE` in case of failure.
+     * @example $redis->resetStat();
+     * @link http://redis.io/commands/config-resetstat
+     */
+    public function resetStat() {}
+
+    /**
      * Returns the time to live left for a given key, in seconds. If the key doesn't exist, FALSE is returned.
      *
      * @param   string  $key
@@ -1739,7 +1754,7 @@ class Redis
     /**
      * Pops a value from the tail of a list, and pushes it to the front of another list.
      * Also return this value.
-     * 
+     *
      * @since   redis >= 1.1
      * @param   string  $srcKey
      * @param   string  $dstKey
@@ -1973,7 +1988,7 @@ class Redis
 
     /**
      * Deletes the elements of the sorted set stored at the specified key which have rank in the range [start,end].
-     * 
+     *
      * @param   string  $key
      * @param   int     $start
      * @param   int     $end
@@ -2023,7 +2038,7 @@ class Redis
 
     /**
      * Returns the score of a given member in the specified sorted set.
-     * 
+     *
      * @param   string  $key
      * @param   string  $member
      * @return  float
@@ -2066,7 +2081,7 @@ class Redis
 
     /**
      * Increments the score of a member from a sorted set by a given amount.
-     * 
+     *
      * @param   string  $key
      * @param   float   $value (double) value that will be added to the member's score
      * @param   string  $member
@@ -2166,7 +2181,7 @@ class Redis
 
     /**
      * Adds a value to the hash stored at key. If this value is already in the hash, FALSE is returned.
-     * 
+     *
      * @param string $key
      * @param string $hashKey
      * @param string $value
@@ -2405,3 +2420,5 @@ class Redis
     public function hMGet($key, $hashKeys) {}
 
 }
+
+class RedisException extends Exception {}
