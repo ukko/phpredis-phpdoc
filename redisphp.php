@@ -1914,7 +1914,9 @@ class Redis
      * @param   string  $key
      * @param   int     $start
      * @param   int     $end
-     * @param   array   $options Two options are available: withscores => TRUE, and limit => array($offset, $count)
+     * @param   array   $options Two options are available:
+     *                      - withscores => TRUE,
+     *                      - and limit => array($offset, $count)
      * @return  array   Array containing the values in specified range.
      * @link    http://redis.io/commands/zrangebyscore
      * @example
@@ -1929,7 +1931,7 @@ class Redis
      * $redis->zRangeByScore('key', 0, 3, array('withscores' => TRUE, 'limit' => array(1, 1));  // array('val2' => 2)
      * </pre>
      */
-    public function zRangeByScore($key, $start, $end, array $options) {}
+    public function zRangeByScore($key, $start, $end, array $options = array()) {}
 
     /**
      * @see zRangeByScore()
