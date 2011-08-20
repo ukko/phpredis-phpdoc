@@ -431,42 +431,54 @@ class Redis
     public function getMultiple(array $keys) {}
 
     /**
-     * Adds the string value to the head (left) of the list. Creates the list if the key didn't exist.
+     * Adds the string values to the head (left) of the list. Creates the list if the key didn't exist.
      * If the key exists and is not a list, FALSE is returned.
      *
      * @param   string $key
-     * @param   string $value String, value to push in key
+     * @param   string $value1  String, value to push in key
+     * @param   string $value2  Optional
+     * @param   string $valueN  Optional
      * @return  int    The new length of the list in case of success, FALSE in case of Failure.
      * @link    http://redis.io/commands/lpush
      * @example
      * <pre>
-     * $redis->delete('key1');
-     * $redis->lPush('key1', 'C'); // returns 1
-     * $redis->lPush('key1', 'B'); // returns 2
-     * $redis->lPush('key1', 'A'); // returns 3
-     * // key1 now points to the following list: [ 'A', 'B', 'C' ]
+     * $redis->lPush('l', 'v1', 'v2', 'v3', 'v4')   // int(4)
+     * var_dump( $redis->lRange('l', 0, -1) );
+     * //// Output:
+     * // array(4) {
+     * //   [0]=> string(2) "v4"
+     * //   [1]=> string(2) "v3"
+     * //   [2]=> string(2) "v2"
+     * //   [3]=> string(2) "v1"
+     * // }
      * </pre>
      */
-    public function lPush($key, $value) {}
+    public function lPush( $key, $value1, $value2, $valueN ) {}
 
     /**
-     * Adds the string value to the tail (right) of the list. Creates the list if the key didn't exist.
+     * Adds the string values to the tail (right) of the list. Creates the list if the key didn't exist.
      * If the key exists and is not a list, FALSE is returned.
      *
      * @param   string  $key
-     * @param   string  $value String, value to push in key
+     * @param   string  $value1 String, value to push in key
+     * @param   string  $value2 Optional
+     * @param   string  $valueN Optional
      * @return  int     The new length of the list in case of success, FALSE in case of Failure.
      * @link    http://redis.io/commands/rpush
      * @example
      * <pre>
-     * $redis->delete('key1');
-     * $redis->rPush('key1', 'A'); // returns 1
-     * $redis->rPush('key1', 'B'); // returns 2
-     * $redis->rPush('key1', 'C'); // returns 3
-     * // key1 now points to the following list: [ 'A', 'B', 'C' ]
+     * $redis->rPush('l', 'v1', 'v2', 'v3', 'v4');    // int(4)
+     * var_dump( $redis->lRange('l', 0, -1) );
+     * //// Output:
+     * // array(4) {
+     * //   [0]=> string(2) "v1"
+     * //   [1]=> string(2) "v2"
+     * //   [2]=> string(2) "v3"
+     * //   [3]=> string(2) "v4"
+     * // }
      * </pre>
      */
-    public function rPush($key, $value) {}
+    public function rPush( $key, $value1, $value2, $valueN ) {}
 
     /**
      * Adds the string value to the head (left) of the list if the list exists.
@@ -821,46 +833,54 @@ class Redis
 
 
     /**
-     * Adds a value to the set value stored at key. If this value is already in the set, FALSE is returned.
+     * Adds a values to the set value stored at key. If this value is already in the set, FALSE is returned.
      *
-     * @param   string  $key
-     * @param   string  $value
-     * @return  bool    TRUE if value didn't exist and was added successfully, FALSE if the value is already present.
+     * @param   string  $key        Required key
+     * @param   string  $value1     Required value
+     * @param   string  $value2     Optional value
+     * @param   string  $valueN     Optional value
+     * @return  int     Number of value added
      * @link    http://redis.io/commands/sadd
      * @example
      * <pre>
-     * $redis->sAdd('key1' , 'set1'); // TRUE, 'key1' => {'set1'}
-     * $redis->sAdd('key1' , 'set2'); // TRUE, 'key1' => {'set1', 'set2'}
-     * $redis->sAdd('key1' , 'set2'); // FALSE, 'key1' => {'set1', 'set2'}
+     * $redis->sAdd('k', 'v1');                // int(1)
+     * $redis->sAdd('k', 'v1', 'v2', 'v3');    // int(2)
      * </pre>
      */
-    public function sAdd($key, $value) {}
+    public function sAdd( $key, $value1, $value2, $valueN ) {}
 
 
     /**
-     * Removes the specified member from the set value stored at key.
+     * Removes the specified members from the set value stored at key.
      *
      * @param   string  $key
-     * @param   string  $member
-     * @return  bool    TRUE if the member was present in the set, FALSE if it didn't.
+     * @param   string  $member1
+     * @param   string  $member2
+     * @param   string  $memberN
+     * @return  int     Number of deleted values
      * @link    http://redis.io/commands/srem
      * @example
      * <pre>
-     * $redis->sAdd('key1' , 'set1');
-     * $redis->sAdd('key1' , 'set2');
-     * $redis->sAdd('key1' , 'set3'); // 'key1' => {'set1', 'set2', 'set3'}
-     * $redis->sRem('key1', 'set2');  // 'key1' => {'set1', 'set3'}
+     * var_dump( $redis->sAdd('k', 'v1', 'v2', 'v3') );    // int(3)
+     * var_dump( $redis->sRem('k', 'v2', 'v3') );          // int(2)
+     * var_dump( $redis->sMembers('k') );
+     * //// Output:
+     * // array(1) {
+     * //   [0]=> string(2) "v1"
+     * // }
      * </pre>
      */
-    public function sRem($key, $member) {}
+    public function sRem($key, $member1, $member2, $memberN) {}
 
     /**
      * @see sRem()
      * @link    http://redis.io/commands/srem
      * @param   string  $key
-     * @param   int     $member
+     * @param   string  $member1
+     * @param   string  $member2
+     * @param   string  $memberN
      */
-    public function sRemove($key, $member) {}
+    public function sRemove($key, $member1, $member2, $memberN) {}
 
 
     /**
@@ -1837,20 +1857,30 @@ class Redis
     /**
      * Adds the specified member with a given score to the sorted set stored at key.
      *
-     * @param   string  $key
-     * @param   float   $score
-     * @param   string  $value
-     * @return  int     1 if the element is added. 0 otherwise.
+     * @param   string  $key    Required key
+     * @param   float   $score1 Required score
+     * @param   string  $value1 Required value
+     * @param   float   $score2 Optional score
+     * @param   string  $value2 Optional value
+     * @param   float   $scoreN Optional score
+     * @param   string  $valueN Optional value
+     * @return  int     Number of values added
      * @link    http://redis.io/commands/zadd
      * @example
      * <pre>
-     * $redis->zAdd('key', 1, 'val1');
-     * $redis->zAdd('key', 0, 'val0');
-     * $redis->zAdd('key', 5, 'val5');
-     * $redis->zRange('key', 0, -1); // array(val0, val1, val5)
+     * <pre>
+     * $redis->zAdd('z', 1, 'v2', 2, 'v2', 3, 'v3', 4, 'v4' );  // int(2)
+     * $redis->zRem('z', 'v2', 'v3');                           // int(2)
+     * var_dump( $redis->zRange('z', 0, -1) );
+     * //// Output:
+     * // array(2) {
+     * //   [0]=> string(2) "v1"
+     * //   [1]=> string(2) "v4"
+     * // }
+     * </pre>
      * </pre>
      */
-    public function zAdd($key, $score, $value) {}
+    public function zAdd($key, $score1, $value1, $score2, $value2, $scoreN, $valueN ) {}
 
     /**
      * Returns a range of elements from the ordered set stored at the specified key,
@@ -1882,30 +1912,34 @@ class Redis
      * Deletes a specified member from the ordered set.
      *
      * @param   string  $key
-     * @param   string  $member
-     * @return  int     1 on success, 0 on failure.
+     * @param   string  $member1
+     * @param   string  $member2
+     * @param   string  $memberN
+     * @return  int     Number of deleted values
      * @link    http://redis.io/commands/zrem
      * @example
      * <pre>
-     * $redis->zAdd('key', 0, 'val0');
-     * $redis->zAdd('key', 2, 'val2');
-     * $redis->zAdd('key', 10, 'val10');
-     * $redis->zDelete('key', 'val2');
-     * $redis->zRange('key', 0, -1); // array('val0', 'val10')
+     * $redis->zAdd('z', 1, 'v2', 2, 'v2', 3, 'v3', 4, 'v4' );  // int(2)
+     * $redis->zRem('z', 'v2', 'v3');                           // int(2)
+     * var_dump( $redis->zRange('z', 0, -1) );
+     * //// Output:
+     * // array(2) {
+     * //   [0]=> string(2) "v1"
+     * //   [1]=> string(2) "v4"
+     * // }
      * </pre>
      */
-    public function zRem($key, $member) {}
+    public function zRem($key, $member1, $member2, $memberN) {}
 
     /**
      * @see zRem()
-     * @param string $key
-     * @param string $member
+     * @param   string  $key
+     * @param   string  $member1
+     * @param   string  $member2
+     * @param   string  $memberN
      * @link    http://redis.io/commands/zrem
      */
-    public function zDelete($key, $member) {}
-
-
-
+    public function zDelete($key, $member1, $member2, $memberN) {}
 
     /**
      * Returns the elements of the sorted set stored at the specified key in the range [start, end]
@@ -2279,15 +2313,36 @@ class Redis
     public function hLen($key) {}
 
     /**
-     * Removes a value from the hash stored at key.
+     * Removes a values from the hash stored at key.
      * If the hash table doesn't exist, or the key doesn't exist, FALSE is returned.
      *
      * @param   string  $key
-     * @param   string  $hashKey
+     * @param   string  $hashKey1
+     * @param   string  $hashKey2
+     * @param   string  $hashKeyN
+     * @return  int     Number of deleted fields
      * @link    http://redis.io/commands/hdel
-     * @return  bool    TRUE in case of success, FALSE in case of failure
+     * @example
+     * <pre>
+     * $redis->hMSet('h',
+     *               array(
+     *                    'f1' => 'v1',
+     *                    'f2' => 'v2',
+     *                    'f3' => 'v3',
+     *                    'f4' => 'v4',
+     *               ));
+     *
+     * var_dump( $redis->hDel('h', 'f1') );        // int(1)
+     * var_dump( $redis->hDel('h', 'f2', 'f3') );  // int(2)
+     * s
+     * var_dump( $redis->hGetAll('h') );
+     * //// Output:
+     * //  array(1) {
+     * //    ["f4"]=> string(2) "v4"
+     * //  }
+     * </pre>
      */
-    public function hDel($key, $hashKey) {}
+    public function hDel($key, $hashKey1, $hashKey2, $hashKeyN) {}
 
     /**
      * Returns the keys in a hash, as an array of strings.
