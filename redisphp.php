@@ -978,7 +978,7 @@ class Redis
      * @param   string  $keyN  ...
      * @return  array, contain the result of the intersection between those keys.
      * If the intersection between the different sets is empty, the return value will be empty array.
-     * @link    http://redis.io/commands/sinter
+     * @link    http://redis.io/commands/sinterstore
      * @example
      * <pre>
      * $redis->sAdd('key1', 'val1');
@@ -1048,7 +1048,7 @@ class Redis
      * @param   string  $key2 ...
      * @param   string  $keyN ...
      * @return  array   of strings: The union of all these sets.
-     * @link    http://redis.io/commands/sunion
+     * @link    http://redis.io/commands/sunionstore
      * @example
      * <pre>
      * $redis->delete('s0', 's1', 's2');
@@ -2143,7 +2143,7 @@ class Redis
      * @param string    $aggregateFunction  Either "SUM", "MIN", or "MAX": defines the behaviour to use on
      * duplicate entries during the zUnion.
      * @return int The number of values in the new sorted set.
-     * @link    http://redis.io/commands/zunion
+     * @link    http://redis.io/commands/zunionstore
      * @example
      * <pre>
      * $redis->delete('k1');
@@ -2166,7 +2166,7 @@ class Redis
      * $redis->zUnion('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko1' => array('val0', 'val2', 'val3', 'val1')
      * </pre>
      */
-    public function zUnion($Output, $ZSetKeys, $Weights, $aggregateFunction) {}
+    public function zUnion($Output, $ZSetKeys, $Weights = 1, $aggregateFunction = 'SUM') {}
 
     /**
      * Creates an intersection of sorted sets given in second argument.
@@ -2182,7 +2182,7 @@ class Redis
      * @param   string  $aggregateFunction Either "SUM", "MIN", or "MAX":
      * defines the behaviour to use on duplicate entries during the zInter.
      * @return  int     The number of values in the new sorted set.
-     * @link    http://redis.io/commands/zinter
+     * @link    http://redis.io/commands/zinterstore
      * @example
      * <pre>
      * $redis->delete('k1');
@@ -2209,7 +2209,7 @@ class Redis
      * $redis->zInter('ko4', array('k1', 'k2'), array(1, 5), 'max'); // 2, 'ko4' => array('val3', 'val1')
      * </pre>
      */
-    public function zInter($Output, $ZSetKeys, $Weights, $aggregateFunction) {}
+    public function zInter($Output, $ZSetKeys, $Weights = 1, $aggregateFunction = 'SUM') {}
 
     /**
      * Adds a value to the hash stored at key. If this value is already in the hash, FALSE is returned.
