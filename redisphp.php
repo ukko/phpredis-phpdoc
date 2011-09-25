@@ -2166,7 +2166,7 @@ class Redis
      * $redis->zUnion('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko1' => array('val0', 'val2', 'val3', 'val1')
      * </pre>
      */
-    public function zUnion($Output, $ZSetKeys, $Weights = 1, $aggregateFunction = 'SUM') {}
+    public function zUnion($Output, $ZSetKeys, $Weights = null, $aggregateFunction = 'SUM') {}
 
     /**
      * Creates an intersection of sorted sets given in second argument.
@@ -2209,7 +2209,7 @@ class Redis
      * $redis->zInter('ko4', array('k1', 'k2'), array(1, 5), 'max'); // 2, 'ko4' => array('val3', 'val1')
      * </pre>
      */
-    public function zInter($Output, $ZSetKeys, $Weights = 1, $aggregateFunction = 'SUM') {}
+    public function zInter($Output, $ZSetKeys, $Weights = null, $aggregateFunction = 'SUM') {}
 
     /**
      * Adds a value to the hash stored at key. If this value is already in the hash, FALSE is returned.
@@ -2260,7 +2260,7 @@ class Redis
      * @return  string  The value, if the command executed successfully BOOL FALSE in case of failure
      * @link    http://redis.io/commands/hget
      */
-    public function hGet($key, $hash) {}
+    public function hGet($key, $hashKey) {}
 
     /**
      * Returns the length of a hash, in number of items
