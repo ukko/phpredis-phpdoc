@@ -114,9 +114,9 @@ class Redis
     /**
      * Set client option.
      *
-     * @param type $name    parameter name
-     * @param type $value   parameter value
-     * @return BOOL: TRUE on success, FALSE on error.
+     * @param   string  $name    parameter name
+     * @param   string  $value   parameter value
+     * @return  bool:   TRUE on success, FALSE on error.
      * @example
      * <pre>
      * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE);        // don't serialize data
@@ -130,8 +130,8 @@ class Redis
     /**
      * Get client option
      *
-     * @param type $name parameter name
-     * @return Parameter value.
+     * @param   string  $name parameter name
+     * @return  Parameter value.
      * @example
      * // return Redis::SERIALIZER_NONE, Redis::SERIALIZER_PHP, or Redis::SERIALIZER_IGBINARY.
      * $redis->getOption(Redis::OPT_SERIALIZER);
@@ -141,7 +141,7 @@ class Redis
     /**
      * Check the current connection status
      *
-     * @return string STRING: +PONG on success. Throws a RedisException object on connectivity error, as described above.
+     * @return  string STRING: +PONG on success. Throws a RedisException object on connectivity error, as described above.
      * @link    http://redis.io/commands/ping
      */
     public function ping( ) {}
@@ -150,8 +150,8 @@ class Redis
     /**
      * Get the value related to the specified key
      *
-     * @param type $key
-     * @return string|bool: If key didn't exist, FALSE is returned. Otherwise, the value related to this key is returned.
+     * @param   string  $key
+     * @return  string|bool: If key didn't exist, FALSE is returned. Otherwise, the value related to this key is returned.
      * @link    http://redis.io/commands/get
      * @example $redis->get('key');
      */
@@ -161,10 +161,10 @@ class Redis
     /**
      * Set the string value in argument as value of the key.
      *
-     * @param string    $key
-     * @param string    $value
-     * @param float     $timeout    Calling setex() is preferred if you want a timeout.
-     * @return bool TRUE if the command is successful.
+     * @param   string  $key
+     * @param   string  $value
+     * @param   float   $timeout    Calling setex() is preferred if you want a timeout.
+     * @return  bool:   TRUE if the command is successful.
      * @link    http://redis.io/commands/set
      * @example $redis->set('key', 'value');
      */
@@ -173,21 +173,21 @@ class Redis
     /**
      * Set the string value in argument as value of the key, with a time to live.
      *
-     * @param string    $key
-     * @param int       $ttl
-     * @param type      $value
-     * @return          Bool TRUE if the command is successful.
+     * @param   string  $key
+     * @param   int     $ttl
+     * @param   string  $value
+     * @return  bool:   TRUE if the command is successful.
      * @link    http://redis.io/commands/setex
-     * @example         $redis->setex('key', 3600, 'value'); // sets key → value, with 1h TTL.
+     * @example $redis->setex('key', 3600, 'value'); // sets key → value, with 1h TTL.
      */
     public function setex( $key, $ttl, $value ) {}
 
     /**
      * Set the string value in argument as value of the key if the key doesn't already exist in the database.
      *
-     * @param type $key
-     * @param type $value
-     * @return Bool TRUE in case of success, FALSE in case of failure.
+     * @param   string  $key
+     * @param   string  $value
+     * @return  bool:   TRUE in case of success, FALSE in case of failure.
      * @link    http://redis.io/commands/setnx
      * @example
      * <pre>
@@ -1546,9 +1546,9 @@ class Redis
      * Return a substring of a larger string
      *
      * @deprecated
-     * @param type $key
-     * @param type $start
-     * @param type $end
+     * @param   string  $key
+     * @param   int     $start
+     * @param   int     $end
      */
     public function substr( $key, $start, $end ) {}
 
