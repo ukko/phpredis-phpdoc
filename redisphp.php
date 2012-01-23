@@ -2445,6 +2445,22 @@ class Redis
      */
     public function hMGet( $key, $hashKeys ) {}
 
+    /**
+     * Get or Set the redis config keys.
+     *
+     * @param   string  $operation  either `GET` or `SET`
+     * @param   string  $key        for `SET`, glob-pattern for `GET`. See http://redis.io/commands/config-get for examples.
+     * @param   string  $value      optional string (only for `SET`)
+     * @return  array   Associative array for `GET`, key -> value
+     * @link    http://redis.io/commands/config-get
+     * @link    http://redis.io/commands/config-set
+     * @example
+     * <pre>
+     * $redis->config("GET", "*max-*-entries*");
+     * $redis->config("SET", "dir", "/var/run/redis/dumps/");
+     * </pre>
+     */
+    public function config( $operation, $key, $value ) {}
 }
 
 class RedisException extends Exception {}
