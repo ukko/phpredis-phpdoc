@@ -1772,6 +1772,37 @@ class Redis
      */
     public function mset( array $array ) {}
 
+
+    /**
+     * Returns the values of all specified keys.
+     *
+     * For every key that does not hold a string value or does not exist,
+     * the special value false is returned. Because of this, the operation never fails.
+     *
+     * @param array $array
+     * @return array
+     * @link http://redis.io/commands/mget
+     * @example
+     * <pre>
+     * $redis->delete('x', 'y', 'z', 'h');	// remove x y z
+     * $redis->mset(array('x' => 'a', 'y' => 'b', 'z' => 'c'));
+     * $redis->hset('h', 'field', 'value');
+     * var_dump($redis->mget(array('x', 'y', 'z', 'h')));
+     * // Output:
+     * // array(3) {
+     * // [0]=>
+     * // string(1) "a"
+     * // [1]=>
+     * // string(1) "b"
+     * // [2]=>
+     * // string(1) "c"
+     * // [3]=>
+     * // bool(false)
+     * // }
+     * </pre>
+     */
+    public function mget( array $array ) {}
+
     /**
      * @see mset()
      * @param   array $array
