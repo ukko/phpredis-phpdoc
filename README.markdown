@@ -27,10 +27,16 @@ Do not forget to declare a variable type $ redis
 
 ### Setup in IDE PhpStorm
 
- Menu "File" -> "Settings" -> "PHP" -> <Select path to folder "phpredis-phpdoc">
+ Menu "File" -> "Settings" -> "PHP" -> _Select path to folder "phpredis-phpdoc"_
 
 ### Setup in IDE NetBeans
 
+ * Right click your project -> "Properties"
+ * Select the "PHP Include Path" category
+ * Click "Add Folder..."
+ * Select your checkout of phpredis-phpdoc
+ * Click "Open"
+ * Click "OK"
 
 ### Setup in IDE Eclipse PDT
 
