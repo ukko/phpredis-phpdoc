@@ -627,16 +627,24 @@ class Redis
      * @param   string  $key
      * @return  int     The size of the list identified by Key exists.
      * bool FALSE if the data type identified by Key is not list
-     * @link    http://redis.io/commands/lsize
+     * @link    http://redis.io/commands/llen
      * @example
      * <pre>
      * $redis->rPush('key1', 'A');
      * $redis->rPush('key1', 'B');
      * $redis->rPush('key1', 'C');  // key1 => [ 'A', 'B', 'C' ]
-     * $redis->lSize('key1');       // 3
+     * $redis->lLen('key1');       // 3
      * $redis->rPop('key1');
-     * $redis->lSize('key1');       // 2
+     * $redis->lLen('key1');       // 2
      * </pre>
+     */
+    public function lLen( $key ) {}
+
+    /**
+     * @see     lLen()
+     * @param   string    $key
+     * @param   int       $index
+     * @link    http://redis.io/commands/llen
      */
     public function lSize( $key ) {}
 
