@@ -2112,8 +2112,10 @@ class Redis
      * @param   int     $start
      * @param   int     $end
      * @param   array   $options
+	 * 
+	 * @return 	array
      */
-    public function zRevRangeByScore( $key, $start, $end, array $options ) {}
+    public function zRevRangeByScore( $key, $start, $end, array $options = array() ) {}
 
     /**
      * Returns the number of elements of the sorted set stored at the specified key which have
