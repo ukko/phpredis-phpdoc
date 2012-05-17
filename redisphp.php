@@ -363,6 +363,26 @@ class Redis
     public function incr( $key ) {}
 
     /**
+     * Increment the float value of a key by the given amount
+     *
+     * @param   string  $key
+     * @param   float   $increment
+     * @return  float
+     * @link    http://redis.io/commands/incrbyfloat
+     * @example
+     * <pre>
+     * $redis = new Redis();
+     * $redis->connect('127.0.0.1');
+     * $redis->set('x', 3);
+     * var_dump( $redis->incrByFloat('x', 1.5) );   // float(4.5)
+     *
+     * // ! SIC
+     * var_dump( $redis->get('x') );                // string(3) "4.5"
+     * </pre>
+     */
+    public function incrByFloat( $key, $increment )
+
+    /**
      * Increment the number stored at key by one. If the second argument is filled, it will be used as the integer
      * value of the increment.
      *
@@ -1734,8 +1754,11 @@ class Redis
 
 
     /**
-     * Returns an associative array of strings and integers, with the following keys:
+     * Returns an associative array of strings and integers
+     * @param   string   $option    Optional. The option to provide redis.
+     * SERVER | CLIENTS | MEMORY | PERSISTENCE | STATS | REPLICATION | CPU | CLASTER | KEYSPACE | COMANDSTATS
      *
+     * Returns an associative array of strings and integers, with the following keys:
      * - redis_version
      * - redis_git_sha1
      * - redis_git_dirty
@@ -1781,7 +1804,7 @@ class Redis
      * @link    http://redis.io/commands/info
      * @example $redis->info();
      */
-    public function info( ) {}
+    public function info( $option = null ) {}
 
     /**
      * Resets the statistics reported by Redis using the INFO command (`info()` function).
@@ -2555,6 +2578,34 @@ class Redis
      * </pre>
      */
     public function hIncrBy( $key, $hashKey, $value ) {}
+
+    /**
+     * Increment the float value of a hash field by the given amount
+     * @param   string  $key
+     * @param   string  $field
+     * @param   float   $increment
+     * @return  float
+     * @link    http://redis.io/commands/hincrbyfloat
+     * @example
+     * <pre>
+     * $redis = new Redis();
+     * $redis->connect('127.0.0.1');
+     * $redis->hset('h', 'float', 3);
+     * $redis->hset('h', 'int',   3);
+     * var_dump( $redis->hIncrByFloat('h', 'float', 1.5) ); // float(4.5)
+     *
+     * var_dump( $redis->hGetAll('h') );
+     *
+     * // Output
+     *  array(2) {
+     *    ["float"]=>
+     *    string(3) "4.5"
+     *    ["int"]=>
+     *    string(1) "3"
+     *  }
+     * </pre>
+     */
+    public function hIncrByFloat( $key, $field, $increment ) {}
 
     /**
      * Fills in a whole hash. Non-string values are converted to string, using the standard (string) cast.
