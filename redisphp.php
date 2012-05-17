@@ -3,6 +3,8 @@
  * Helper autocomplete for php redis extension
  * @author Max Kamashev <max.kamashev@gmail.com>
  * @link https://github.com/ukko/phpredis-phpdoc
+ *
+ * @method echo string $string Sends a string to Redis, which replies with the same string
  */
 class Redis
 {
@@ -131,7 +133,7 @@ class Redis
      * Get client option
      *
      * @param   string  $name parameter name
-     * @return  Parameter value.
+     * @return  int     Parameter value.
      * @example
      * // return Redis::SERIALIZER_NONE, Redis::SERIALIZER_PHP, or Redis::SERIALIZER_IGBINARY.
      * $redis->getOption(Redis::OPT_SERIALIZER);
@@ -145,7 +147,6 @@ class Redis
      * @link    http://redis.io/commands/ping
      */
     public function ping( ) {}
-
 
     /**
      * Get the value related to the specified key
@@ -817,7 +818,7 @@ class Redis
      * @param   int     $position Redis::BEFORE | Redis::AFTER
      * @param   string  $pivot
      * @param   string  $value
-     * @return  The number of the elements in the list, -1 if the pivot didn't exists.
+     * @return  int     The number of the elements in the list, -1 if the pivot didn't exists.
      * @link    http://redis.io/commands/linsert
      * @example
      * <pre>
@@ -1372,6 +1373,23 @@ class Redis
     public function expire( $key, $ttl ) {}
 
     /**
+     * Sets an expiration date (a timeout in milliseconds) on an item.
+     *
+     * @param   string  $key    The key that will disappear.
+     * @param   int     $pttl   The key's remaining Time To Live, in milliseconds.
+     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @link    http://redis.io/commands/pexpire
+     * @example
+     * <pre>
+     * $redis->set('x', '42');
+     * $redis->pExpire('x', 11500); // x will disappear in 11500 milliseconds.
+     * $redis->ttl('x');            // 12
+     * $redis->pttl('x');           // 11500
+     * </pre>
+     */
+    public function pExpire( $key, $ttl ) {}
+
+    /**
      * @see expire()
      * @param   string  $key
      * @param   int     $ttl
@@ -1396,6 +1414,23 @@ class Redis
      * </pre>
      */
     public function expireAt( $key, $timestamp ) {}
+
+    /**
+     * Sets an expiration date (a timestamp) on an item. Requires a timestamp in milliseconds
+     *
+     * @param   string  $key        The key that will disappear.
+     * @param   int     $timestamp  Unix timestamp. The key's date of death, in seconds from Epoch time.
+     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @link    http://redis.io/commands/pexpireat
+     * @example
+     * <pre>
+     * $redis->set('x', '42');
+     * $redis->pExpireAt('x', 1555555555005);
+     * echo $redis->ttl('x');                       // 218270121
+     * echo $redis->pttl('x');                      // 218270120575
+     * </pre>
+     */
+    public function pExpireAt( $key, $timestamp ) {}
 
     /**
      * Returns the keys that match a certain pattern.
@@ -1523,7 +1558,9 @@ class Redis
      * Returns the type of data pointed by a given key.
      *
      * @param   string  $key
-     * @return Depending on the type of the data pointed by the key,
+     * @return  int
+     *
+     * Depending on the type of the data pointed by the key,
      * this method will return the following value:
      * - string: Redis::REDIS_STRING
      * - set:   Redis::REDIS_SET
@@ -1770,6 +1807,18 @@ class Redis
      * @example $redis->ttl('key');
      */
     public function ttl( $key ) {}
+
+    /**
+     * Returns a time to live left for a given key, in milliseconds.
+     *
+     * If the key doesn't exist, FALSE is returned.
+     *
+     * @param   string  $key
+     * @return  int     the time left to live in milliseconds.
+     * @link    http://redis.io/commands/pttl
+     * @example $redis->pttl('key');
+     */
+    public function pttl( $key ) {}
 
     /**
      * Remove the expiration timer from a key.
