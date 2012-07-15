@@ -1703,6 +1703,44 @@ class Redis
      */
     public function setBit( $key, $offset, $value ) {}
 
+    /**
+     * Count bits in a string.
+     *
+     * @param   string  $key
+     * @return  int     The number of bits set to 1 in the value behind the input key.
+     * @link    http://redis.io/commands/bitcount
+     * @example
+     * <pre>
+     * $redis->set('bit', '345'); // // 11 0011  0011 0100  0011 0101
+     * var_dump( $redis->bitCount('bit', 0, 0) ); // int(4)
+     * var_dump( $redis->bitCount('bit', 1, 1) ); // int(3)
+     * var_dump( $redis->bitCount('bit', 2, 2) ); // int(4)
+     * var_dump( $redis->bitCount('bit', 0, 2) ); // int(11)
+     * </pre>
+     */
+    public function bitCount( $key ) {}
+
+    /**
+     * Bitwise operation on multiple keys.
+     *
+     * @param   string  $operation  either "AND", "OR", "NOT", "XOR"
+     * @param   string  $retKey     return key
+     * @param   string  $key1
+     * @param   string  $key2
+     * @return  int     The size of the string stored in the destination key.
+     * @link    http://redis.io/commands/bitop
+     * @example
+     * <pre>
+     * $redis->set('bit1', '1'); // 11 0001
+     * $redis->set('bit2', '2'); // 11 0010
+     *
+     * $redis->bitOp('AND', 'bit', 'bit1', 'bit2'); // bit = 110000
+     * $redis->bitOp('OR',  'bit', 'bit1', 'bit2'); // bit = 110011
+     * $redis->bitOp('NOT', 'bit', 'bit1', 'bit2'); // bit = 110011
+     * $redis->bitOp('XOR', 'bit', 'bit1', 'bit2'); // bit = 11
+     * </pre>
+     */
+    public function bitOp( $operation, $retKey, $key1, $key2, $key3 = null ) {}
 
     /**
      * Removes all entries from the current database.
@@ -1802,7 +1840,15 @@ class Redis
      * - vm_enabled
      * - role
      * @link    http://redis.io/commands/info
-     * @example $redis->info();
+     * @example
+     * <pre>
+     * $redis->info();
+     *
+     * or
+     *
+     * $redis->info("COMMANDSTATS"); //Information on the commands that have been run (>=2.6 only)
+     * $redis->info("CPU"); // just CPU information from Redis INFO
+     * </pre>
      */
     public function info( $option = null ) {}
 
@@ -2112,7 +2158,7 @@ class Redis
      * @param   int     $start
      * @param   int     $end
      * @param   array   $options
-	 * 
+	 *
 	 * @return 	array
      */
     public function zRevRangeByScore( $key, $start, $end, array $options = array() ) {}
