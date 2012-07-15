@@ -1,5 +1,5 @@
 {
-    "name":         "ukko/phpredisphpdoc",
+    "name":         "ukko/phpredis-phpdoc",
     "type":         "library",
     "description":  "@phpdoc extension phpredis for IDE autocomplete",
     "keywords":     ["redis", "phpredis", "helper"],
@@ -16,5 +16,11 @@
     "require":{
         "php":">=5.3.0"
     },
-    "minimum-stability": "dev"
+    "version": "2.6.0-dev",
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-0": {
+            "phpredis-phpdoc": "src/"
+        }
+    }
 }
