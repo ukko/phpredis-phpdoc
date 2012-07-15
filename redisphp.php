@@ -380,7 +380,7 @@ class Redis
      * var_dump( $redis->get('x') );                // string(3) "4.5"
      * </pre>
      */
-    public function incrByFloat( $key, $increment )
+    public function incrByFloat( $key, $increment ) {}
 
     /**
      * Increment the number stored at key by one. If the second argument is filled, it will be used as the integer
