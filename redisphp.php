@@ -5,6 +5,29 @@
  * @link https://github.com/ukko/phpredis-phpdoc
  *
  * @method echo string $string Sends a string to Redis, which replies with the same string
+ *
+ * @method  eval( $script, $args = array(), $numKeys = 0 )
+ *  Evaluate a LUA script serverside
+ *  @param  string  $script
+ *  @param  array   $args
+ *  @param  int     $numKeys
+ *  @return Mixed.  What is returned depends on what the LUA script itself returns, which could be a scalar value
+ *  (int/string), or an array. Arrays that are returned can also contain other arrays, if that's how it was set up in
+ *  your LUA script.  If there is an error executing the LUA script, the getLastError() function can tell you the
+ *  message that came back from Redis (e.g. compile error).
+ *  @link   http://redis.io/commands/eval
+ *  @example
+ *  <pre>
+ *  $redis->eval("return 1"); // Returns an integer: 1
+ *  $redis->eval("return {1,2,3}"); // Returns Array(1,2,3)
+ *  $redis->del('mylist');
+ *  $redis->rpush('mylist','a');
+ *  $redis->rpush('mylist','b');
+ *  $redis->rpush('mylist','c');
+ *  // Nested response:  Array(1,2,3,Array('a','b','c'));
+ *  $redis->eval("return {1,2,3,redis.call('lrange','mylist',0,-1)}}");
+ * </pre>
+ *
  */
 class Redis
 {
@@ -2706,6 +2729,152 @@ class Redis
      * </pre>
      */
     public function config( $operation, $key, $value ) {}
+
+    /**
+     * Evaluate a LUA script serverside, from the SHA1 hash of the script instead of the script itself.
+     * In order to run this command Redis will have to have already loaded the script, either by running it or via
+     * the SCRIPT LOAD command.
+     * @param   string  $scriptSha
+     * @param   array   $args
+     * @param   int     $numKeys
+     * @return  mixed. @see eval()
+     * @see     eval()
+     * @link    http://redis.io/commands/evalsha
+     * @example
+     * <pre>
+     * $script = 'return 1';
+     * $sha = $redis->script('load', $script);
+     * $redis->evalSha($sha); // Returns 1
+     * </pre>
+     */
+    public function evalSha( $scriptSha, $args = array(), $numKeys = 0 ) {}
+
+    /**
+     * Execute the Redis SCRIPT command to perform various operations on the scripting subsystem.
+     * @param   string  $command load | flush | kill | exists
+     * @param   string  $script
+     * @return  mixed
+     * @link    http://redis.io/commands/script-load
+     * @link    http://redis.io/commands/script-kill
+     * @link    http://redis.io/commands/script-flush
+     * @link    http://redis.io/commands/script-exists
+     * @example
+     * <pre>
+     * $redis->script('load', $script);
+     * $redis->script('flush');
+     * $redis->script('kill');
+     * $redis->script('exists', $script1, [$script2, $script3, ...]);
+     * </pre>
+     *
+     * SCRIPT LOAD will return the SHA1 hash of the passed script on success, and FALSE on failure.
+     * SCRIPT FLUSH should always return TRUE
+     * SCRIPT KILL will return true if a script was able to be killed and false if not
+     * SCRIPT EXISTS will return an array with TRUE or FALSE for each passed script
+     */
+    public function script( $command, $script ) {}
+
+    /**
+     * The last error message (if any) returned from a SCRIPT call
+     * @return  string  A string with the last returned script based error message, or NULL if there is no error
+     * @example
+     * <pre>
+     * $redis->eval('this-is-not-lua');
+     * $err = $redis->getLastError();
+     * // "ERR Error compiling script (new function): user_script:1: '=' expected near '-'"
+     * </pre>
+     */
+    public function getLastError() {}
+
+    /**
+     * A utility method to prefix the value with the prefix setting for phpredis.
+     * @param   $value  The value you wish to prefix
+     * @return  string  If a prefix is set up, the value now prefixed.  If there is no prefix, the value will be returned unchanged.
+     * @example
+     * <pre>
+     * $redis->setOpt(Redis::OPT_PREFIX, 'my-prefix:');
+     * $redis->_prefix('my-value'); // Will return 'my-prefix:my-value'
+     * </pre>
+     */
+    public function _prefix( $value ) {}
+
+    /**
+     * A utility method to unserialize data with whatever serializer is set up.  If there is no serializer set, the
+     * value will be returned unchanged.  If there is a serializer set up, and the data passed in is malformed, an
+     * exception will be thrown. This can be useful if phpredis is serializing values, and you return something from
+     * redis in a LUA script that is serialized.
+     * @param   string  $value  The value to be unserialized
+     * @return mixed
+     * @example
+     * <pre>
+     * $redis->setOpt(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
+     * $redis->_unserialize('a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}'); // Will return Array(1,2,3)
+     * </pre>
+     */
+    public function _unserialize( $value ) {}
+
+    /**
+     * Dump a key out of a redis database, the value of which can later be passed into redis using the RESTORE command.
+     * The data that comes out of DUMP is a binary representation of the key as Redis stores it.
+     * @param   string  $key
+     * @return  string  The Redis encoded value of the key, or FALSE if the key doesn't exist
+     * @link    http://redis.io/commands/dump
+     * @example
+     * <pre>
+     * $redis->set('foo', 'bar');
+     * $val = $redis->dump('foo'); // $val will be the Redis encoded key value
+     * </pre>
+     */
+    public function dump( $key ) {}
+
+    /**
+     * Restore a key from the result of a DUMP operation.
+     *
+     * @param   string  $key    The key name
+     * @param   int     $ttl    How long the key should live (if zero, no expire will be set on the key)
+     * @param   string  $value  (binary).  The Redis encoded key value (from DUMP)
+     * @return  bool
+     * @link    http://redis.io/commands/restore
+     * @example
+     * <pre>
+     * $redis->set('foo', 'bar');
+     * $val = $redis->dump('foo');
+     * $redis->restore('bar', 0, $val); // The key 'bar', will now be equal to the key 'foo'
+     * </pre>
+     */
+    public function restore( $key, $ttl, $value ) {}
+
+    /**
+     * Migrates a key to a different Redis instance.
+     *
+     * @param   string  $host       The destination host
+     * @param   int     $port       The TCP port to connect to.
+     * @param   string  $key        The key to migrate.
+     * @param   int     $db         The target DB.
+     * @param   int     $timeout    The maximum amount of time given to this transfer.
+     * @return  bool
+     * @link    http://redis.io/commands/migrate
+     * @example
+     * <pre>
+     * $redis->migrate('backup', 6379, 'foo', 0, 3600);
+     * </pre>
+     */
+    public function migrate( $host, $port, $key, $db, $timeout ) {}
+
+    /**
+     * Return the current Redis server time.
+     * @return  array If successfull, the time will come back as an associative array with element zero being the
+     * unix timestamp, and element one being microseconds.
+     * @link    http://redis.io/commands/time
+     * @example
+     * <pre>
+     * var_dump( $redis->time() );
+     * // array(2) {
+     * //   [0] => string(10) "1342364352"
+     * //   [1] => string(6) "253002"
+     * // }
+     * </pre>
+     */
+    public function time() {}
 }
 
 class RedisException extends Exception {}
