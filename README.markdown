@@ -29,6 +29,7 @@ Do not forget to declare a variable type $ redis
         "require": {
             "ukko/redisphp-phpdoc": "*"
         },
+        "minimum-stability": "dev"
     }
 
  * Or download [phpredis-phpdoc](https://github.com/ukko/phpredis-phpdoc/tarball/master)
