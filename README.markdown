@@ -21,7 +21,7 @@ Do not forget to declare a variable type $ redis
 
 ### Install
 
- * Install redis-server
+ * Install [redis-server](http://redis.io/download)
  * Install [phpredis extension](https://github.com/nicolasff/phpredis)
  * The simpliest way to install and use redisphp-phpdoc is to use Composer, as there is a package on Packagist. Just add this to your project composer.json file :
 
@@ -32,7 +32,7 @@ Do not forget to declare a variable type $ redis
         "minimum-stability": "dev"
     }
 
- * Or download [phpredis-phpdoc](https://github.com/ukko/phpredis-phpdoc/tarball/master)
+ * Or direct download [phpredis-phpdoc](https://github.com/ukko/phpredis-phpdoc/tarball/master)
 
 ### Setup in IDE PhpStorm
 
