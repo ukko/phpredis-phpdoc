@@ -53,4 +53,5 @@ Do not forget to declare a variable type $ redis
  * In preferences dialog open "PHP" -> "PHP Libriaries"
  * Click "New" button, in "User library name" enter "Redis", click "OK"
  * Select newly created "Redis", library Click "Add external folder", select path to the folder which contains your checkout of phpredis-phpdoc or you can download single "Redis.php" file https://raw.github.com/ukko/phpredis-phpdoc/master/src/Redis.php
+ * Include your custom library in your project: open "Project" -> "Properties" -> "PHP Include Path", click add library, select "User library", click "Next", check "Redis", click "Finish"
 
