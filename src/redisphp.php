@@ -345,6 +345,24 @@ class Redis
     public function subscribe( $channels, $callback ) {}
 
     /**
+     * Subscribe to channels by pattern
+     *
+     * @param   array           $patterns   The number of elements removed from the set.
+     * @param   string|array    $callback   Either a string or an array with an object and method.
+     *                          The callback will get four arguments ($redis, $pattern, $channel, $message)
+     * @link    http://redis.io/commands/psubscribe
+     * @example
+     * <pre>
+     * function psubscribe($redis, $pattern, $chan, $msg) {
+     *  echo "Pattern: $pattern\n";
+     *  echo "Channel: $chan\n";
+     *  echo "Payload: $msg\n";
+     * }
+     * </pre>
+     */
+    public function psubscribe( $patterns, $callback ) {}
+
+    /**
      * Publish messages to channels. Warning: this function will probably change in the future.
      *
      * @param   string $channel a channel to publish to
@@ -885,13 +903,14 @@ class Redis
 
 
     /**
-     * Adds a values to the set value stored at key. If this value is already in the set, FALSE is returned.
+     * Adds a values to the set value stored at key.
+     * If this value is already in the set, FALSE is returned.
      *
      * @param   string  $key        Required key
      * @param   string  $value1     Required value
      * @param   string  $value2     Optional value
      * @param   string  $valueN     Optional value
-     * @return  int     Number of value added
+     * @return  int     The number of elements added to the set
      * @link    http://redis.io/commands/sadd
      * @example
      * <pre>
@@ -909,7 +928,7 @@ class Redis
      * @param   string  $member1
      * @param   string  $member2
      * @param   string  $memberN
-     * @return  int     Number of deleted values
+     * @return  int     The number of elements removed from the set.
      * @link    http://redis.io/commands/srem
      * @example
      * <pre>
@@ -2376,8 +2395,8 @@ class Redis
      * $redis->zUnion('ko1', array('k1', 'k2')); // 4, 'ko1' => array('val0', 'val1', 'val2', 'val3')
      *
      * // Weighted zUnion
-     * $redis->zUnion('ko2', array('k1', 'k2'), array(1, 1)); // 4, 'ko1' => array('val0', 'val1', 'val2', 'val3')
-     * $redis->zUnion('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko1' => array('val0', 'val2', 'val3', 'val1')
+     * $redis->zUnion('ko2', array('k1', 'k2'), array(1, 1)); // 4, 'ko2' => array('val0', 'val1', 'val2', 'val3')
+     * $redis->zUnion('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko3' => array('val0', 'val2', 'val3', 'val1')
      * </pre>
      */
     public function zUnion($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM') {}
@@ -2774,7 +2793,7 @@ class Redis
     public function script( $command, $script ) {}
 
     /**
-     * The last error message (if any) returned from a SCRIPT call
+     * The last error message (if any)
      * @return  string  A string with the last returned script based error message, or NULL if there is no error
      * @example
      * <pre>
@@ -2786,12 +2805,29 @@ class Redis
     public function getLastError() {}
 
     /**
+     * Clear the last error message
+     *
+     * @return bool true
+     * @example
+     * <pre>
+     * $redis->set('x', 'a');
+     * $redis->incr('x');
+     * $err = $redis->getLastError();
+     * // "ERR value is not an integer or out of range"
+     * $redis->clearLastError();
+     * $err = $redis->getLastError();
+     * // NULL
+     * </pre>
+     */
+    public function clearLastError() {}
+
+    /**
      * A utility method to prefix the value with the prefix setting for phpredis.
      * @param   $value  The value you wish to prefix
      * @return  string  If a prefix is set up, the value now prefixed.  If there is no prefix, the value will be returned unchanged.
      * @example
      * <pre>
-     * $redis->setOpt(Redis::OPT_PREFIX, 'my-prefix:');
+     * $redis->setOption(Redis::OPT_PREFIX, 'my-prefix:');
      * $redis->_prefix('my-value'); // Will return 'my-prefix:my-value'
      * </pre>
      */
@@ -2806,7 +2842,7 @@ class Redis
      * @return mixed
      * @example
      * <pre>
-     * $redis->setOpt(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
+     * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);
      * $redis->_unserialize('a:3:{i:0;i:1;i:1;i:2;i:2;i:3;}'); // Will return Array(1,2,3)
      * </pre>
      */
