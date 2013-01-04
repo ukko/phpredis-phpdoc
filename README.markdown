@@ -23,11 +23,11 @@ Do not forget to declare a variable type $ redis
 
  * Install [redis-server](http://redis.io/download)
  * Install [phpredis extension](https://github.com/nicolasff/phpredis)
- * The simpliest way to install and use redisphp-phpdoc is to use Composer, as there is a package on Packagist. Just add this to your project composer.json file :
+ * The simpliest way to install and use phpredis-phpdoc is to use Composer, as there is a [package on Packagist](https://packagist.org/packages/ukko/phpredis-phpdoc). Just add this to your project composer.json file :
 
     {
         "require": {
-            "ukko/redisphp-phpdoc": "*"
+            "ukko/phpredis-phpdoc": "*"
         },
         "minimum-stability": "dev"
     }
