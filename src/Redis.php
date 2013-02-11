@@ -2339,8 +2339,10 @@ class Redis
 
     /**
      * @see zRank()
-     * @param string $key
-     * @param string $member
+     * @param  string $key
+     * @param  string $member
+     * @return int    the item's score
+     * @link   http://redis.io/commands/zrevrank
      */
     public function zRevRank( $key, $member ) {}
 
