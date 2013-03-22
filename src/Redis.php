@@ -2752,6 +2752,14 @@ class Redis
     public function config( $operation, $key, $value ) {}
 
     /**
+     * @see eval()
+     * @param string $script
+     * @param array  $args
+     * @param int    $numKeys
+     */
+    public function evaluate( $script, $args = array(), $numKeys = 0 ) {}
+
+    /**
      * Evaluate a LUA script serverside, from the SHA1 hash of the script instead of the script itself.
      * In order to run this command Redis will have to have already loaded the script, either by running it or via
      * the SCRIPT LOAD command.
@@ -2769,6 +2777,14 @@ class Redis
      * </pre>
      */
     public function evalSha( $scriptSha, $args = array(), $numKeys = 0 ) {}
+
+    /**
+     * @see evalSha()
+     * @param string $scriptSha
+     * @param array  $args
+     * @param int    $numKeys
+     */
+    public function evaluateSha( $scriptSha, $args = array(), $numKeys = 0 ) {}
 
     /**
      * Execute the Redis SCRIPT command to perform various operations on the scripting subsystem.
