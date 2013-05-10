@@ -368,6 +368,7 @@ class Redis
      * @param   string $channel a channel to publish to
      * @param   string $message string
      * @link    http://redis.io/commands/publish
+     * @return  int Number of clients that received the message
      * @example $redis->publish('chan-1', 'hello, world!'); // send message.
      */
     public function publish( $channel, $message ) {}
@@ -1882,6 +1883,7 @@ class Redis
      * - vm_enabled
      * - role
      * @link    http://redis.io/commands/info
+     * @return string
      * @example
      * <pre>
      * $redis->info();
@@ -1994,6 +1996,7 @@ class Redis
     /**
      * @see mset()
      * @param   array $array
+     * @return  int 1 (if the keys were set) or 0 (no key was set)
      * @link    http://redis.io/commands/msetnx
      */
     public function msetnx( array $array ) {}
@@ -2134,6 +2137,7 @@ class Redis
      * @param   string  $member1
      * @param   string  $member2
      * @param   string  $memberN
+     * @return  int     Number of deleted values
      * @link    http://redis.io/commands/zrem
      */
     public function zDelete( $key, $member1, $member2 = null, $memberN = null ) {}
