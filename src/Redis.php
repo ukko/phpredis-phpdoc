@@ -187,12 +187,12 @@ class Redis
      *
      * @param   string  $key
      * @param   string  $value
-     * @param   float   $timeout    Calling setex() is preferred if you want a timeout.
-     * @return  bool:   TRUE if the command is successful.
+     * @param   int     $ttl    Calling setex() is preferred if you want a Time To Live.
+     * @return  bool:   If the command is successful return TRUE or 'Redis Socket Buffer' object
      * @link    http://redis.io/commands/set
      * @example $redis->set('key', 'value');
      */
-    public function set( $key, $value, $timeout = 0.0 ) {}
+    public function set( $key, $value, $ttl = 0 ) {}
 
     /**
      * Set the string value in argument as value of the key, with a time to live.
