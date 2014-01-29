@@ -11,7 +11,7 @@
  *  @param  string  $script
  *  @param  array   $args
  *  @param  int     $numKeys
- *  @return Mixed.  What is returned depends on what the LUA script itself returns, which could be a scalar value
+ *  @return mixed   What is returned depends on what the LUA script itself returns, which could be a scalar value
  *  (int/string), or an array. Arrays that are returned can also contain other arrays, if that's how it was set up in
  *  your LUA script.  If there is an error executing the LUA script, the getLastError() function can tell you the
  *  message that came back from Redis (e.g. compile error).
@@ -2757,9 +2757,10 @@ class Redis
 
     /**
      * @see eval()
-     * @param string $script
-     * @param array  $args
-     * @param int    $numKeys
+     * @param   string  $script
+     * @param   array   $args
+     * @param   int     $numKeys
+     * @return  mixed   @see eval()
      */
     public function evaluate( $script, $args = array(), $numKeys = 0 ) {}
 
@@ -2770,7 +2771,7 @@ class Redis
      * @param   string  $scriptSha
      * @param   array   $args
      * @param   int     $numKeys
-     * @return  mixed. @see eval()
+     * @return  mixed   @see eval()
      * @see     eval()
      * @link    http://redis.io/commands/evalsha
      * @example
