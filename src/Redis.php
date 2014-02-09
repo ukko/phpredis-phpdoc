@@ -2846,7 +2846,7 @@ class Redis
 
     /**
      * A utility method to prefix the value with the prefix setting for phpredis.
-     * @param   $value  The value you wish to prefix
+     * @param   mixed   $value  The value you wish to prefix
      * @return  string  If a prefix is set up, the value now prefixed.  If there is no prefix, the value will be returned unchanged.
      * @example
      * <pre>
