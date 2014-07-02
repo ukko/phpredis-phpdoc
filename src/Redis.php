@@ -243,9 +243,10 @@ class Redis
 
     /**
      * @see del()
-     * @param $key1
-     * @param null $key2
-     * @param null $key3
+     * @param   int|array   $key1
+     * @param   string      $key2
+     * @param   string      $key3
+     * @return int Number of keys deleted.
      */
     public function delete( $key1, $key2 = null, $key3 = null ) {}
 
