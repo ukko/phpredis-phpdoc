@@ -1044,22 +1044,32 @@ class Redis
 
 
     /**
-     * Returns a random element from the set value at Key, without removing it.
+     * Returns a random element(s) from the set value at Key, without removing it.
      *
-     * @param   string  $key
-     * @return  string  value from the set
-     * bool FALSE if set identified by key is empty or doesn't exist.
+     * @param   string        $key
+     * @param   int           $count [optional]
+     * @return  string|array  value(s) from the set
+     * bool FALSE if set identified by key is empty or doesn't exist and count argument isn't passed.
      * @link    http://redis.io/commands/srandmember
      * @example
      * <pre>
-     * $redis->sAdd('key1' , 'set1');
-     * $redis->sAdd('key1' , 'set2');
-     * $redis->sAdd('key1' , 'set3');   // 'key1' => {'set3', 'set1', 'set2'}
-     * $redis->sRandMember('key1');     // 'set1', 'key1' => {'set3', 'set1', 'set2'}
-     * $redis->sRandMember('key1');     // 'set3', 'key1' => {'set3', 'set1', 'set2'}
+     * $redis->sAdd('key1' , 'one');
+     * $redis->sAdd('key1' , 'two');
+     * $redis->sAdd('key1' , 'three');              // 'key1' => {'one', 'two', 'three'}
+     *
+     * var_dump( $redis->sRandMember('key1') );     // 'key1' => {'one', 'two', 'three'}
+     *
+     * // string(5) "three"
+     *
+     * var_dump( $redis->sRandMember('key1', 2) );  // 'key1' => {'one', 'two', 'three'}
+     *
+     * // array(2) {
+     * //   [0]=> string(2) "one"
+     * //   [1]=> string(2) "three"
+     * // }
      * </pre>
      */
-    public function sRandMember( $key ) {}
+    public function sRandMember( $key, $count = null ) {}
 
     /**
      * Returns the members of a set resulting from the intersection of all the sets
