@@ -2766,6 +2766,27 @@ class Redis
     public function hMGet( $key, $hashKeys ) {}
 
     /**
+     * Scan a HASH value for members, with an optional pattern and count.
+     * @param   string    $key
+     * @param   int       $iterator
+     * @param   string    $pattern    Optional pattern to match against.
+     * @param   int       $count      How many keys to return in a go (only a sugestion to Redis).
+     * @return  array     An array of members that match our pattern.
+     * @link    http://redis.io/commands/hscan
+     * @example
+     * <pre>
+     * // $iterator = null;
+     * // while($elements = $redis->hscan('hash', $iterator)) {
+     * //     foreach($elements as $key => $value) {
+     * //         echo $key . ' => ' . $value . PHP_EOL;
+     * //     }
+     * // }
+     * </pre>
+     */
+    public function hScan( $key, &$iterator, $pattern = null, $count = 0 ) {}
+
+
+    /**
      * Get or Set the redis config keys.
      *
      * @param   string  $operation  either `GET` or `SET`
