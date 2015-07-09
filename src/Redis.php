@@ -393,6 +393,28 @@ class Redis
     public function publish( $channel, $message ) {}
 
     /**
+     * A command allowing you to get information on the Redis pub/sub system.
+     * @param   string          $keyword    String, which can be: "channels", "numsub", or "numpat"
+     * @param   string|array    $argument   Optional, variant.
+     *                                      For the "channels" subcommand, you can pass a string pattern.
+     *                                      For "numsub" an array of channel names
+     * @return  array|int                   Either an integer or an array.
+     *                          - channels  Returns an array where the members are the matching channels.
+     *                          - numsub    Returns a key/value array where the keys are channel names and
+     *                                      values are their counts.
+     *                          - numpat    Integer return containing the number active pattern subscriptions.
+     * @link    http://redis.io/commands/pubsub
+     * @example
+     * <pre>
+     * $redis->pubsub('channels'); // All channels
+     * $redis->pubsub('channels', '*pattern*'); // Just channels matching your pattern
+     * $redis->pubsub('numsub', array('chan1', 'chan2')); // Get subscriber counts for 'chan1' and 'chan2'
+     * $redis->pubsub('numpat'); // Get the number of pattern subscribers
+     * </pre>
+     */
+    public function pubsub( $keyword, $argument ) {}
+
+    /**
      * Verify if the specified key exists.
      *
      * @param   string $key
