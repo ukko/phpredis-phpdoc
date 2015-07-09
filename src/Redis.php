@@ -3222,6 +3222,13 @@ class Redis
      * </pre>
      */
     public function rawCommand( $command, $arguments ) {}
+
+    /**
+     * Detect whether we're in ATOMIC/MULTI/PIPELINE mode.
+     * @return  int     Either Redis::ATOMIC, Redis::MULTI or Redis::PIPELINE
+     * @example $redis->getMode();
+     */
+    public function getMode() {}
 }
 
 class RedisException extends Exception {}
