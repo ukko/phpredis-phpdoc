@@ -31,8 +31,8 @@
  */
 class Redis
 {
-    const AFTER                 = '';
-    const BEFORE                = '';
+    const AFTER                 = 'after';
+    const BEFORE                = 'before';
 
     /**
      * Options
