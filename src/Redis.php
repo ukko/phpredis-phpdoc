@@ -1336,6 +1336,26 @@ class Redis
     public function sGetMembers( $key ) {}
 
     /**
+     * Scan a set for members.
+     * @param   string  $key        The set to search.
+     * @param   int     $iterator   LONG (reference) to the iterator as we go.
+     * @param   null    $pattern    String, optional pattern to match against.
+     * @param   int     $count      How many members to return at a time (Redis might return a different amount).
+     * @return  array   PHPRedis will return an array of keys or FALSE when we're done iterating.
+     * @link    http://redis.io/commands/sscan
+     * @example
+     * <pre>
+     * $iterator = null;
+     * while ($members = $redis->sscan('set', $iterator)) {
+     *     foreach ($members as $member) {
+     *         echo $member . PHP_EOL;
+     *     }
+     * }
+     * </pre>
+     */
+    public function sScan( $key, &$iterator, $pattern = null, $count = 0 ) {}
+
+    /**
      * Sets a value and returns the previous entry at that key.
      *
      * @param   string  $key
