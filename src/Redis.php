@@ -1687,6 +1687,17 @@ class Redis
      */
     public function lastSave( ) {}
 
+    /**
+     * Blocks the current client until all the previous write commands are successfully transferred and
+     * acknowledged by at least the specified number of slaves.
+     * @param   int $numSlaves  Number of slaves that need to acknowledge previous write commands.
+     * @param   int $timeout    Timeout in milliseconds.
+     * @return  int The command returns the number of slaves reached by all the writes performed in the
+     *              context of the current connection.
+     * @link    http://redis.io/commands/wait
+     * @example $redis->wait(2, 1000);
+     */
+    public function wait( $numSlaves, $timeout ) {}
 
     /**
      * Returns the type of data pointed by a given key.
