@@ -2535,6 +2535,26 @@ class Redis
     public function zInter($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM') {}
 
     /**
+     * Scan a sorted set for members, with optional pattern and count.
+     * @param   string  $key        String, the set to scan.
+     * @param   int     $iterator   Long (reference), initialized to NULL.
+     * @param   string  $pattern    String (optional), the pattern to match.
+     * @param   int     $count      How many keys to return per iteration (Redis might return a different number).
+     * @return  array   PHPRedis will return matching keys from Redis, or FALSE when iteration is complete.
+     * @link    http://redis.io/commands/zscan
+     * @example
+     * <pre>
+     * $iterator = null;
+     * while ($members = $redis-zscan('zset', $iterator)) {
+     *     foreach ($members as $member => $score) {
+     *         echo $member . ' => ' . $score . PHP_EOL;
+     *     }
+     * }
+     * </pre>
+     */
+    public function zScan( $key, &$iterator, $pattern = null, $count = 0 ) {}
+
+    /**
      * Adds a value to the hash stored at key. If this value is already in the hash, FALSE is returned.
      *
      * @param string $key
