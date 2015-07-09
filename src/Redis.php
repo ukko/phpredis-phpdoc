@@ -3176,6 +3176,19 @@ class Redis
      * $redis->pfCount('key3'); // int(3)
      */
     public function pfMerge( $destkey, array $sourcekeys ) {}
+
+    /**
+     * Send arbitrary things to the redis server.
+     * @param   string      $command    Required command to send to the server.
+     * @param   mixed,...   $arguments  Optional variable amount of arguments to send to the server.
+     * @return  mixed
+     * @example
+     * <pre>
+     * $redis->rawCommand('SET', 'key', 'value'); // bool(true)
+     * $redis->rawCommand('GET", 'key'); // string(5) "value"
+     * </pre>
+     */
+    public function rawCommand( $command, $arguments ) {}
 }
 
 class RedisException extends Exception {}
