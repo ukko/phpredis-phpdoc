@@ -2937,6 +2937,8 @@ class Redis
      * @param   string  $key        The key to migrate.
      * @param   int     $db         The target DB.
      * @param   int     $timeout    The maximum amount of time given to this transfer.
+     * @param   bool    $copy       Should we send the COPY flag to redis.
+     * @param   bool    $replace    Should we send the REPLACE flag to redis.
      * @return  bool
      * @link    http://redis.io/commands/migrate
      * @example
@@ -2944,7 +2946,7 @@ class Redis
      * $redis->migrate('backup', 6379, 'foo', 0, 3600);
      * </pre>
      */
-    public function migrate( $host, $port, $key, $db, $timeout ) {}
+    public function migrate( $host, $port, $key, $db, $timeout, $copy = false, $replace = false ) {}
 
     /**
      * Return the current Redis server time.
