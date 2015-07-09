@@ -66,8 +66,9 @@ class Redis
     /**
      * Multi
      */
-    const MULTI                 = '';
-    const PIPELINE              = '';
+    const ATOMIC                = 0;
+    const MULTI                 = 1;
+    const PIPELINE              = 2;
 
     /**
      * Type
