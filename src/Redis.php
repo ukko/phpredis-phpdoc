@@ -2282,6 +2282,18 @@ class Redis
     public function zRangeByLex( $key, $min, $max, $offset = null, $limit = null ) {}
 
     /**
+     * @see zRangeByLex()
+     * @param   string  $key
+     * @param   int     $min
+     * @param   int     $max
+     * @param   int     $offset
+     * @param   int     $limit
+     * @return  array
+     * @link    http://redis.io/commands/zrevrangebylex
+     */
+    public function zRevRangeByLex( $key, $min, $max, $offset = null, $limit = null ) {}
+
+    /**
      * Returns the number of elements of the sorted set stored at the specified key which have
      * scores in the range [start,end]. Adding a parenthesis before start or end excludes it
      * from the range. +inf and -inf are also valid limits.
