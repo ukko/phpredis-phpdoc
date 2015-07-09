@@ -3135,6 +3135,16 @@ class Redis
      * </pre>
      */
     public function scan( &$iterator, $pattern = null, $count = 0 ) {}
+
+    /**
+     * Adds all the element arguments to the HyperLogLog data structure stored at the key.
+     * @param   string  $key
+     * @param   array   $elements
+     * @return  bool
+     * @link    http://redis.io/commands/pfadd
+     * @example $redis->pfAdd('key', array('elem1', 'elem2'))
+     */
+    public function pfAdd( $key, array $elements ) {}
 }
 
 class RedisException extends Exception {}
