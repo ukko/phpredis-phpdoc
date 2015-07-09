@@ -2961,6 +2961,25 @@ class Redis
      * </pre>
      */
     public function time() {}
+
+    /**
+     * Scan the keyspace for keys.
+     * @param  int    $iterator Iterator, initialized to NULL.
+     * @param  string $pattern  Pattern to match.
+     * @param  int    $count    Count of keys per iteration (only a suggestion to Redis).
+     * @return array            This function will return an array of keys or FALSE if there are no more keys.
+     * @link   http://redis.io/commands/scan
+     * @example
+     * <pre>
+     * $iterator = null;
+     * while($keys = $redis->scan($iterator)) {
+     *     foreach($keys as $key) {
+     *         echo $key . PHP_EOL;
+     *     }
+     * }
+     * </pre>
+     */
+    public function scan( &$iterator, $pattern = null, $count = 0 ) {}
 }
 
 class RedisException extends Exception {}
