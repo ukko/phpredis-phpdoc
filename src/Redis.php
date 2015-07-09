@@ -3160,6 +3160,22 @@ class Redis
      * $redis->pfCount(array('key1', 'key2')); // int(3)
      */
     public function pfCount( $key ) {}
+
+    /**
+     * Merge multiple HyperLogLog values into an unique value that will approximate the cardinality
+     * of the union of the observed Sets of the source HyperLogLog structures.
+     * @param   string  $destkey
+     * @param   array   $sourcekeys
+     * @return  bool
+     * @link    http://redis.io/commands/pfmerge
+     * @example
+     * <pre>
+     * $redis->pfAdd('key1', array('elem1', 'elem2'));
+     * $redis->pfAdd('key2', array('elem3', 'elem2'));
+     * $redis->pfMerge('key3', array('key1', 'key2'));
+     * $redis->pfCount('key3'); // int(3)
+     */
+    public function pfMerge( $destkey, array $sourcekeys ) {}
 }
 
 class RedisException extends Exception {}
