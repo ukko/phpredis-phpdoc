@@ -337,6 +337,7 @@ class Redis
      * @param array             $channels an array of channels to subscribe to
      * @param string | array    $callback either a string or an array($instance, 'method_name').
      * The callback function receives 3 parameters: the redis instance, the channel name, and the message.
+     * @return mixed            Any non-null return value in the callback will be returned to the caller.
      * @link    http://redis.io/commands/subscribe
      * @example
      * <pre>
@@ -367,6 +368,7 @@ class Redis
      * @param   array           $patterns   The number of elements removed from the set.
      * @param   string|array    $callback   Either a string or an array with an object and method.
      *                          The callback will get four arguments ($redis, $pattern, $channel, $message)
+     * @param   mixed           Any non-null return value in the callback will be returned to the caller.
      * @link    http://redis.io/commands/psubscribe
      * @example
      * <pre>
