@@ -39,6 +39,22 @@ class Redis
      */
     const OPT_SERIALIZER        = 1;
     const OPT_PREFIX            = 2;
+    const OPT_READ_TIMEOUT      = 3;
+    const OPT_SCAN              = 4;
+    const OPT_SLAVE_FAILOVER    = 5;
+
+    /**
+     * Cluster options
+     */
+    const FAILOVER_NONE         = 0;
+    const FAILOVER_ERROR        = 1;
+    const FAILOVER_DISTRIBUTE   = 2;
+
+    /**
+     * SCAN options
+     */
+    const SCAN_NORETRY          = 0;
+    const SCAN_RETRY            = 1;
 
     /**
      * Serializers
