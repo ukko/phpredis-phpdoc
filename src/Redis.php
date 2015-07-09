@@ -3145,6 +3145,21 @@ class Redis
      * @example $redis->pfAdd('key', array('elem1', 'elem2'))
      */
     public function pfAdd( $key, array $elements ) {}
+
+    /**
+     * When called with a single key, returns the approximated cardinality computed by the HyperLogLog data
+     * structure stored at the specified variable, which is 0 if the variable does not exist.
+     * @param   string|array    $key
+     * @return  int
+     * @link    http://redis.io/commands/pfcount
+     * @example
+     * <pre>
+     * $redis->pfAdd('key1', array('elem1', 'elem2'));
+     * $redis->pfAdd('key2', array('elem3', 'elem2'));
+     * $redis->pfCount('key1'); // int(2)
+     * $redis->pfCount(array('key1', 'key2')); // int(3)
+     */
+    public function pfCount( $key ) {}
 }
 
 class RedisException extends Exception {}
