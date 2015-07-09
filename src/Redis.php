@@ -2257,6 +2257,31 @@ class Redis
     public function zRevRangeByScore( $key, $start, $end, array $options = array() ) {}
 
     /**
+     * Returns a lexigraphical range of members in a sorted set, assuming the members have the same score. The
+     * min and max values are required to start with '(' (exclusive), '[' (inclusive), or be exactly the values
+     * '-' (negative inf) or '+' (positive inf).  The command must be called with either three *or* five
+     * arguments or will return FALSE.
+     * @param   string  $key    The ZSET you wish to run against.
+     * @param   int     $min    The minimum alphanumeric value you wish to get.
+     * @param   int     $max    The maximum alphanumeric value you wish to get.
+     * @param   int     $offset Optional argument if you wish to start somewhere other than the first element.
+     * @param   int     $limit  Optional argument if you wish to limit the number of elements returned.
+     * @return  array   Array containing the values in the specified range.
+     * @link    http://redis.io/commands/zrangebylex
+     * @example
+     * <pre>
+     * foreach (array('a', 'b', 'c', 'd', 'e', 'f', 'g') as $char) {
+     *     $redis->zAdd('key', $char);
+     * }
+     *
+     * $redis->zRangeByLex('key', '-', '[c'); // array('a', 'b', 'c')
+     * $redis->zRangeByLex('key', '-', '(c'); // array('a', 'b')
+     * $redis->zRangeByLex('key', '-', '[c'); // array('b', 'c')
+     * </pre>
+     */
+    public function zRangeByLex( $key, $min, $max, $offset = null, $limit = null ) {}
+
+    /**
      * Returns the number of elements of the sorted set stored at the specified key which have
      * scores in the range [start,end]. Adding a parenthesis before start or end excludes it
      * from the range. +inf and -inf are also valid limits.
