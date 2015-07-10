@@ -50,8 +50,8 @@ class Redis
     /**
      * Multi
      */
-    const MULTI                 = '';
-    const PIPELINE              = '';
+    const MULTI                 = 0;
+    const PIPELINE              = 1;
 
     /**
      * Type
@@ -253,7 +253,7 @@ class Redis
     /**
      * Enter and exit transactional mode.
      *
-     * @internal param Redis::MULTI|Redis::PIPELINE
+     * @param int Redis::MULTI|Redis::PIPELINE
      * Defaults to Redis::MULTI.
      * A Redis::MULTI block of commands runs as a single transaction;
      * a Redis::PIPELINE block is simply transmitted faster to the server, but without any guarantee of atomicity.
@@ -277,7 +277,7 @@ class Redis
      * //    3 => 'val2');
      * </pre>
      */
-    public function multi( ) {}
+    public function multi( $mode = Redis::MULTI ) {}
 
     /**
      * @see multi()
@@ -719,7 +719,6 @@ class Redis
     /**
      * @see     lLen()
      * @param   string    $key
-     * @param   int       $index
      * @link    http://redis.io/commands/llen
      */
     public function lSize( $key ) {}
@@ -1450,7 +1449,7 @@ class Redis
      * Sets an expiration date (a timeout in milliseconds) on an item.
      *
      * @param   string  $key    The key that will disappear.
-     * @param   int     $pttl   The key's remaining Time To Live, in milliseconds.
+     * @param   int     $ttl   The key's remaining Time To Live, in milliseconds.
      * @return  bool:   TRUE in case of success, FALSE in case of failure.
      * @link    http://redis.io/commands/pexpire
      * @example
@@ -1781,6 +1780,7 @@ class Redis
      * @param   string  $retKey     return key
      * @param   string  $key1
      * @param   string  $key2
+     * @param   string  $key3
      * @return  int     The size of the string stored in the destination key.
      * @link    http://redis.io/commands/bitop
      * @example
@@ -2971,7 +2971,7 @@ class RedisArray {
     public function _function() {}
 
     /**
-     * @param   string  key     The key for which you want to lookup the host
+     * @param   string  $key The key for which you want to lookup the host
      * @return  string  the host to be used for a certain key
      */
     public function _target($key) {}
