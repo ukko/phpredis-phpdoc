@@ -1371,7 +1371,7 @@ class Redis
      * @example
      * <pre>
      * $iterator = null;
-     * while ($members = $redis->sscan('set', $iterator)) {
+     * while ($members = $redis->sScan('set', $iterator)) {
      *     foreach ($members as $member) {
      *         echo $member . PHP_EOL;
      *     }
