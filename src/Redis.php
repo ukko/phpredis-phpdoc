@@ -1362,6 +1362,7 @@ class Redis
 
     /**
      * @see sMembers()
+     * @return  array   An array of elements, the contents of the set.
      * @param   string  $key
      * @link    http://redis.io/commands/smembers
      */
