@@ -670,8 +670,10 @@ class Redis
      * Il all the list identified by the keys passed in arguments are empty, blPop will block
      * during the specified timeout until an element is pushed to one of those lists. This element will be popped.
      *
-     * @param   array $keys Array containing the keys of the lists INTEGER Timeout
-     * Or STRING Key1 STRING Key2 STRING Key3 ... STRING Keyn INTEGER Timeout
+     * @param array $keys    Array containing the keys of the lists
+     * Or STRING Key1 STRING Key2 STRING Key3 ... STRING Keyn
+     * @param int   $timeout Timeout
+     *
      * @return  array array('listName', 'element')
      * @link    http://redis.io/commands/blpop
      * @example
@@ -702,7 +704,7 @@ class Redis
      * // array('key1', 'A') is returned
      * </pre>
      */
-    public function blPop( array $keys ) {}
+    public function blPop( array $keys, $timeout) {}
 
     /**
      * Is a blocking rPop primitive. If at least one of the lists contains at least one element,
@@ -711,8 +713,9 @@ class Redis
      * block during the specified timeout until an element is pushed to one of those lists. T
      * his element will be popped.
      *
-     * @param   array $keys Array containing the keys of the lists INTEGER Timeout
-     * Or STRING Key1 STRING Key2 STRING Key3 ... STRING Keyn INTEGER Timeout
+     * @param array $keys    Array containing the keys of the lists
+     * Or STRING Key1 STRING Key2 STRING Key3 ... STRING Keyn
+     * @param int   $timeout Timeout
      * @return  array array('listName', 'element')
      * @link    http://redis.io/commands/brpop
      * @example
@@ -743,7 +746,7 @@ class Redis
      * // array('key1', 'A') is returned
      * </pre>
      */
-    public function brPop( array $keys ) {}
+    public function brPop( array $keys, $timeout ) {}
 
 
     /**
