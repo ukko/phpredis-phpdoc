@@ -210,14 +210,31 @@ class Redis
     /**
      * Set the string value in argument as value of the key.
      *
-     * @param   string  $key
-     * @param   string  $value
-     * @param   int     $ttl    Calling setex() is preferred if you want a Time To Live.
-     * @return  bool:   If the command is successful return TRUE or 'Redis Socket Buffer' object
-     * @link    http://redis.io/commands/set
-     * @example $redis->set('key', 'value');
+     * @since If you're using Redis >= 2.6.12, you can pass extended options as explained in example
+     *
+     * @param   string    $key
+     * @param   string    $value
+     * @param   int|array $timeout If you pass an integer, phpredis will redirect to SETEX, and will try to use Redis >= 2.6.12 extended options if you pass an array with valid values
+     *
+     * <pre>
+     * // Simple key -> value set
+     * $redis->set('key', 'value');
+     *
+     * // Will redirect, and actually make an SETEX call
+     * $redis->set('key','value', 10);
+     *
+     * // Will set the key, if it doesn't exist, with a ttl of 10 seconds
+     * $redis->set('key', 'value', Array('nx', 'ex'=>10));
+     *
+     * // Will set a key, if it does exist, with a ttl of 1000 miliseconds
+     * $redis->set('key', 'value', Array('xx', 'px'=>1000));
+     * </pre>
+     *
+     * @return  bool TRUE if the command is successful.
+     *
+     * @link     http://redis.io/commands/set
      */
-    public function set( $key, $value, $ttl = 0 ) {}
+    public function set( $key, $value, $timeout = 0 ) {}
 
     /**
      * Set the string value in argument as value of the key, with a time to live.
