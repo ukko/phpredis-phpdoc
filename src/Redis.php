@@ -108,6 +108,12 @@ class Redis
     public function connect( $host, $port = 6379, $timeout = 0.0, $reserved = null, $retry_interval = 0 ) {}
 
     /**
+     * A method to determine if a phpredis object thinks it's connected to a server
+     * @return bool Returns TRUE if phpredis thinks it's connected and FALSE if not
+     */
+    public function isConnected() {}
+
+    /**
      * @see connect()
      * @param string    $host
      * @param int       $port
