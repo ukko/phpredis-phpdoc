@@ -240,7 +240,7 @@ class Redis
      *
      * @link     http://redis.io/commands/set
      */
-    public function set( $key, $value, $timeout = 0 ) {}
+    public function set( $key, $value, $timeout = null ) {}
 
     /**
      * Set the string value in argument as value of the key, with a time to live.
