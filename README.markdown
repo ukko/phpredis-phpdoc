@@ -40,12 +40,8 @@ Do not forget to declare a variable type $ redis
 
 ### Setup in IDE NetBeans
 
- * Right click your project -> "Properties"
- * Select the "PHP Include Path" category
- * Click "Add Folder..."
- * Select your checkout of phpredis-phpdoc
- * Click "Open"
- * Click "OK"
+ * Save the file to netbeans stubs folder. For example:
+ `~/netbeans-8.2/php/phpstubs/phpruntime/redis.php`
 
 ### Setup in Zend Studio IDE (Eclipse PDT)
 
