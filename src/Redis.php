@@ -255,6 +255,19 @@ class Redis
     public function setex( $key, $ttl, $value ) {}
 
     /**
+     * Set the value and expiration in milliseconds of a key.
+     *
+     * @see     setex()
+     * @param   string  $key
+     * @param   int     $ttl, in milliseconds.
+     * @param   string  $value
+     * @return  bool:   TRUE if the command is successful.
+     * @link    http://redis.io/commands/psetex
+     * @example $redis->psetex('key', 1000, 'value'); // sets key → value, with 1sec TTL.
+     */
+    public function psetex( $key, $ttl, $value ) {}
+
+    /**
      * Set the string value in argument as value of the key if the key doesn't already exist in the database.
      *
      * @param   string  $key
@@ -297,6 +310,28 @@ class Redis
      * @return int Number of keys deleted.
      */
     public function delete( $key1, $key2 = null, $key3 = null ) {}
+
+    /**
+     * Delete a key asynchronously in another thread. Otherwise it is just as DEL, but non blocking.
+     *
+     * @see del()
+     * @param   string|array   $key1
+     * @param   string      $key2
+     * @param   string      $key3
+     * @return int Number of keys unlinked.
+     *
+     * @link    https://redis.io/commands/unlink
+     * @example
+     * <pre>
+     * $redis->set('key1', 'val1');
+     * $redis->set('key2', 'val2');
+     * $redis->set('key3', 'val3');
+     * $redis->set('key4', 'val4');
+     * $redis->unlink('key1', 'key2');          // return 2
+     * $redis->unlink(array('key3', 'key4'));   // return 2
+     * </pre>
+     */
+    public function unlink( $key1, $key2 = null, $key3 = null ) {}
 
     /**
      * Enter and exit transactional mode.
@@ -367,7 +402,7 @@ class Redis
     /**
      * Subscribe to channels. Warning: this function will probably change in the future.
      *
-     * @param array             $channels an array of channels to subscribe to
+     * @param array             $channels an array of channels to subscribe
      * @param string | array    $callback either a string or an array($instance, 'method_name').
      * The callback function receives 3 parameters: the redis instance, the channel name, and the message.
      * @return mixed            Any non-null return value in the callback will be returned to the caller.
@@ -398,7 +433,7 @@ class Redis
     /**
      * Subscribe to channels by pattern
      *
-     * @param   array           $patterns   The number of elements removed from the set.
+     * @param   array           $patterns   an array of glob-style patterns to subscribe
      * @param   string|array    $callback   Either a string or an array with an object and method.
      *                          The callback will get four arguments ($redis, $pattern, $channel, $message)
      * @param   mixed           Any non-null return value in the callback will be returned to the caller.
@@ -446,6 +481,22 @@ class Redis
      * </pre>
      */
     public function pubsub( $keyword, $argument ) {}
+
+    /**
+     * Stop listening for messages posted to the given channels.
+     *
+     * @param   array             $channels an array of channels to usubscribe
+     * @link    http://redis.io/commands/unsubscribe
+     */
+    public function unsubscribe( $channels = null ) {}
+
+    /**
+     * Stop listening for messages posted to the given channels.
+     *
+     * @param   array           $patterns   an array of glob-style patterns to unsubscribe
+     * @link    http://redis.io/commands/punsubscribe
+     */
+    public function punsubscribe( $patterns = null ) {}
 
     /**
      * Verify if the specified key exists.
