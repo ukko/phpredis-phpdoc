@@ -3326,10 +3326,11 @@ class Redis
 
     /**
      * Acknowledge one or more messages on behalf of a consumer group.
-     * @param string $stream
-     * @param string $group
-     * @param array $arr_messages
-     * @return int The number of messages Redis reports as acknowledged.
+     * @param   string  $stream
+     * @param   string  $group
+     * @param   array   $arr_messages
+     * @return  int     The number of messages Redis reports as acknowledged.
+     * @link    https://redis.io/commands/xack
      * @example
      * <pre>
      * $obj_redis->xAck('stream', 'group1', ['1530063064286-0', '1530063064286-1']);
@@ -3339,10 +3340,11 @@ class Redis
 
     /**
      * Add a message to a stream.
-     * @param string $str_key
-     * @param string $str_id
-     * @param $arr_message
-     * @return string The added message ID.
+     * @param   string  $str_key
+     * @param   string  $str_id
+     * @param   array   $arr_message
+     * @return  string  The added message ID.
+     * @link    https://redis.io/commands/xadd
      * @example
      * <pre>
      * $obj_redis->xAdd('mystream', "*", ['field' => 'value']);
@@ -3352,13 +3354,14 @@ class Redis
 
     /**
      * Claim ownership of one or more pending messages.
-     * @param string $str_key
-     * @param string $str_group
-     * @param string $str_consumer
-     * @param int $min_idle_time
-     * @param array $arr_ids
-     * @param array $arr_options ['IDLE' => $value, 'TIME' => $value, 'RETRYCOUNT' => $value, 'FORCE', 'JUSTID']
-     * @return array Either an array of message IDs along with corresponding data, or just an array of IDs (if the 'JUSTID' option was passed).
+     * @param   string  $str_key
+     * @param   string  $str_group
+     * @param   string  $str_consumer
+     * @param   int     $min_idle_time
+     * @param   array   $arr_ids
+     * @param   array   $arr_options ['IDLE' => $value, 'TIME' => $value, 'RETRYCOUNT' => $value, 'FORCE', 'JUSTID']
+     * @return  array   Either an array of message IDs along with corresponding data, or just an array of IDs (if the 'JUSTID' option was passed).
+     * @link    https://redis.io/commands/xclaim
      * @example
      * <pre>
      * $ids = ['1530113681011-0', '1530113681011-1', '1530113681011-2'];
@@ -3382,9 +3385,10 @@ class Redis
 
     /**
      * Delete one or more messages from a stream.
-     * @param string $str_key
-     * @param array $arr_ids
-     * @return int The number of messages removed.
+     * @param   string  $str_key
+     * @param   array   $arr_ids
+     * @return  int     The number of messages removed.
+     * @link    https://redis.io/commands/xdel
      * @example
      * <pre>
      * $obj_redis->xDel('mystream', ['1530115304877-0', '1530115305731-0']);
@@ -3393,11 +3397,12 @@ class Redis
     public function xDel($str_key, $arr_ids) {}
 
     /**
-     * @param string $operation e.g.: 'HELP', 'SETID', 'DELGROUP', 'CREATE', 'DELCONSUMER'
-     * @param string $str_key
-     * @param string $str_group
-     * @param string $str_msg_id
-     * @return mixed This command returns different types depending on the specific XGROUP command executed.
+     * @param   string  $operation  e.g.: 'HELP', 'SETID', 'DELGROUP', 'CREATE', 'DELCONSUMER'
+     * @param   string  $str_key
+     * @param   string  $str_group
+     * @param   string  $str_msg_id
+     * @return  mixed   This command returns different types depending on the specific XGROUP command executed.
+     * @link    https://redis.io/commands/xgroup
      * @example
      * <pre>
      * $obj_redis->xGroup('CREATE', 'mystream', 'mygroup');
@@ -3408,10 +3413,11 @@ class Redis
 
     /**
      * Get information about a stream or consumer groups.
-     * @param string $operation e.g.: 'CONSUMERS', 'GROUPS', 'STREAM', 'HELP'
-     * @param string $str_stream
-     * @param string $str_group
-     * @return mixed This command returns different types depending on which subcommand is used.
+     * @param   string  $operation  e.g.: 'CONSUMERS', 'GROUPS', 'STREAM', 'HELP'
+     * @param   string  $str_stream
+     * @param   string  $str_group
+     * @return  mixed   This command returns different types depending on which subcommand is used.
+     * @link    https://redis.io/commands/xinfo
      * @example
      * <pre>
      * $obj_redis->xInfo('STREAM', 'mystream');
@@ -3421,8 +3427,9 @@ class Redis
 
     /**
      * Get the length of a given stream.
-     * @param string $str_stream
-     * @return int The number of messages in the stream.
+     * @param   string  $str_stream
+     * @return  int     The number of messages in the stream.
+     * @link    https://redis.io/commands/xlen
      * @example
      * <pre>
      * $obj_redis->xLen('mystream');
@@ -3432,13 +3439,14 @@ class Redis
 
     /**
      * Get information about pending messages in a given stream.
-     * @param string $str_stream
-     * @param string $str_group
-     * @param int|string $i_start
-     * @param int|string $i_end
-     * @param int|string $i_count
-     * @param string $str_consumer
-     * @return array Information about the pending messages, in various forms depending on the specific invocation of XPENDING.
+     * @param   string      $str_stream
+     * @param   string      $str_group
+     * @param   int|string  $i_start
+     * @param   int|string  $i_end
+     * @param   int|string  $i_count
+     * @param   string      $str_consumer
+     * @return  array       Information about the pending messages, in various forms depending on the specific invocation of XPENDING.
+     * @link    https://redis.io/commands/xpending
      * @example
      * <pre>
      * $obj_redis->xPending('mystream', 'mygroup');
@@ -3449,11 +3457,12 @@ class Redis
 
     /**
      * Get a range of messages from a given stream.
-     * @param string $str_stream
-     * @param int $i_start
-     * @param int $i_end
-     * @param int $i_count
-     * @return array The messages in the stream within the requested range.
+     * @param   string  $str_stream
+     * @param   int     $i_start
+     * @param   int     $i_end
+     * @param   int     $i_count
+     * @return  array   The messages in the stream within the requested range.
+     * @link    https://redis.io/commands/xrange
      * @example
      * <pre>
      * // Get everything in this stream
@@ -3466,10 +3475,11 @@ class Redis
 
     /**
      * Read data from one or more streams and only return IDs greater than sent in the command.
-     * @param $arr_streams
-     * @param int|string $i_count
-     * @param int|string $i_block
-     * @return array The messages in the stream newer than the IDs passed to Redis (if any).
+     * @param   array       $arr_streams
+     * @param   int|string  $i_count
+     * @param   int|string  $i_block
+     * @return  array       The messages in the stream newer than the IDs passed to Redis (if any).
+     * @link    https://redis.io/commands/xread
      * @example
      * <pre>
      * $obj_redis->xRead(['stream1' => '1535222584555-0', 'stream2' => '1535222584555-0']);
@@ -3479,12 +3489,13 @@ class Redis
 
     /**
      * This method is similar to xRead except that it supports reading messages for a specific consumer group.
-     * @param string $str_group
-     * @param string $str_consumer
-     * @param array $arr_streams
-     * @param int|string $i_count
-     * @param int|string $i_block
-     * @return array The messages delivered to this consumer group (if any).
+     * @param   string      $str_group
+     * @param   string      $str_consumer
+     * @param   array       $arr_streams
+     * @param   int|string  $i_count
+     * @param   int|string  $i_block
+     * @return  array       The messages delivered to this consumer group (if any).
+     * @link    https://redis.io/commands/xreadgroup
      * @example
      * <pre>
      * // Consume messages for 'mygroup', 'consumer1'
@@ -3497,11 +3508,12 @@ class Redis
 
     /**
      * This is identical to xRange except the results come back in reverse order. Also note that Redis reverses the order of "start" and "end".
-     * @param string $str_stream
-     * @param int|string $i_end
-     * @param int|string $i_start
-     * @param int|string $i_count
-     * @return array The messages in the range specified.
+     * @param   string      $str_stream
+     * @param   int|string  $i_end
+     * @param   int|string  $i_start
+     * @param   int|string  $i_count
+     * @return  array       The messages in the range specified.
+     * @link    https://redis.io/commands/xrevrange
      * @example
      * <pre>
      * $obj_redis->xRevRange('mystream', '+', '-');
@@ -3511,10 +3523,11 @@ class Redis
 
     /**
      * Trim the stream length to a given maximum. If the "approximate" flag is pasesed, Redis will use your size as a hint but only trim trees in whole nodes (this is more efficient)..
-     * @param string $str_stream
-     * @param int $i_max_len
-     * @param bool $boo_approximate
-     * @return int The number of messages trimed from the stream.
+     * @param   string  $str_stream
+     * @param   int     $i_max_len
+     * @param   bool    $boo_approximate
+     * @return  int     The number of messages trimed from the stream.
+     * @link    https://redis.io/commands/xtrim
      * @example
      * <pre>
      * // Trim to exactly 100 messages
