@@ -3551,12 +3551,11 @@ class RedisArray {
     /**
      * Constructor
      *
-     * @param   string  $name   Name of the redis array to create (required if using redis.ini to define array)
-     * @param   array   $hosts  Array of hosts to construct the array with
-     * @param   array   $opts   Array of options
+     * @param   string|array   $hosts  Name of the redis array from redis.ini or array of hosts to construct the array with
+     * @param   array          $opts   Array of options
      * @link    https://github.com/nicolasff/phpredis/blob/master/arrays.markdown
      */
-    function __construct($name = '', array $hosts = NULL, array $opts = NULL) {}
+    function __construct($hosts, array $opts = NULL) {}
 
     /**
      * @return  array   list of hosts for the selected array
