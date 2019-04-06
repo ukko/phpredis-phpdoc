@@ -3555,7 +3555,7 @@ class RedisArray {
      * @param   array          $opts   Array of options
      * @link    https://github.com/nicolasff/phpredis/blob/master/arrays.markdown
      */
-    function __construct($hosts, array $opts = NULL) {}
+    function __construct($hosts, array $opts = null) {}
 
     /**
      * @return  array   list of hosts for the selected array
