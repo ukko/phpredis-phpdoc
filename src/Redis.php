@@ -2284,7 +2284,7 @@ class Redis
      * @example
      * <pre>
      * <pre>
-     * $redis->zAdd('z', 1, 'v2', 2, 'v2', 3, 'v3', 4, 'v4' );  // int(2)
+     * $redis->zAdd('z', 1, 'v1', 2, 'v2', 3, 'v3', 4, 'v4' );  // int(2)
      * $redis->zRem('z', 'v2', 'v3');                           // int(2)
      * var_dump( $redis->zRange('z', 0, -1) );
      * //// Output:
@@ -2334,7 +2334,7 @@ class Redis
      * @link    https://redis.io/commands/zrem
      * @example
      * <pre>
-     * $redis->zAdd('z', 1, 'v2', 2, 'v2', 3, 'v3', 4, 'v4' );  // int(2)
+     * $redis->zAdd('z', 1, 'v1', 2, 'v2', 3, 'v3', 4, 'v4' );  // int(2)
      * $redis->zRem('z', 'v2', 'v3');                           // int(2)
      * var_dump( $redis->zRange('z', 0, -1) );
      * //// Output:
