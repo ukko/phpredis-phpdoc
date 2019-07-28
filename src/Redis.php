@@ -165,6 +165,8 @@ class Redis
 
     /**
      * @see connect()
+     * @deprecated use Redis::connect()
+     *
      * @param string    $host
      * @param int       $port
      * @param float     $timeout
@@ -211,6 +213,8 @@ class Redis
 
     /**
      * @see pconnect()
+     * @deprecated use Redis::pconnect()
+     *
      * @param string    $host
      * @param int       $port
      * @param float     $timeout
@@ -393,19 +397,19 @@ class Redis
     /**
      * Remove specified keys.
      *
-     * @param   string|array   $key1 An array of keys, or an undefined number of parameters, each a key: key1 key2 key3 ... keyN
-     * @param   string      $key2 ...
-     * @param   string      $key3 ...
-     * @return int Number of keys deleted.
-     * @link    https://redis.io/commands/del
+     * @param string|array $key1 An array of keys, or an undefined number of parameters, each a key: key1 key2 key3 ... keyN
+     * @param string $key2 ...
+     * @param string $key3 ...
+     * @return int Number of keys deleted
+     * @link https://redis.io/commands/del
      * @example
      * <pre>
      * $redis->set('key1', 'val1');
      * $redis->set('key2', 'val2');
      * $redis->set('key3', 'val3');
      * $redis->set('key4', 'val4');
-     * $redis->delete('key1', 'key2');          // return 2
-     * $redis->delete(array('key3', 'key4'));   // return 2
+     * $redis->del('key1', 'key2');          // return 2
+     * $redis->del(array('key3', 'key4'));   // return 2
      * </pre>
      */
     public function del($key1, $key2 = null, $key3 = null)
@@ -414,10 +418,12 @@ class Redis
 
     /**
      * @see del()
+     * @deprecated use Redis::del()
+     *
      * @param   string|array   $key1
      * @param   string      $key2
      * @param   string      $key3
-     * @return int Number of keys deleted.
+     * @return int Number of keys deleted
      */
     public function delete($key1, $key2 = null, $key3 = null)
     {
@@ -750,25 +756,6 @@ class Redis
     }
 
     /**
-     * Get the values of all the specified keys. If one or more keys dont exist, the array will contain FALSE at the
-     * position of the key.
-     *
-     * @param   array $keys Array containing the list of the keys
-     * @return  array Array containing the values related to keys in argument
-     * @example
-     * <pre>
-     * $redis->set('key1', 'value1');
-     * $redis->set('key2', 'value2');
-     * $redis->set('key3', 'value3');
-     * $redis->getMultiple(array('key1', 'key2', 'key3')); // array('value1', 'value2', 'value3');
-     * $redis->getMultiple(array('key0', 'key1', 'key5')); // array(`FALSE`, 'value2', `FALSE`);
-     * </pre>
-     */
-    public function getMultiple(array $keys)
-    {
-    }
-
-    /**
      * Adds the string values to the head (left) of the list. Creates the list if the key didn't exist.
      * If the key exists and is not a list, FALSE is returned.
      *
@@ -831,7 +818,7 @@ class Redis
      * @link    https://redis.io/commands/lpushx
      * @example
      * <pre>
-     * $redis->delete('key1');
+     * $redis->del('key1');
      * $redis->lPushx('key1', 'A');     // returns 0
      * $redis->lPush('key1', 'A');      // returns 1
      * $redis->lPushx('key1', 'B');     // returns 2
@@ -852,7 +839,7 @@ class Redis
      * @link    https://redis.io/commands/rpushx
      * @example
      * <pre>
-     * $redis->delete('key1');
+     * $redis->del('key1');
      * $redis->rPushx('key1', 'A'); // returns 0
      * $redis->rPush('key1', 'A'); // returns 1
      * $redis->rPushx('key1', 'B'); // returns 2
@@ -916,7 +903,7 @@ class Redis
      * <pre>
      * // Non blocking feature
      * $redis->lPush('key1', 'A');
-     * $redis->delete('key2');
+     * $redis->del('key2');
      *
      * $redis->blPop('key1', 'key2', 10); // array('key1', 'A')
      * // OR
@@ -929,7 +916,7 @@ class Redis
      * // Blocking feature
      *
      * // process 1
-     * $redis->delete('key1');
+     * $redis->del('key1');
      * $redis->blPop('key1', 10);
      * // blocking for 10 seconds
      *
@@ -960,7 +947,7 @@ class Redis
      * <pre>
      * // Non blocking feature
      * $redis->lPush('key1', 'A');
-     * $redis->delete('key2');
+     * $redis->del('key2');
      *
      * $redis->blPop('key1', 'key2', 10); // array('key1', 'A')
      * // OR
@@ -973,7 +960,7 @@ class Redis
      * // Blocking feature
      *
      * // process 1
-     * $redis->delete('key1');
+     * $redis->del('key1');
      * $redis->blPop('key1', 10);
      * // blocking for 10 seconds
      *
@@ -1011,9 +998,11 @@ class Redis
     }
 
     /**
-     * @see     lLen()
-     * @param   string    $key
+     * @see lLen()
      * @link    https://redis.io/commands/llen
+     * @deprecated use Redis::lLen()
+     *
+     * @param   string    $key
      */
     public function lSize($key)
     {
@@ -1027,15 +1016,16 @@ class Redis
      * @param int       $index
      * @return String the element at this index
      * Bool FALSE if the key identifies a non-string data type, or no value corresponds to this index in the list Key.
+     *
      * @link    https://redis.io/commands/lindex
      * @example
      * <pre>
      * $redis->rPush('key1', 'A');
      * $redis->rPush('key1', 'B');
      * $redis->rPush('key1', 'C');  // key1 => [ 'A', 'B', 'C' ]
-     * $redis->lGet('key1', 0);     // 'A'
-     * $redis->lGet('key1', -1);    // 'C'
-     * $redis->lGet('key1', 10);    // `FALSE`
+     * $redis->lIndex('key1', 0);     // 'A'
+     * $redis->lIndex('key1', -1);    // 'C'
+     * $redis->lIndex('key1', 10);    // `FALSE`
      * </pre>
      */
     public function lIndex($key, $index)
@@ -1044,9 +1034,11 @@ class Redis
 
     /**
      * @see lIndex()
-     * @param   string    $key
-     * @param   int       $index
-     * @link    https://redis.io/commands/lindex
+     * @link https://redis.io/commands/lindex
+     * @deprecated use Redis::lIndex()
+     *
+     * @param string $key
+     * @param int $index
      */
     public function lGet($key, $index)
     {
@@ -1066,9 +1058,9 @@ class Redis
      * $redis->rPush('key1', 'A');
      * $redis->rPush('key1', 'B');
      * $redis->rPush('key1', 'C');  // key1 => [ 'A', 'B', 'C' ]
-     * $redis->lGet('key1', 0);     // 'A'
+     * $redis->lIndex('key1', 0);     // 'A'
      * $redis->lSet('key1', 0, 'X');
-     * $redis->lGet('key1', 0);     // 'X'
+     * $redis->lIndex('key1', 0);     // 'X'
      * </pre>
      */
     public function lSet($key, $index, $value)
@@ -1099,6 +1091,8 @@ class Redis
     /**
      * @see lRange()
      * @link https://redis.io/commands/lrange
+     * @deprecated use Redis::lRange()
+     *
      * @param string    $key
      * @param int       $start
      * @param int       $end
@@ -1132,6 +1126,8 @@ class Redis
     /**
      * @see lTrim()
      * @link  https://redis.io/commands/ltrim
+     * @deprecated use Redis::lTrim()
+     *
      * @param string    $key
      * @param int       $start
      * @param int       $stop
@@ -1170,10 +1166,12 @@ class Redis
 
     /**
      * @see lRem
-     * @link    https://redis.io/commands/lremove
-     * @param string    $key
-     * @param string    $value
-     * @param int       $count
+     * @link https://redis.io/commands/lremove
+     * @deprecated use Redis::lRem()
+     *
+     * @param string $key
+     * @param string $value
+     * @param int $count
      */
     public function lRemove($key, $value, $count)
     {
@@ -1192,7 +1190,7 @@ class Redis
      * @link    https://redis.io/commands/linsert
      * @example
      * <pre>
-     * $redis->delete('key1');
+     * $redis->del('key1');
      * $redis->lInsert('key1', Redis::AFTER, 'A', 'X');     // 0
      *
      * $redis->lPush('key1', 'A');
@@ -1259,6 +1257,8 @@ class Redis
     /**
      * @see sRem()
      * @link    https://redis.io/commands/srem
+     * @deprecated use Redis::sRem()
+     *
      * @param   string  $key
      * @param   string  $member1
      * @param   string  $member2
@@ -1316,6 +1316,8 @@ class Redis
     /**
      * @see sIsMember()
      * @link    https://redis.io/commands/sismember
+     * @deprecated use Redis::sIsMember()
+     *
      * @param   string  $key
      * @param   string  $value
      */
@@ -1479,7 +1481,7 @@ class Redis
      * @link    https://redis.io/commands/sunionstore
      * @example
      * <pre>
-     * $redis->delete('s0', 's1', 's2');
+     * $redis->del('s0', 's1', 's2');
      *
      * $redis->sAdd('s0', '1');
      * $redis->sAdd('s0', '2');
@@ -1517,7 +1519,7 @@ class Redis
      * @link    https://redis.io/commands/sunionstore
      * @example
      * <pre>
-     * $redis->delete('s0', 's1', 's2');
+     * $redis->del('s0', 's1', 's2');
      *
      * $redis->sAdd('s0', '1');
      * $redis->sAdd('s0', '2');
@@ -1556,7 +1558,7 @@ class Redis
      * @link    https://redis.io/commands/sdiff
      * @example
      * <pre>
-     * $redis->delete('s0', 's1', 's2');
+     * $redis->del('s0', 's1', 's2');
      *
      * $redis->sAdd('s0', '1');
      * $redis->sAdd('s0', '2');
@@ -1591,7 +1593,7 @@ class Redis
      * @link    https://redis.io/commands/sdiffstore
      * @example
      * <pre>
-     * $redis->delete('s0', 's1', 's2');
+     * $redis->del('s0', 's1', 's2');
      *
      * $redis->sAdd('s0', '1');
      * $redis->sAdd('s0', '2');
@@ -1625,7 +1627,7 @@ class Redis
      * @link    https://redis.io/commands/smembers
      * @example
      * <pre>
-     * $redis->delete('s');
+     * $redis->del('s');
      * $redis->sAdd('s', 'a');
      * $redis->sAdd('s', 'b');
      * $redis->sAdd('s', 'a');
@@ -1649,9 +1651,11 @@ class Redis
 
     /**
      * @see sMembers()
+     * @link    https://redis.io/commands/smembers
+     * @deprecated use Redis::sMembers()
+     *
      * @return  array   An array of elements, the contents of the set.
      * @param   string  $key
-     * @link    https://redis.io/commands/smembers
      */
     public function sGetMembers($key)
     {
@@ -1773,6 +1777,8 @@ class Redis
     /**
      * @see rename()
      * @link    https://redis.io/commands/rename
+     * @deprecated use Redis::rename()
+     *
      * @param   string  $srcKey
      * @param   string  $dstKey
      */
@@ -1812,7 +1818,7 @@ class Redis
      * @example
      * <pre>
      * $redis->set('x', '42');
-     * $redis->setTimeout('x', 3);  // x will disappear in 3 seconds.
+     * $redis->expire('x', 3);  // x will disappear in 3 seconds.
      * sleep(5);                    // wait 5 seconds
      * $redis->get('x');            // will return `FALSE`, as 'x' has expired.
      * </pre>
@@ -1842,9 +1848,11 @@ class Redis
 
     /**
      * @see expire()
+     * @link    https://redis.io/commands/expire
+     * @deprecated use Redis::expire()
+     *
      * @param   string  $key
      * @param   int     $ttl
-     * @link    https://redis.io/commands/expire
      */
     public function setTimeout($key, $ttl)
     {
@@ -1907,6 +1915,8 @@ class Redis
 
     /**
      * @see keys()
+     * @deprecated use Redis::keys()
+     *
      * @param   string  $pattern
      * @link    https://redis.io/commands/keys
      */
@@ -2334,7 +2344,7 @@ class Redis
      * @link    https://redis.io/commands/sort
      * @example
      * <pre>
-     * $redis->delete('s');
+     * $redis->del('s');
      * $redis->sadd('s', 5);
      * $redis->sadd('s', 4);
      * $redis->sadd('s', 2);
@@ -2491,6 +2501,27 @@ class Redis
     }
 
     /**
+     * Get the values of all the specified keys.
+     * If one or more keys dont exist, the array will contain FALSE at the position of the key.
+     *
+     * @param array $keys Array containing the list of the keys
+     * @return array Array containing the values related to keys in argument
+     *
+     * @deprecated use Redis::mGet()
+     * @example
+     * <pre>
+     * $redis->set('key1', 'value1');
+     * $redis->set('key2', 'value2');
+     * $redis->set('key3', 'value3');
+     * $redis->getMultiple(array('key1', 'key2', 'key3')); // array('value1', 'value2', 'value3');
+     * $redis->getMultiple(array('key0', 'key1', 'key5')); // array(`FALSE`, 'value2', `FALSE`);
+     * </pre>
+     */
+    public function getMultiple(array $keys)
+    {
+    }
+
+    /**
      * Returns the values of all specified keys.
      *
      * For every key that does not hold a string value or does not exist,
@@ -2498,23 +2529,20 @@ class Redis
      *
      * @param array $array
      * @return array
+     *
      * @link https://redis.io/commands/mget
      * @example
      * <pre>
-     * $redis->delete('x', 'y', 'z', 'h');  // remove x y z
+     * $redis->del('x', 'y', 'z', 'h');  // remove x y z
      * $redis->mset(array('x' => 'a', 'y' => 'b', 'z' => 'c'));
      * $redis->hset('h', 'field', 'value');
      * var_dump($redis->mget(array('x', 'y', 'z', 'h')));
      * // Output:
      * // array(3) {
-     * // [0]=>
-     * // string(1) "a"
-     * // [1]=>
-     * // string(1) "b"
-     * // [2]=>
-     * // string(1) "c"
-     * // [3]=>
-     * // bool(false)
+     * //   [0]=> string(1) "a"
+     * //   [1]=> string(1) "b"
+     * //   [2]=> string(1) "c"
+     * //   [3]=> bool(false)
      * // }
      * </pre>
      */
@@ -2543,7 +2571,7 @@ class Redis
      * @link    https://redis.io/commands/rpoplpush
      * @example
      * <pre>
-     * $redis->delete('x', 'y');
+     * $redis->del('x', 'y');
      *
      * $redis->lPush('x', 'abc');
      * $redis->lPush('x', 'def');
@@ -2674,12 +2702,14 @@ class Redis
 
     /**
      * @see zRem()
+     * @link https://redis.io/commands/zrem
+     * @deprecated use Redis::zRem()
+     *
      * @param   string  $key
      * @param   string  $member1
      * @param   string  $member2
      * @param   string  $memberN
      * @return  int     Number of deleted values
-     * @link    https://redis.io/commands/zrem
      */
     public function zDelete($key, $member1, $member2 = null, $memberN = null)
     {
@@ -2843,6 +2873,8 @@ class Redis
 
     /**
      * @see zRemRangeByScore()
+     * @deprecated use Redis::zRemRangeByScore()
+     *
      * @param string    $key
      * @param float     $start
      * @param float     $end
@@ -2874,10 +2906,12 @@ class Redis
 
     /**
      * @see zRemRangeByRank()
+     * @link    https://redis.io/commands/zremrangebyscore
+     * @deprecated use Redis::zRemRangeByRank()
+     *
      * @param   string  $key
      * @param   int     $start
      * @param   int     $end
-     * @link    https://redis.io/commands/zremrangebyscore
      */
     public function zDeleteRangeByRank($key, $start, $end)
     {
@@ -2888,6 +2922,7 @@ class Redis
      *
      * @param   string  $key
      * @return  int     the set's cardinality
+     *
      * @link    https://redis.io/commands/zsize
      * @example
      * <pre>
@@ -2903,6 +2938,8 @@ class Redis
 
     /**
      * @see zCard()
+     * @deprecated use Redis::zCard()
+     *
      * @param string $key
      */
     public function zSize($key)
@@ -2936,7 +2973,7 @@ class Redis
      * @link    https://redis.io/commands/zrank
      * @example
      * <pre>
-     * $redis->delete('z');
+     * $redis->del('z');
      * $redis->zAdd('key', 1, 'one');
      * $redis->zAdd('key', 2, 'two');
      * $redis->zRank('key', 'one');     // 0
@@ -2970,7 +3007,7 @@ class Redis
      * @link    https://redis.io/commands/zincrby
      * @example
      * <pre>
-     * $redis->delete('key');
+     * $redis->del('key');
      * $redis->zIncrBy('key', 2.5, 'member1');  // key or member1 didn't exist, so member1's score is to 0
      *                                          // before the increment and now has the value 2.5
      * $redis->zIncrBy('key', 1, 'member1');    // 3.5
@@ -2992,17 +3029,17 @@ class Redis
      * @param array     $ZSetKeys
      * @param array     $Weights
      * @param string    $aggregateFunction  Either "SUM", "MIN", or "MAX": defines the behaviour to use on
-     * duplicate entries during the zUnion.
+     * duplicate entries during the zUnionStore
      * @return int The number of values in the new sorted set.
      * @link    https://redis.io/commands/zunionstore
      * @example
      * <pre>
-     * $redis->delete('k1');
-     * $redis->delete('k2');
-     * $redis->delete('k3');
-     * $redis->delete('ko1');
-     * $redis->delete('ko2');
-     * $redis->delete('ko3');
+     * $redis->del('k1');
+     * $redis->del('k2');
+     * $redis->del('k3');
+     * $redis->del('ko1');
+     * $redis->del('ko2');
+     * $redis->del('ko3');
      *
      * $redis->zAdd('k1', 0, 'val0');
      * $redis->zAdd('k1', 1, 'val1');
@@ -3010,12 +3047,25 @@ class Redis
      * $redis->zAdd('k2', 2, 'val2');
      * $redis->zAdd('k2', 3, 'val3');
      *
-     * $redis->zUnion('ko1', array('k1', 'k2')); // 4, 'ko1' => array('val0', 'val1', 'val2', 'val3')
+     * $redis->zUnionStore('ko1', array('k1', 'k2')); // 4, 'ko1' => array('val0', 'val1', 'val2', 'val3')
      *
-     * // Weighted zUnion
-     * $redis->zUnion('ko2', array('k1', 'k2'), array(1, 1)); // 4, 'ko2' => array('val0', 'val1', 'val2', 'val3')
-     * $redis->zUnion('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko3' => array('val0', 'val2', 'val3', 'val1')
+     * // Weighted zUnionStore
+     * $redis->zUnionStore('ko2', array('k1', 'k2'), array(1, 1)); // 4, 'ko2' => array('val0', 'val1', 'val2', 'val3')
+     * $redis->zUnionStore('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko3' => array('val0', 'val2', 'val3', 'val1')
      * </pre>
+     */
+    public function zUnionStore($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM')
+    {
+    }
+
+    /**
+     * @see zUnionStore
+     * @deprecated use Redis::zUnionStore()
+     *
+     * @param $Output
+     * @param $ZSetKeys
+     * @param array|null $Weights
+     * @param string $aggregateFunction
      */
     public function zUnion($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM')
     {
@@ -3033,19 +3083,19 @@ class Redis
      * @param   array   $ZSetKeys
      * @param   array   $Weights
      * @param   string  $aggregateFunction Either "SUM", "MIN", or "MAX":
-     * defines the behaviour to use on duplicate entries during the zInter.
+     * defines the behaviour to use on duplicate entries during the zInterStore.
      * @return  int     The number of values in the new sorted set.
      * @link    https://redis.io/commands/zinterstore
      * @example
      * <pre>
-     * $redis->delete('k1');
-     * $redis->delete('k2');
-     * $redis->delete('k3');
+     * $redis->del('k1');
+     * $redis->del('k2');
+     * $redis->del('k3');
      *
-     * $redis->delete('ko1');
-     * $redis->delete('ko2');
-     * $redis->delete('ko3');
-     * $redis->delete('ko4');
+     * $redis->del('ko1');
+     * $redis->del('ko2');
+     * $redis->del('ko3');
+     * $redis->del('ko4');
      *
      * $redis->zAdd('k1', 0, 'val0');
      * $redis->zAdd('k1', 1, 'val1');
@@ -3054,13 +3104,26 @@ class Redis
      * $redis->zAdd('k2', 2, 'val1');
      * $redis->zAdd('k2', 3, 'val3');
      *
-     * $redis->zInter('ko1', array('k1', 'k2'));               // 2, 'ko1' => array('val1', 'val3')
-     * $redis->zInter('ko2', array('k1', 'k2'), array(1, 1));  // 2, 'ko2' => array('val1', 'val3')
+     * $redis->zInterStore('ko1', array('k1', 'k2'));               // 2, 'ko1' => array('val1', 'val3')
+     * $redis->zInterStore('ko2', array('k1', 'k2'), array(1, 1));  // 2, 'ko2' => array('val1', 'val3')
      *
-     * // Weighted zInter
-     * $redis->zInter('ko3', array('k1', 'k2'), array(1, 5), 'min'); // 2, 'ko3' => array('val1', 'val3')
-     * $redis->zInter('ko4', array('k1', 'k2'), array(1, 5), 'max'); // 2, 'ko4' => array('val3', 'val1')
+     * // Weighted zInterStore
+     * $redis->zInterStore('ko3', array('k1', 'k2'), array(1, 5), 'min'); // 2, 'ko3' => array('val1', 'val3')
+     * $redis->zInterStore('ko4', array('k1', 'k2'), array(1, 5), 'max'); // 2, 'ko4' => array('val3', 'val1')
      * </pre>
+     */
+    public function zInterStore($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM')
+    {
+    }
+
+    /**
+     * @see zInterStore
+     * @deprecated use Redis::zInterStore()
+     *
+     * @param $Output
+     * @param $ZSetKeys
+     * @param array|null $Weights
+     * @param string $aggregateFunction
      */
     public function zInter($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM')
     {
@@ -3144,7 +3207,7 @@ class Redis
      * @link    https://redis.io/commands/hset
      * @example
      * <pre>
-     * $redis->delete('h')
+     * $redis->del('h')
      * $redis->hSet('h', 'key1', 'hello');  // 1, 'key1' => 'hello' in the hash at "h"
      * $redis->hGet('h', 'key1');           // returns "hello"
      *
@@ -3167,7 +3230,7 @@ class Redis
      * @link    https://redis.io/commands/hsetnx
      * @example
      * <pre>
-     * $redis->delete('h')
+     * $redis->del('h')
      * $redis->hSetNx('h', 'key1', 'hello'); // TRUE, 'key1' => 'hello' in the hash at "h"
      * $redis->hSetNx('h', 'key1', 'world'); // FALSE, 'key1' => 'hello' in the hash at "h". No change since the field
      * wasn't replaced.
@@ -3200,7 +3263,7 @@ class Redis
      * @link    https://redis.io/commands/hlen
      * @example
      * <pre>
-     * $redis->delete('h')
+     * $redis->del('h')
      * $redis->hSet('h', 'key1', 'hello');
      * $redis->hSet('h', 'key2', 'plop');
      * $redis->hLen('h'); // returns 2
@@ -3254,7 +3317,7 @@ class Redis
      * @link    https://redis.io/commands/hkeys
      * @example
      * <pre>
-     * $redis->delete('h');
+     * $redis->del('h');
      * $redis->hSet('h', 'a', 'x');
      * $redis->hSet('h', 'b', 'y');
      * $redis->hSet('h', 'c', 'z');
@@ -3288,7 +3351,7 @@ class Redis
      * @link    https://redis.io/commands/hvals
      * @example
      * <pre>
-     * $redis->delete('h');
+     * $redis->del('h');
      * $redis->hSet('h', 'a', 'x');
      * $redis->hSet('h', 'b', 'y');
      * $redis->hSet('h', 'c', 'z');
@@ -3322,7 +3385,7 @@ class Redis
      * @link    https://redis.io/commands/hgetall
      * @example
      * <pre>
-     * $redis->delete('h');
+     * $redis->del('h');
      * $redis->hSet('h', 'a', 'x');
      * $redis->hSet('h', 'b', 'y');
      * $redis->hSet('h', 'c', 'z');
@@ -3377,7 +3440,7 @@ class Redis
      * @link    https://redis.io/commands/hincrby
      * @example
      * <pre>
-     * $redis->delete('h');
+     * $redis->del('h');
      * $redis->hIncrBy('h', 'x', 2); // returns 2: h[x] = 2 now.
      * $redis->hIncrBy('h', 'x', 1); // h[x] ← 2 + 1. Returns 3
      * </pre>
@@ -3429,7 +3492,7 @@ class Redis
      * @link    https://redis.io/commands/hmset
      * @example
      * <pre>
-     * $redis->delete('user:1');
+     * $redis->del('user:1');
      * $redis->hMSet('user:1', array('name' => 'Joe', 'salary' => 2000));
      * $redis->hIncrBy('user:1', 'salary', 100); // Joe earns 100 more now.
      * </pre>
@@ -3449,7 +3512,7 @@ class Redis
      * @link    https://redis.io/commands/hmget
      * @example
      * <pre>
-     * $redis->delete('h');
+     * $redis->del('h');
      * $redis->hSet('h', 'field1', 'value1');
      * $redis->hSet('h', 'field2', 'value2');
      * $redis->hmGet('h', array('field1', 'field2')); // returns array('field1' => 'value1', 'field2' => 'value2')
@@ -3826,6 +3889,8 @@ class Redis
 
     /**
      * @see eval()
+     * @deprecated use Redis::eval()
+     *
      * @param   string  $script
      * @param   array   $args
      * @param   int     $numKeys
@@ -3858,6 +3923,8 @@ class Redis
 
     /**
      * @see evalSha()
+     * @deprecated use Redis::evalSha()
+     *
      * @param string $scriptSha
      * @param array  $args
      * @param int    $numKeys
