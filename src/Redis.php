@@ -1,32 +1,10 @@
 <?php
+
 /**
  * Helper autocomplete for php redis extension
  *
  * @author Max Kamashev <max.kamashev@gmail.com>
  * @link   https://github.com/ukko/phpredis-phpdoc
- *
- * @method  eval( $script, $args = array(), $numKeys = 0 )
- *  Evaluate a LUA script serverside
- *  @param  string  $script
- *  @param  array   $args
- *  @param  int     $numKeys
- *  @return mixed   What is returned depends on what the LUA script itself returns, which could be a scalar value
- *  (int/string), or an array. Arrays that are returned can also contain other arrays, if that's how it was set up in
- *  your LUA script.  If there is an error executing the LUA script, the getLastError() function can tell you the
- *  message that came back from Redis (e.g. compile error).
- *  @link   https://redis.io/commands/eval
- *  @example
- *  <pre>
- *  $redis->eval("return 1"); // Returns an integer: 1
- *  $redis->eval("return {1,2,3}"); // Returns Array(1,2,3)
- *  $redis->del('mylist');
- *  $redis->rpush('mylist','a');
- *  $redis->rpush('mylist','b');
- *  $redis->rpush('mylist','c');
- *  // Nested response:  Array(1,2,3,Array('a','b','c'));
- *  $redis->eval("return {1,2,3,redis.call('lrange','mylist',0,-1)}}");
- * </pre>
- *
  */
 class Redis
 {
@@ -119,6 +97,73 @@ class Redis
     }
 
     /**
+     * Retrieve our host or unix socket that we're connected to
+     *
+     * @return mixed The host or unix socket we're connected to or FALSE if we're not connected
+     */
+    public function getHost()
+    {
+    }
+
+    /**
+     * Get the port we're connected to
+     *
+     * @return mixed Returns the port we're connected to or FALSE if we're not connected
+     */
+    public function getPort()
+    {
+    }
+
+    /**
+     * Get the database number phpredis is pointed to
+     *
+     * @return mixed Returns the database number (LONG) phpredis thinks it's pointing to
+     * or FALSE if we're not connected
+     */
+    public function getDbNum()
+    {
+    }
+
+    /**
+     * Get the (write) timeout in use for phpredis
+     *
+     * @return mixed The timeout (DOUBLE) specified in our connect call or FALSE if we're not connected
+     */
+    public function getTimeout()
+    {
+    }
+
+    /**
+     * Get the read timeout specified to phpredis or FALSE if we're not connected
+     *
+     * @return mixed Returns the read timeout (which can be set using setOption and Redis::OPT_READ_TIMEOUT)
+     * or FALSE if we're not connected
+     */
+    public function getReadTimeout()
+    {
+    }
+
+    /**
+     * Gets the persistent ID that phpredis is using
+     *
+     * @return mixed Returns the persistent id phpredis is using (which will only be set if connected with pconnect),
+     * NULL if we're not using a persistent ID, and FALSE if we're not connected
+     */
+    public function getPersistentID()
+    {
+    }
+
+    /**
+     * Get the password used to authenticate the phpredis connection
+     *
+     * @return mixed Returns the password used to authenticate a phpredis session or NULL if none was used,
+     * and FALSE if we're not connected
+     */
+    public function getAuth()
+    {
+    }
+
+    /**
      * @see connect()
      * @param string    $host
      * @param int       $port
@@ -182,6 +227,25 @@ class Redis
      * Disconnects from the Redis instance, except when pconnect is used.
      */
     public function close()
+    {
+    }
+
+    /**
+     * Swap one Redis database with another atomically
+     *
+     * Note: Requires Redis >= 4.0.0
+     *
+     * @param int $db1
+     * @param int $db2
+     * @return bool TRUE on success and FALSE on failure
+     *
+     * @link https://redis.io/commands/swapdb
+     * @since >= 4.0
+     * @example
+     * // Swaps DB 0 with DB 1 atomically
+     * $redis->swapdb(0, 1);
+     */
+    public function swapdb(int $db1, int $db2)
     {
     }
 
@@ -1909,6 +1973,37 @@ class Redis
     }
 
     /**
+     * Access the Redis slowLog
+     *
+     * @param string $operation This can be either GET, LEN, or RESET
+     * @param int|null $length If executing a SLOWLOG GET command, you can pass an optional length.
+     * @return mixed The return value of SLOWLOG will depend on which operation was performed.
+     * - SLOWLOG GET: Array of slowLog entries, as provided by Redis
+     * - SLOGLOG LEN: Integer, the length of the slowLog
+     * - SLOWLOG RESET: Boolean, depending on success
+     *
+     * @example
+     * <pre>
+     * // Get ten slowLog entries
+     * $redis->slowLog('get', 10);
+     * // Get the default number of slowLog entries
+     *
+     * $redis->slowLog('get');
+     * // Reset our slowLog
+     * $redis->slowLog('reset');
+     *
+     * // Retrieve slowLog length
+     * $redis->slowLog('len');
+     * </pre>
+     *
+     * @link https://redis.io/commands/slowlog
+     */
+    public function slowLog(string $operation, int $length = null)
+    {
+    }
+
+
+    /**
      * Describes the object pointed to by a key.
      * The information to retrieve (string) and the key (string).
      * Info can be one of the following:
@@ -2978,6 +3073,7 @@ class Redis
      * @param   string  $pattern    String (optional), the pattern to match.
      * @param   int     $count      How many keys to return per iteration (Redis might return a different number).
      * @return  array   PHPRedis will return matching keys from Redis, or FALSE when iteration is complete.
+     *
      * @link    https://redis.io/commands/zscan
      * @example
      * <pre>
@@ -2994,14 +3090,57 @@ class Redis
     }
 
     /**
+     * Block until Redis can pop the highest or lowest scoring members from one or more ZSETs.
+     * There are two commands (BZPOPMIN and BZPOPMAX for popping the lowest and highest scoring elements respectively.)
+     *
+     * @param string|array $key1
+     * @param string|array $key2 ...
+     * @param int $timeout
+     * @return array Either an array with the key member and score of the higest or lowest element or an empty array
+     * if the timeout was reached without an element to pop.
+     *
+     * @since >= 5.0
+     * @link https://redis.io/commands/bzpopmax
+     * @example
+     * <pre>
+     * // Wait up to 5 seconds to pop the *lowest* scoring member from sets `zs1` and `zs2`.
+     * $redis->bzPopMin(['zs1', 'zs2'], 5);
+     * $redis->bzPopMin('zs1', 'zs2', 5);
+     *
+     * // Wait up to 5 seconds to pop the *highest* scoring member from sets `zs1` and `zs2`
+     * $redis->bzPopMax(['zs1', 'zs2'], 5);
+     * $redis->bzPopMax('zs1', 'zs2', 5);
+     * </pre>
+     */
+    public function bzPopMax($key1, $key2, $timeout)
+    {
+    }
+
+    /**
+     * @param string|array $key1
+     * @param string|array $key2 ...
+     * @param int $timeout
+     * @return array Either an array with the key member and score of the higest or lowest element or an empty array
+     * if the timeout was reached without an element to pop.
+     *
+     * @see @bzPopMax
+     * @since >= 5.0
+     * @link https://redis.io/commands/bzpopmin
+     */
+    public function bzPopMin($key1, $key2, $timeout)
+    {
+    }
+
+    /**
      * Adds a value to the hash stored at key. If this value is already in the hash, FALSE is returned.
      *
      * @param string $key
      * @param string $hashKey
      * @param string $value
      * @return int
-     * 1 if value didn't exist and was added successfully,
-     * 0 if the value was already present and was replaced, FALSE if there was an error.
+     * - 1 if value didn't exist and was added successfully,
+     * - 0 if the value was already present and was replaced, FALSE if there was an error.
+     *
      * @link    https://redis.io/commands/hset
      * @example
      * <pre>
@@ -3024,6 +3163,7 @@ class Redis
      * @param   string  $hashKey
      * @param   string  $value
      * @return  bool    TRUE if the field was set, FALSE if it was already present.
+     *
      * @link    https://redis.io/commands/hsetnx
      * @example
      * <pre>
@@ -3044,6 +3184,7 @@ class Redis
      * @param   string  $key
      * @param   string  $hashKey
      * @return  string  The value, if the command executed successfully BOOL FALSE in case of failure
+     *
      * @link    https://redis.io/commands/hget
      */
     public function hGet($key, $hashKey)
@@ -3055,6 +3196,7 @@ class Redis
      *
      * @param   string  $key
      * @return  int     the number of items in a hash, FALSE if the key doesn't exist or isn't a hash.
+     *
      * @link    https://redis.io/commands/hlen
      * @example
      * <pre>
@@ -3077,6 +3219,7 @@ class Redis
      * @param   string  $hashKey2
      * @param   string  $hashKeyN
      * @return  int     Number of deleted fields
+     *
      * @link    https://redis.io/commands/hdel
      * @example
      * <pre>
@@ -3107,6 +3250,7 @@ class Redis
      *
      * @param   string  $key
      * @return  array   An array of elements, the keys of the hash. This works like PHP's array_keys().
+     *
      * @link    https://redis.io/commands/hkeys
      * @example
      * <pre>
@@ -3140,6 +3284,7 @@ class Redis
      *
      * @param   string  $key
      * @return  array   An array of elements, the values of the hash. This works like PHP's array_values().
+     *
      * @link    https://redis.io/commands/hvals
      * @example
      * <pre>
@@ -3173,6 +3318,7 @@ class Redis
      *
      * @param   string  $key
      * @return  array   An array of elements, the contents of the hash.
+     *
      * @link    https://redis.io/commands/hgetall
      * @example
      * <pre>
@@ -3207,6 +3353,7 @@ class Redis
      * @param   string  $key
      * @param   string  $hashKey
      * @return  bool:   If the member exists in the hash table, return TRUE, otherwise return FALSE.
+     *
      * @link    https://redis.io/commands/hexists
      * @example
      * <pre>
@@ -3226,6 +3373,7 @@ class Redis
      * @param   string  $hashKey
      * @param   int     $value (integer) value that will be added to the member's value
      * @return  int     the new value
+     *
      * @link    https://redis.io/commands/hincrby
      * @example
      * <pre>
@@ -3240,10 +3388,12 @@ class Redis
 
     /**
      * Increment the float value of a hash field by the given amount
+     *
      * @param   string  $key
      * @param   string  $field
      * @param   float   $increment
      * @return  float
+     *
      * @link    https://redis.io/commands/hincrbyfloat
      * @example
      * <pre>
@@ -3275,6 +3425,7 @@ class Redis
      * @param   string  $key
      * @param   array   $hashKeys key → value array
      * @return  bool
+     *
      * @link    https://redis.io/commands/hmset
      * @example
      * <pre>
@@ -3294,6 +3445,7 @@ class Redis
      * @param   array   $hashKeys
      * @return  array   Array An array of elements, the values of the specified fields in the hash,
      * with the hash keys as array keys.
+     *
      * @link    https://redis.io/commands/hmget
      * @example
      * <pre>
@@ -3309,11 +3461,13 @@ class Redis
 
     /**
      * Scan a HASH value for members, with an optional pattern and count.
+     *
      * @param   string    $key
      * @param   int       $iterator
      * @param   string    $pattern    Optional pattern to match against.
      * @param   int       $count      How many keys to return in a go (only a sugestion to Redis).
      * @return  array     An array of members that match our pattern.
+     *
      * @link    https://redis.io/commands/hscan
      * @example
      * <pre>
@@ -3326,6 +3480,302 @@ class Redis
      * </pre>
      */
     public function hScan($key, &$iterator, $pattern = null, $count = 0)
+    {
+    }
+
+    /**
+     * Get the string length of the value associated with field in the hash stored at key
+     *
+     * @param string $key
+     * @param string $field
+     * @return int the string length of the value associated with field, or zero when field is not present in the hash
+     * or key does not exist at all.
+     *
+     * @link https://redis.io/commands/hstrlen
+     * @since >= 3.2
+     */
+    public function hStrLen(string $key, string $field)
+    {
+    }
+
+    /**
+     * Add one or more geospatial items to the specified key.
+     * This function must be called with at least one longitude, latitude, member triplet.
+     *
+     * @param string $key
+     * @param float $longitude
+     * @param float $latitude
+     * @param string string $member
+     * @return int The number of elements added to the geospatial key
+     *
+     * @link https://redis.io/commands/geoadd
+     * @since >=3.2
+     *
+     * @example
+     * <pre>
+     * $redis->del("myplaces");
+     *
+     * // Since the key will be new, $result will be 2
+     * $result = $redis->geoAdd(
+     *   "myplaces",
+     *   -122.431, 37.773, "San Francisco",
+     *   -157.858, 21.315, "Honolulu"
+     * ); // 2
+     * </pre>
+     */
+    public function geoadd($key, $longitude, $latitude, $member)
+    {
+    }
+
+    /**
+     * Retrieve Geohash strings for one or more elements of a geospatial index.
+
+     * @param string $key
+     * @param string $member ...
+     * @return array One or more Redis Geohash encoded strings
+     *
+     * @link https://redis.io/commands/geohash
+     * @since >=3.2
+     *
+     * @example
+     * <pre>
+     * $redis->geoAdd("hawaii", -157.858, 21.306, "Honolulu", -156.331, 20.798, "Maui");
+     * $hashes = $redis->geoHash("hawaii", "Honolulu", "Maui");
+     * var_dump($hashes);
+     * // Output: array(2) {
+     * //   [0]=>
+     * //   string(11) "87z9pyek3y0"
+     * //   [1]=>
+     * //   string(11) "8e8y6d5jps0"
+     * // }
+     * </pre>
+     */
+    public function geohash($key, ...$member)
+    {
+    }
+
+    /**
+     * Return longitude, latitude positions for each requested member.
+     *
+     * @param string $key
+     * @param string $member
+     * @return array One or more longitude/latitude positions
+     *
+     * @link https://redis.io/commands/geopos
+     * @since >=3.2
+     *
+     * @example
+     * <pre>
+     * $redis->geoAdd("hawaii", -157.858, 21.306, "Honolulu", -156.331, 20.798, "Maui");
+     * $positions = $redis->geoPos("hawaii", "Honolulu", "Maui");
+     * var_dump($positions);
+     *
+     * // Output:
+     * array(2) {
+     *  [0]=> array(2) {
+     *      [0]=> string(22) "-157.85800248384475708"
+     *      [1]=> string(19) "21.3060004581273077"
+     *  }
+     *  [1]=> array(2) {
+     *      [0]=> string(22) "-156.33099943399429321"
+     *      [1]=> string(20) "20.79799924753607598"
+     *  }
+     * }
+     * </pre>
+     */
+    public function geopos(string $key, string $member)
+    {
+    }
+
+    /**
+     * Return the distance between two members in a geospatial set.
+     *
+     * If units are passed it must be one of the following values:
+     * - 'm' => Meters
+     * - 'km' => Kilometers
+     * - 'mi' => Miles
+     * - 'ft' => Feet
+     *
+     * @param string $key
+     * @param string $member1
+     * @param string $member2
+     * @param string|null $unit
+     * @return float The distance between the two passed members in the units requested (meters by default)
+     *
+     * @link https://redis.io/commands/geodist
+     * @since >=3.2
+     *
+     * @example
+     * <pre>
+     * $redis->geoAdd("hawaii", -157.858, 21.306, "Honolulu", -156.331, 20.798, "Maui");
+     *
+     * $meters = $redis->geoDist("hawaii", "Honolulu", "Maui");
+     * $kilometers = $redis->geoDist("hawaii", "Honolulu", "Maui", 'km');
+     * $miles = $redis->geoDist("hawaii", "Honolulu", "Maui", 'mi');
+     * $feet = $redis->geoDist("hawaii", "Honolulu", "Maui", 'ft');
+     *
+     * echo "Distance between Honolulu and Maui:\n";
+     * echo "  meters    : $meters\n";
+     * echo "  kilometers: $kilometers\n";
+     * echo "  miles     : $miles\n";
+     * echo "  feet      : $feet\n";
+     *
+     * // Bad unit
+     * $inches = $redis->geoDist("hawaii", "Honolulu", "Maui", 'in');
+     * echo "Invalid unit returned:\n";
+     * var_dump($inches);
+     *
+     * // Output
+     * Distance between Honolulu and Maui:
+     * meters    : 168275.204
+     * kilometers: 168.2752
+     * miles     : 104.5616
+     * feet      : 552084.0028
+     * Invalid unit returned:
+     * bool(false)
+     * </pre>
+     */
+    public function geodist($key, $member1, $member2, $unit = null)
+    {
+    }
+
+    /**
+     * Return members of a set with geospatial information that are within the radius specified by the caller.
+     * 
+     * @param $key
+     * @param $longitude
+     * @param $latitude
+     * @param $radius
+     * @param $unit
+     * @param array|null $options
+     * |Key	        |Value	        |Description                                        |
+     * |------------|---------------|---------------------------------------------------|
+     * |COUNT	    |integer > 0	|Limit how many results are returned                |
+     * |            |WITHCOORD	    |Return longitude and latitude of matching members  |
+     * |            |WITHDIST	    |Return the distance from the center                |
+     * |            |WITHHASH	    |Return the raw geohash-encoded score               |
+     * |            |ASC	        |Sort results in ascending order                    |
+     * |            |DESC	        |Sort results in descending order                   |
+     * |STORE	    |key	        |Store results in key                               |
+     * |STOREDIST	|key	        |Store the results as distances in key              |
+     * Note: It doesn't make sense to pass both ASC and DESC options but if both are passed
+     * the last one passed will be used.
+     * Note: When using STORE[DIST] in Redis Cluster, the store key must has to the same slot as
+     * the query key or you will get a CROSSLOT error.
+     * @return mixed When no STORE option is passed, this function returns an array of results.
+     * If it is passed this function returns the number of stored entries.
+     *
+     * @link https://redis.io/commands/georadius
+     * @since >= 3.2
+     * @example
+     * <pre>
+     * // Add some cities
+     * $redis->geoAdd("hawaii", -157.858, 21.306, "Honolulu", -156.331, 20.798, "Maui");
+     *
+     * echo "Within 300 miles of Honolulu:\n";
+     * var_dump($redis->geoRadius("hawaii", -157.858, 21.306, 300, 'mi'));
+     *
+     * echo "\nWithin 300 miles of Honolulu with distances:\n";
+     * $options = ['WITHDIST'];
+     * var_dump($redis->geoRadius("hawaii", -157.858, 21.306, 300, 'mi', $options));
+     *
+     * echo "\nFirst result within 300 miles of Honolulu with distances:\n";
+     * $options['count'] = 1;
+     * var_dump($redis->geoRadius("hawaii", -157.858, 21.306, 300, 'mi', $options));
+     *
+     * echo "\nFirst result within 300 miles of Honolulu with distances in descending sort order:\n";
+     * $options[] = 'DESC';
+     * var_dump($redis->geoRadius("hawaii", -157.858, 21.306, 300, 'mi', $options));
+     *
+     * // Output
+     * Within 300 miles of Honolulu:
+     * array(2) {
+     *  [0]=> string(8) "Honolulu"
+     *  [1]=> string(4) "Maui"
+     * }
+     *
+     * Within 300 miles of Honolulu with distances:
+     * array(2) {
+     *     [0]=>
+     *   array(2) {
+     *         [0]=>
+     *     string(8) "Honolulu"
+     *         [1]=>
+     *     string(6) "0.0002"
+     *   }
+     *   [1]=>
+     *   array(2) {
+     *         [0]=>
+     *     string(4) "Maui"
+     *         [1]=>
+     *     string(8) "104.5615"
+     *   }
+     * }
+     *
+     * First result within 300 miles of Honolulu with distances:
+     * array(1) {
+     *     [0]=>
+     *   array(2) {
+     *         [0]=>
+     *     string(8) "Honolulu"
+     *         [1]=>
+     *     string(6) "0.0002"
+     *   }
+     * }
+     *
+     * First result within 300 miles of Honolulu with distances in descending sort order:
+     * array(1) {
+     *     [0]=>
+     *   array(2) {
+     *         [0]=>
+     *     string(4) "Maui"
+     *         [1]=>
+     *     string(8) "104.5615"
+     *   }
+     * }
+     * </pre>
+     */
+    public function georadius($key, $longitude, $latitude, $radius, $unit, array $options = null)
+    {
+    }
+
+    /**
+     * This method is identical to geoRadius except that instead of passing a longitude and latitude as the "source"
+     * you pass an existing member in the geospatial set.
+     * @param string $key
+     * @param string $member
+     * @param $radius
+     * @param $units
+     * @param array|null $options see georadius
+     * @return array The zero or more entries that are close enough to the member given the distance and radius specified
+     *
+     * @link https://redis.io/commands/georadiusbymember
+     * @since >= 3.2
+     * @see georadius
+     * @example
+     * <pre>
+     * $redis->geoAdd("hawaii", -157.858, 21.306, "Honolulu", -156.331, 20.798, "Maui");
+     *
+     * echo "Within 300 miles of Honolulu:\n";
+     * var_dump($redis->geoRadiusByMember("hawaii", "Honolulu", 300, 'mi'));
+     *
+     * echo "\nFirst match within 300 miles of Honolulu:\n";
+     * var_dump($redis->geoRadiusByMember("hawaii", "Honolulu", 300, 'mi', ['count' => 1]));
+     *
+     * // Output
+     * Within 300 miles of Honolulu:
+     * array(2) {
+     *  [0]=> string(8) "Honolulu"
+     *  [1]=> string(4) "Maui"
+     * }
+     *
+     * First match within 300 miles of Honolulu:
+     * array(1) {
+     *  [0]=> string(8) "Honolulu"
+     * }
+     * </pre>
+     */
+    public function georadiusbymember($key, $member, $radius, $units, array $options = null)
     {
     }
 
@@ -3345,6 +3795,32 @@ class Redis
      * </pre>
      */
     public function config($operation, $key, $value)
+    {
+    }
+
+    /**
+     *  Evaluate a LUA script serverside
+     *  @param  string  $script
+     *  @param  array   $args
+     *  @param  int     $numKeys
+     *  @return mixed   What is returned depends on what the LUA script itself returns, which could be a scalar value
+     *  (int/string), or an array. Arrays that are returned can also contain other arrays, if that's how it was set up in
+     *  your LUA script.  If there is an error executing the LUA script, the getLastError() function can tell you the
+     *  message that came back from Redis (e.g. compile error).
+     *  @link   https://redis.io/commands/eval
+     *  @example
+     *  <pre>
+     *  $redis->eval("return 1"); // Returns an integer: 1
+     *  $redis->eval("return {1,2,3}"); // Returns Array(1,2,3)
+     *  $redis->del('mylist');
+     *  $redis->rpush('mylist','a');
+     *  $redis->rpush('mylist','b');
+     *  $redis->rpush('mylist','c');
+     *  // Nested response:  Array(1,2,3,Array('a','b','c'));
+     *  $redis->eval("return {1,2,3,redis.call('lrange','mylist',0,-1)}}");
+     * </pre>
+     */
+    public function eval($script, $args = array(), $numKeys = 0)
     {
     }
 
@@ -3395,6 +3871,7 @@ class Redis
      * @param   string  $command load | flush | kill | exists
      * @param   string  $script
      * @return  mixed
+     *
      * @link    https://redis.io/commands/script-load
      * @link    https://redis.io/commands/script-kill
      * @link    https://redis.io/commands/script-flush
@@ -3419,6 +3896,7 @@ class Redis
     /**
      * The last error message (if any)
      * @return  string  A string with the last returned script based error message, or NULL if there is no error
+     *
      * @example
      * <pre>
      * $redis->eval('this-is-not-lua');
@@ -3434,6 +3912,7 @@ class Redis
      * Clear the last error message
      *
      * @return bool true
+     *
      * @example
      * <pre>
      * $redis->set('x', 'a');
@@ -3446,6 +3925,41 @@ class Redis
      * </pre>
      */
     public function clearLastError()
+    {
+    }
+
+    /**
+     * Issue the CLIENT command with various arguments.
+     * The Redis CLIENT command can be used in four ways:
+     * - CLIENT LIST
+     * - CLIENT GETNAME
+     * - CLIENT SETNAME [name]
+     * - CLIENT KILL [ip:port]
+     *
+     * @param string $command
+     * @param string $value
+     * @return mixed This will vary depending on which client command was executed:
+     * - CLIENT LIST will return an array of arrays with client information.
+     * - CLIENT GETNAME will return the client name or false if none has been set
+     * - CLIENT SETNAME will return true if it can be set and false if not
+     * - CLIENT KILL will return true if the client can be killed, and false if not
+     *
+     * Note: phpredis will attempt to reconnect so you can actually kill your own connection but may not notice losing it!
+     *
+     * @link https://redis.io/commands/client-list
+     * @link https://redis.io/commands/client-getname
+     * @link https://redis.io/commands/client-setname
+     * @link https://redis.io/commands/client-kill
+     *
+     * @example
+     * <pre>
+     * $redis->client('list'); // Get a list of clients
+     * $redis->client('getname'); // Get the name of the current connection
+     * $redis->client('setname', 'somename'); // Set the name of the current connection
+     * $redis->client('kill', <ip:port>); // Kill the process at ip:port
+     * </pre>
+     */
+    public function client($command, $value)
     {
     }
 
@@ -3913,6 +4427,7 @@ class Redis
     public function xTrim($str_stream, $i_max_len, $boo_approximate)
     {
     }
+
 }
 
 class RedisException extends Exception
