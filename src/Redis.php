@@ -39,6 +39,8 @@ class Redis
     const SERIALIZER_NONE       = 0;
     const SERIALIZER_PHP        = 1;
     const SERIALIZER_IGBINARY   = 2;
+    const SERIALIZER_MSGPACK    = 3;
+    const SERIALIZER_JSON       = 4;
 
     /**
      * Multi
@@ -69,13 +71,15 @@ class Redis
     /**
      * Connects to a Redis instance.
      *
-     * @param string    $host           can be a host, or the path to a unix domain socket
-     * @param int       $port           optional
-     * @param float     $timeout        value in seconds (optional, default is 0.0 meaning unlimited)
-     * @param null      $reserved       should be null if $retry_interval is specified
-     * @param int       $retry_interval retry interval in milliseconds.
-     * @param float     $read_timeout   value in seconds (optional, default is 0 meaning unlimited)
-     * @return bool                     TRUE on success, FALSE on error.
+     * @param string $host          can be a host, or the path to a unix domain socket
+     * @param int    $port          optional
+     * @param float  $timeout       value in seconds (optional, default is 0.0 meaning unlimited)
+     * @param null   $reserved      should be null if $retryInterval is specified
+     * @param int    $retryInterval retry interval in milliseconds.
+     * @param float  $readTimeout   value in seconds (optional, default is 0 meaning unlimited)
+     *
+     * @return bool TRUE on success, FALSE on error
+     *
      * @example
      * <pre>
      * $redis->connect('127.0.0.1', 6379);
@@ -84,12 +88,44 @@ class Redis
      * $redis->connect('/tmp/redis.sock');      // unix domain socket.
      * </pre>
      */
-    public function connect($host, $port = 6379, $timeout = 0.0, $reserved = null, $retry_interval = 0, $read_timeout = 0.0)
-    {
+    public function connect(
+        $host,
+        $port = 6379,
+        $timeout = 0.0,
+        $reserved = null,
+        $retryInterval = 0,
+        $readTimeout = 0.0
+    ) {
+    }
+
+    /**
+     * Connects to a Redis instance.
+     *
+     * @param string $host          can be a host, or the path to a unix domain socket
+     * @param int    $port          optional
+     * @param float  $timeout       value in seconds (optional, default is 0.0 meaning unlimited)
+     * @param null   $reserved      should be null if $retry_interval is specified
+     * @param int    $retryInterval retry interval in milliseconds.
+     * @param float  $readTimeout   value in seconds (optional, default is 0 meaning unlimited)
+     *
+     * @return bool TRUE on success, FALSE on error
+     *
+     * @see        connect()
+     * @deprecated use Redis::connect()
+     */
+    public function open(
+        $host,
+        $port = 6379,
+        $timeout = 0.0,
+        $reserved = null,
+        $retryInterval = 0,
+        $readTimeout = 0.0
+    ) {
     }
 
     /**
      * A method to determine if a phpredis object thinks it's connected to a server
+     *
      * @return bool Returns TRUE if phpredis thinks it's connected and FALSE if not
      */
     public function isConnected()
@@ -99,7 +135,7 @@ class Redis
     /**
      * Retrieve our host or unix socket that we're connected to
      *
-     * @return mixed The host or unix socket we're connected to or FALSE if we're not connected
+     * @return string|bool The host or unix socket we're connected to or FALSE if we're not connected
      */
     public function getHost()
     {
@@ -108,7 +144,7 @@ class Redis
     /**
      * Get the port we're connected to
      *
-     * @return mixed Returns the port we're connected to or FALSE if we're not connected
+     * @return int|bool Returns the port we're connected to or FALSE if we're not connected
      */
     public function getPort()
     {
@@ -117,7 +153,7 @@ class Redis
     /**
      * Get the database number phpredis is pointed to
      *
-     * @return mixed Returns the database number (LONG) phpredis thinks it's pointing to
+     * @return int|bool Returns the database number (int) phpredis thinks it's pointing to
      * or FALSE if we're not connected
      */
     public function getDbNum()
@@ -127,7 +163,7 @@ class Redis
     /**
      * Get the (write) timeout in use for phpredis
      *
-     * @return mixed The timeout (DOUBLE) specified in our connect call or FALSE if we're not connected
+     * @return float|bool The timeout (DOUBLE) specified in our connect call or FALSE if we're not connected
      */
     public function getTimeout()
     {
@@ -136,7 +172,7 @@ class Redis
     /**
      * Get the read timeout specified to phpredis or FALSE if we're not connected
      *
-     * @return mixed Returns the read timeout (which can be set using setOption and Redis::OPT_READ_TIMEOUT)
+     * @return float|bool Returns the read timeout (which can be set using setOption and Redis::OPT_READ_TIMEOUT)
      * or FALSE if we're not connected
      */
     public function getReadTimeout()
@@ -146,8 +182,10 @@ class Redis
     /**
      * Gets the persistent ID that phpredis is using
      *
-     * @return mixed Returns the persistent id phpredis is using (which will only be set if connected with pconnect),
-     * NULL if we're not using a persistent ID, and FALSE if we're not connected
+     * @return string|null|bool Returns the persistent id phpredis is using
+     * (which will only be set if connected with pconnect),
+     * NULL if we're not using a persistent ID,
+     * and FALSE if we're not connected
      */
     public function getPersistentID()
     {
@@ -156,26 +194,10 @@ class Redis
     /**
      * Get the password used to authenticate the phpredis connection
      *
-     * @return mixed Returns the password used to authenticate a phpredis session or NULL if none was used,
+     * @return string|null|bool Returns the password used to authenticate a phpredis session or NULL if none was used,
      * and FALSE if we're not connected
      */
     public function getAuth()
-    {
-    }
-
-    /**
-     * @see connect()
-     * @deprecated use Redis::connect()
-     *
-     * @param string    $host
-     * @param int       $port
-     * @param float     $timeout
-     * @param null      $reserved
-     * @param int       $retry_interval
-     * @param float     $read_timeout
-     * @return bool
-     */
-    public function open($host, $port = 6379, $timeout = 0.0, $reserved = null, $retry_interval = 0, $read_timeout = 0.0)
     {
     }
 
@@ -187,48 +209,78 @@ class Redis
      * many servers connecting to one redis server.
      *
      * Also more than one persistent connection can be made identified by either host + port + timeout
-     * or host + persistent_id or unix socket + timeout.
+     * or host + persistentId or unix socket + timeout.
      *
      * This feature is not available in threaded versions. pconnect and popen then working like their non persistent
      * equivalents.
      *
-     * @param string    $host           can be a host, or the path to a unix domain socket
-     * @param int       $port           optional
-     * @param float     $timeout        value in seconds (optional, default is 0 meaning unlimited)
-     * @param string    $persistent_id  identity for the requested persistent connection
-     * @param int       $retry_interval retry interval in milliseconds.
-     * @param float     $read_timeout   value in seconds (optional, default is 0 meaning unlimited)
-     * @return bool                     TRUE on success, FALSE on ertcnror.
+     * @param string $host          can be a host, or the path to a unix domain socket
+     * @param int    $port          optional
+     * @param float  $timeout       value in seconds (optional, default is 0 meaning unlimited)
+     * @param string $persistentId  identity for the requested persistent connection
+     * @param int    $retryInterval retry interval in milliseconds.
+     * @param float  $readTimeout   value in seconds (optional, default is 0 meaning unlimited)
+     *
+     * @return bool TRUE on success, FALSE on ertcnror.
+     *
+     * @example
      * <pre>
      * $redis->pconnect('127.0.0.1', 6379);
-     * $redis->pconnect('127.0.0.1');                 // port 6379 by default - same connection like before.
-     * $redis->pconnect('127.0.0.1', 6379, 2.5);      // 2.5 sec timeout and would be another connection than the two before.
-     * $redis->pconnect('127.0.0.1', 6379, 2.5, 'x'); // x is sent as persistent_id and would be another connection than the three before.
-     * $redis->pconnect('/tmp/redis.sock');           // unix domain socket - would be another connection than the four before.
+     *
+     * // port 6379 by default - same connection like before
+     * $redis->pconnect('127.0.0.1');
+     *
+     * // 2.5 sec timeout and would be another connection than the two before.
+     * $redis->pconnect('127.0.0.1', 6379, 2.5);
+     *
+     * // x is sent as persistent_id and would be another connection than the three before.
+     * $redis->pconnect('127.0.0.1', 6379, 2.5, 'x');
+     *
+     * // unix domain socket - would be another connection than the four before.
+     * $redis->pconnect('/tmp/redis.sock');
      * </pre>
      */
-    public function pconnect($host, $port = 6379, $timeout = 0.0, $persistent_id = null, $retry_interval = 0, $read_timeout = 0.0)
-    {
+    public function pconnect(
+        $host,
+        $port = 6379,
+        $timeout = 0.0,
+        $persistentId = null,
+        $retryInterval = 0,
+        $readTimeout = 0.0
+    ) {
     }
 
     /**
-     * @see pconnect()
-     * @deprecated use Redis::pconnect()
+     * @param string $host
+     * @param int    $port
+     * @param float  $timeout
+     * @param string $persistentId
+     * @param int    $retryInterval
+     * @param float  $readTimeout
      *
-     * @param string    $host
-     * @param int       $port
-     * @param float     $timeout
-     * @param string    $persistent_id
-     * @param int       $retry_interval
-     * @param float     $read_timeout
      * @return bool
+     *
+     * @deprecated use Redis::pconnect()
+     * @see pconnect()
      */
-    public function popen($host, $port = 6379, $timeout = 0.0, $persistent_id = '', $retry_interval = 0, $read_timeout = 0.0)
-    {
+    public function popen(
+        $host,
+        $port = 6379,
+        $timeout = 0.0,
+        $persistentId = '',
+        $retryInterval = 0,
+        $readTimeout = 0.0
+    ) {
     }
 
     /**
-     * Disconnects from the Redis instance, except when pconnect is used.
+     * Disconnects from the Redis instance.
+     *
+     * Note: Closing a persistent connection requires PhpRedis >= 4.2.0
+     *
+     * @since >= 4.2 Closing a persistent connection requires PhpRedis
+     *
+     * @return bool TRUE on success, FALSE on error
      */
     public function close()
     {
@@ -241,53 +293,74 @@ class Redis
      *
      * @param int $db1
      * @param int $db2
+     *
      * @return bool TRUE on success and FALSE on failure
      *
      * @link https://redis.io/commands/swapdb
      * @since >= 4.0
      * @example
+     * <pre>
      * // Swaps DB 0 with DB 1 atomically
      * $redis->swapdb(0, 1);
+     * </pre>
      */
     public function swapdb(int $db1, int $db2)
     {
     }
 
     /**
-     * Set client option.
+     * Set client option
      *
-     * @param   string  $name    parameter name
-     * @param   string  $value   parameter value
-     * @return  bool:   TRUE on success, FALSE on error.
+     * @param int   $option option name
+     * @param mixed $value  option value
+     *
+     * @return bool TRUE on success, FALSE on error
+     *
      * @example
      * <pre>
      * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_NONE);        // don't serialize data
      * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_PHP);         // use built-in serialize/unserialize
      * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_IGBINARY);    // use igBinary serialize/unserialize
+     * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_MSGPACK);     // Use msgpack serialize/unserialize
+     * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_JSON);        // Use json serialize/unserialize
+     *
      * $redis->setOption(Redis::OPT_PREFIX, 'myAppName:');                      // use custom prefix on all keys
+     *
+     * // Options for the SCAN family of commands, indicating whether to abstract
+     * // empty results from the user.  If set to SCAN_NORETRY (the default), phpredis
+     * // will just issue one SCAN command at a time, sometimes returning an empty
+     * // array of results.  If set to SCAN_RETRY, phpredis will retry the scan command
+     * // until keys come back OR Redis returns an iterator of zero
+     * $redis->setOption(Redis::OPT_SCAN, Redis::SCAN_NORETRY);
+     * $redis->setOption(Redis::OPT_SCAN, Redis::SCAN_RETRY);
      * </pre>
      */
-    public function setOption($name, $value)
+    public function setOption($option, $value)
     {
     }
 
     /**
      * Get client option
      *
-     * @param   string  $name parameter name
-     * @return  int     Parameter value.
+     * @param int $option parameter name
+     *
+     * @return mixed|null Parameter value
+     *
+     * @see setOption()
      * @example
-     * // return Redis::SERIALIZER_NONE, Redis::SERIALIZER_PHP, or Redis::SERIALIZER_IGBINARY.
+     * // return option value
      * $redis->getOption(Redis::OPT_SERIALIZER);
      */
-    public function getOption($name)
+    public function getOption($option)
     {
     }
 
     /**
      * Check the current connection status
      *
-     * @return  string STRING: +PONG on success. Throws a RedisException object on connectivity error, as described above.
+     * @return  string STRING: +PONG on success.
+     * Throws a RedisException object on connectivity error, as described above.
+     * @throws RedisException
      * @link    https://redis.io/commands/ping
      */
     public function ping()
@@ -297,8 +370,10 @@ class Redis
     /**
      * Echo the given string
      *
-     * @param   string  $message
-     * @return  string: Returns message.
+     * @param string $message
+     *
+     * @return string Returns message
+     *
      * @link    https://redis.io/commands/echo
      */
     public function echo($message)
@@ -308,10 +383,29 @@ class Redis
     /**
      * Get the value related to the specified key
      *
-     * @param   string  $key
-     * @return  string|bool: If key didn't exist, FALSE is returned. Otherwise, the value related to this key is returned.
+     * @param string $key
+     *
+     * @return string|mixed|bool If key didn't exist, FALSE is returned.
+     * Otherwise, the value related to this key is returned
+     *
      * @link    https://redis.io/commands/get
-     * @example $redis->get('key');
+     * @example
+     * <pre>
+     * $redis->set('key', 'hello');
+     * $redis->get('key');
+     *
+     * // set and get with serializer
+     * $redis->setOption(Redis::OPT_SERIALIZER, Redis::SERIALIZER_JSON);
+     *
+     * $redis->set('key', ['asd' => 'as', 'dd' => 123, 'b' => true]);
+     * var_dump($redis->get('key'));
+     * // Output:
+     * array(3) {
+     *  'asd' => string(2) "as"
+     *  'dd' => int(123)
+     *  'b' => bool(true)
+     * }
+     * </pre>
      */
     public function get($key)
     {
@@ -322,10 +416,15 @@ class Redis
      *
      * @since If you're using Redis >= 2.6.12, you can pass extended options as explained in example
      *
-     * @param   string    $key
-     * @param   string    $value
-     * @param   int|array $timeout If you pass an integer, phpredis will redirect to SETEX, and will try to use Redis >= 2.6.12 extended options if you pass an array with valid values
-     *
+     * @param string       $key
+     * @param string|mixed $value string if not used serializer
+     * @param int|array    $timeout [optional] Calling setex() is preferred if you want a timeout.<br>
+     * Since 2.6.12 it also supports different flags inside an array. Example ['NX', 'EX' => 60]<br>
+     *  - EX seconds -- Set the specified expire time, in seconds.<br>
+     *  - PX milliseconds -- Set the specified expire time, in milliseconds.<br>
+     *  - PX milliseconds -- Set the specified expire time, in milliseconds.<br>
+     *  - NX -- Only set the key if it does not already exist.<br>
+     *  - XX -- Only set the key if it already exist.<br>
      * <pre>
      * // Simple key -> value set
      * $redis->set('key', 'value');
@@ -334,13 +433,13 @@ class Redis
      * $redis->set('key','value', 10);
      *
      * // Will set the key, if it doesn't exist, with a ttl of 10 seconds
-     * $redis->set('key', 'value', Array('nx', 'ex'=>10));
+     * $redis->set('key', 'value', ['nx', 'ex' => 10]);
      *
      * // Will set a key, if it does exist, with a ttl of 1000 miliseconds
-     * $redis->set('key', 'value', Array('xx', 'px'=>1000));
+     * $redis->set('key', 'value', ['xx', 'px' => 1000]);
      * </pre>
      *
-     * @return  bool TRUE if the command is successful.
+     * @return bool TRUE if the command is successful
      *
      * @link     https://redis.io/commands/set
      */
@@ -351,10 +450,12 @@ class Redis
     /**
      * Set the string value in argument as value of the key, with a time to live.
      *
-     * @param   string  $key
-     * @param   int     $ttl
-     * @param   string  $value
-     * @return  bool:   TRUE if the command is successful.
+     * @param string       $key
+     * @param int          $ttl
+     * @param string|mixed $value
+     *
+     * @return bool TRUE if the command is successful
+     *
      * @link    https://redis.io/commands/setex
      * @example $redis->setex('key', 3600, 'value'); // sets key → value, with 1h TTL.
      */
@@ -366,10 +467,12 @@ class Redis
      * Set the value and expiration in milliseconds of a key.
      *
      * @see     setex()
-     * @param   string  $key
-     * @param   int     $ttl, in milliseconds.
-     * @param   string  $value
-     * @return  bool:   TRUE if the command is successful.
+     * @param   string       $key
+     * @param   int          $ttl, in milliseconds.
+     * @param   string|mixed $value
+     *
+     * @return bool TRUE if the command is successful
+     *
      * @link    https://redis.io/commands/psetex
      * @example $redis->psetex('key', 1000, 'value'); // sets key → value, with 1sec TTL.
      */
@@ -380,9 +483,11 @@ class Redis
     /**
      * Set the string value in argument as value of the key if the key doesn't already exist in the database.
      *
-     * @param   string  $key
-     * @param   string  $value
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string       $key
+     * @param string|mixed $value
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/setnx
      * @example
      * <pre>
@@ -397,10 +502,11 @@ class Redis
     /**
      * Remove specified keys.
      *
-     * @param string|array $key1 An array of keys, or an undefined number of parameters, each a key: key1 key2 key3 ... keyN
-     * @param string $key2 ...
-     * @param string $key3 ...
+     * @param   int|string|array $key1 An array of keys, or an undefined number of parameters, each a key: key1 key2 key3 ... keyN
+     * @param   int|string       ...$otherKeys
+     *
      * @return int Number of keys deleted
+     *
      * @link https://redis.io/commands/del
      * @example
      * <pre>
@@ -408,11 +514,12 @@ class Redis
      * $redis->set('key2', 'val2');
      * $redis->set('key3', 'val3');
      * $redis->set('key4', 'val4');
-     * $redis->del('key1', 'key2');          // return 2
-     * $redis->del(array('key3', 'key4'));   // return 2
+     *
+     * $redis->del('key1', 'key2');     // return 2
+     * $redis->del(['key3', 'key4']);   // return 2
      * </pre>
      */
-    public function del($key1, $key2 = null, $key3 = null)
+    public function del($key1, ...$otherKeys)
     {
     }
 
@@ -420,9 +527,10 @@ class Redis
      * @see del()
      * @deprecated use Redis::del()
      *
-     * @param   string|array   $key1
-     * @param   string      $key2
-     * @param   string      $key3
+     * @param   string|string[] $key1
+     * @param   string          $key2
+     * @param   string          $key3
+     *
      * @return int Number of keys deleted
      */
     public function delete($key1, $key2 = null, $key3 = null)
@@ -433,9 +541,10 @@ class Redis
      * Delete a key asynchronously in another thread. Otherwise it is just as DEL, but non blocking.
      *
      * @see del()
-     * @param   string|array   $key1
-     * @param   string      $key2
-     * @param   string      $key3
+     * @param string|string[] $key1
+     * @param string          $key2
+     * @param string          $key3
+     *
      * @return int Number of keys unlinked.
      *
      * @link    https://redis.io/commands/unlink
@@ -456,13 +565,15 @@ class Redis
     /**
      * Enter and exit transactional mode.
      *
-     * @param int Redis::MULTI|Redis::PIPELINE
+     * @param int $mode Redis::MULTI|Redis::PIPELINE
      * Defaults to Redis::MULTI.
      * A Redis::MULTI block of commands runs as a single transaction;
      * a Redis::PIPELINE block is simply transmitted faster to the server, but without any guarantee of atomicity.
      * discard cancels a transaction.
-     * @return Redis returns the Redis instance and enters multi-mode.
+     *
+     * @return resource Redis returns the Redis instance and enters multi-mode.
      * Once in multi-mode, all subsequent method calls return the same object until exec() is called.
+     *
      * @link    https://redis.io/commands/multi
      * @example
      * <pre>
@@ -485,9 +596,10 @@ class Redis
     }
 
     /**
-     * @see multi()
      * @return void|array
-     * @link    https://redis.io/commands/exec
+     *
+     * @see multi()
+     * @link https://redis.io/commands/exec
      */
     public function exec()
     {
@@ -495,7 +607,7 @@ class Redis
 
     /**
      * @see multi()
-     * @link    https://redis.io/commands/discard
+     * @link https://redis.io/commands/discard
      */
     public function discard()
     {
@@ -504,8 +616,10 @@ class Redis
     /**
      * Watches a key for modifications by another client. If the key is modified between WATCH and EXEC,
      * the MULTI/EXEC transaction will fail (return FALSE). unwatch cancels all the watching of all keys by this client.
-     * @param string | array $key: a list of keys
+     * @param string|string[] $key a list of keys
+     *
      * @return void
+     *
      * @link    https://redis.io/commands/watch
      * @example
      * <pre>
@@ -530,12 +644,16 @@ class Redis
     }
 
     /**
-     * Subscribe to channels. Warning: this function will probably change in the future.
+     * Subscribe to channels.
      *
-     * @param array             $channels an array of channels to subscribe
-     * @param string | array    $callback either a string or an array($instance, 'method_name').
+     * Warning: this function will probably change in the future.
+     *
+     * @param string[]     $channels an array of channels to subscribe
+     * @param string|array $callback either a string or an array($instance, 'method_name').
      * The callback function receives 3 parameters: the redis instance, the channel name, and the message.
-     * @return mixed            Any non-null return value in the callback will be returned to the caller.
+     *
+     * @return mixed|null Any non-null return value in the callback will be returned to the caller.
+     *
      * @link    https://redis.io/commands/subscribe
      * @example
      * <pre>
@@ -565,10 +683,11 @@ class Redis
     /**
      * Subscribe to channels by pattern
      *
-     * @param   array           $patterns   an array of glob-style patterns to subscribe
-     * @param   string|array    $callback   Either a string or an array with an object and method.
-     *                          The callback will get four arguments ($redis, $pattern, $channel, $message)
-     * @param   mixed           Any non-null return value in the callback will be returned to the caller.
+     * @param array        $patterns   an array of glob-style patterns to subscribe
+     * @param string|array $callback   Either a string or an array with an object and method.
+     *                     The callback will get four arguments ($redis, $pattern, $channel, $message)
+     * @param mixed        Any non-null return value in the callback will be returned to the caller
+     *
      * @link    https://redis.io/commands/psubscribe
      * @example
      * <pre>
@@ -584,12 +703,16 @@ class Redis
     }
 
     /**
-     * Publish messages to channels. Warning: this function will probably change in the future.
+     * Publish messages to channels.
      *
-     * @param   string $channel a channel to publish to
-     * @param   string $message string
+     * Warning: this function will probably change in the future.
+     *
+     * @param string $channel a channel to publish to
+     * @param string $message string
+     *
+     * @return int Number of clients that received the message
+     *
      * @link    https://redis.io/commands/publish
-     * @return  int Number of clients that received the message
      * @example $redis->publish('chan-1', 'hello, world!'); // send message.
      */
     public function publish($channel, $message)
@@ -597,16 +720,19 @@ class Redis
     }
 
     /**
-     * A command allowing you to get information on the Redis pub/sub system.
-     * @param   string          $keyword    String, which can be: "channels", "numsub", or "numpat"
-     * @param   string|array    $argument   Optional, variant.
-     *                                      For the "channels" subcommand, you can pass a string pattern.
-     *                                      For "numsub" an array of channel names
-     * @return  array|int                   Either an integer or an array.
-     *                          - channels  Returns an array where the members are the matching channels.
-     *                          - numsub    Returns a key/value array where the keys are channel names and
-     *                                      values are their counts.
-     *                          - numpat    Integer return containing the number active pattern subscriptions.
+     * A command allowing you to get information on the Redis pub/sub system
+     *
+     * @param string       $keyword    String, which can be: "channels", "numsub", or "numpat"
+     * @param string|array $argument   Optional, variant.
+     *                                 For the "channels" subcommand, you can pass a string pattern.
+     *                                 For "numsub" an array of channel names
+     *
+     * @return array|int Either an integer or an array.
+     *   - channels  Returns an array where the members are the matching channels.
+     *   - numsub    Returns a key/value array where the keys are channel names and
+     *               values are their counts.
+     *   - numpat    Integer return containing the number active pattern subscriptions
+     *
      * @link    https://redis.io/commands/pubsub
      * @example
      * <pre>
@@ -623,7 +749,8 @@ class Redis
     /**
      * Stop listening for messages posted to the given channels.
      *
-     * @param   array             $channels an array of channels to usubscribe
+     * @param array $channels an array of channels to usubscribe
+     *
      * @link    https://redis.io/commands/unsubscribe
      */
     public function unsubscribe($channels = null)
@@ -633,24 +760,35 @@ class Redis
     /**
      * Stop listening for messages posted to the given channels.
      *
-     * @param   array           $patterns   an array of glob-style patterns to unsubscribe
-     * @link    https://redis.io/commands/punsubscribe
+     * @param array $patterns   an array of glob-style patterns to unsubscribe
+     *
+     * @link https://redis.io/commands/punsubscribe
      */
     public function punsubscribe($patterns = null)
     {
     }
 
     /**
-     * Verify if the specified key exists.
+     * Verify if the specified key/keys exists
      *
-     * @param   string $key
-     * @return  bool: If the key exists, return TRUE, otherwise return FALSE.
-     * @link    https://redis.io/commands/exists
+     * This function took a single argument and returned TRUE or FALSE in phpredis versions < 4.0.0.
+     *
+     * @since >= 4.0 Returned int, if < 4.0 returned bool
+     *
+     * @param string|string[] $key
+     *
+     * @return bool The number of keys tested that do exist
+     *
+     * @link https://redis.io/commands/exists
+     * @link https://github.com/phpredis/phpredis#exists
      * @example
      * <pre>
-     * $redis->set('key', 'value');
-     * $redis->exists('key');               //  TRUE
-     * $redis->exists('NonExistingKey');    // FALSE
+     * $redis->exists('key'); // 1
+     * $redis->exists('NonExistingKey'); // 0
+     *
+     * $redis->mset(['foo' => 'foo', 'bar' => 'bar', 'baz' => 'baz']);
+     * $redis->exists(['foo', 'bar', 'baz]); // 3
+     * $redis->exists('foo', 'bar', 'baz'); // 3
      * </pre>
      */
     public function exists($key)
@@ -661,7 +799,9 @@ class Redis
      * Increment the number stored at key by one.
      *
      * @param   string $key
-     * @return  int    the new value
+     *
+     * @return int the new value
+     *
      * @link    https://redis.io/commands/incr
      * @example
      * <pre>
@@ -678,19 +818,17 @@ class Redis
     /**
      * Increment the float value of a key by the given amount
      *
-     * @param   string  $key
-     * @param   float   $increment
-     * @return  float
+     * @param string $key
+     * @param float  $increment
+     *
+     * @return float
+     *
      * @link    https://redis.io/commands/incrbyfloat
      * @example
      * <pre>
-     * $redis = new Redis();
-     * $redis->connect('127.0.0.1');
      * $redis->set('x', 3);
-     * var_dump( $redis->incrByFloat('x', 1.5) );   // float(4.5)
-     *
-     * // ! SIC
-     * var_dump( $redis->get('x') );                // string(3) "4.5"
+     * $redis->incrByFloat('x', 1.5);   // float(4.5)
+     * $redis->get('x');                // float(4.5)
      * </pre>
      */
     public function incrByFloat($key, $increment)
@@ -698,12 +836,14 @@ class Redis
     }
 
     /**
-     * Increment the number stored at key by one. If the second argument is filled, it will be used as the integer
-     * value of the increment.
+     * Increment the number stored at key by one.
+     * If the second argument is filled, it will be used as the integer value of the increment.
      *
-     * @param   string    $key    key
-     * @param   int       $value  value that will be added to key (only for incrBy)
-     * @return  int         the new value
+     * @param string $key   key
+     * @param int    $value value that will be added to key (only for incrBy)
+     *
+     * @return int the new value
+     *
      * @link    https://redis.io/commands/incrby
      * @example
      * <pre>
@@ -721,8 +861,10 @@ class Redis
     /**
      * Decrement the number stored at key by one.
      *
-     * @param   string $key
-     * @return  int    the new value
+     * @param string $key
+     *
+     * @return int the new value
+     *
      * @link    https://redis.io/commands/decr
      * @example
      * <pre>
@@ -736,12 +878,14 @@ class Redis
     }
 
     /**
-     * Decrement the number stored at key by one. If the second argument is filled, it will be used as the integer
-     * value of the decrement.
+     * Decrement the number stored at key by one.
+     * If the second argument is filled, it will be used as the integer value of the decrement.
      *
-     * @param   string    $key
-     * @param   int       $value  that will be substracted to key (only for decrBy)
-     * @return  int       the new value
+     * @param string $key
+     * @param int    $value  that will be substracted to key (only for decrBy)
+     *
+     * @return int the new value
+     *
      * @link    https://redis.io/commands/decrby
      * @example
      * <pre>
@@ -756,20 +900,21 @@ class Redis
     }
 
     /**
-     * Adds the string values to the head (left) of the list. Creates the list if the key didn't exist.
+     * Adds the string values to the head (left) of the list.
+     * Creates the list if the key didn't exist.
      * If the key exists and is not a list, FALSE is returned.
      *
-     * @param   string $key
-     * @param   string $value1  String, value to push in key
-     * @param   string $value2  Optional
-     * @param   string $valueN  Optional
-     * @return  int    The new length of the list in case of success, FALSE in case of Failure.
-     * @link    https://redis.io/commands/lpush
+     * @param string $key
+     * @param string|mixed $value1... Variadic list of values to push in key, if dont used serialized, used string
+     *
+     * @return int|bool The new length of the list in case of success, FALSE in case of Failure
+     *
+     * @link https://redis.io/commands/lpush
      * @example
      * <pre>
      * $redis->lPush('l', 'v1', 'v2', 'v3', 'v4')   // int(4)
      * var_dump( $redis->lRange('l', 0, -1) );
-     * //// Output:
+     * // Output:
      * // array(4) {
      * //   [0]=> string(2) "v4"
      * //   [1]=> string(2) "v3"
@@ -778,25 +923,26 @@ class Redis
      * // }
      * </pre>
      */
-    public function lPush($key, $value1, $value2 = null, $valueN = null)
+    public function lPush($key, ...$value1)
     {
     }
 
     /**
-     * Adds the string values to the tail (right) of the list. Creates the list if the key didn't exist.
+     * Adds the string values to the tail (right) of the list.
+     * Creates the list if the key didn't exist.
      * If the key exists and is not a list, FALSE is returned.
      *
-     * @param   string  $key
-     * @param   string  $value1 String, value to push in key
-     * @param   string  $value2 Optional
-     * @param   string  $valueN Optional
-     * @return  int     The new length of the list in case of success, FALSE in case of Failure.
+     * @param string $key
+     * @param string|mixed $value1... Variadic list of values to push in key, if dont used serialized, used string
+     *
+     * @return int|bool The new length of the list in case of success, FALSE in case of Failure
+     *
      * @link    https://redis.io/commands/rpush
      * @example
      * <pre>
      * $redis->rPush('l', 'v1', 'v2', 'v3', 'v4');    // int(4)
      * var_dump( $redis->lRange('l', 0, -1) );
-     * //// Output:
+     * // Output:
      * // array(4) {
      * //   [0]=> string(2) "v1"
      * //   [1]=> string(2) "v2"
@@ -805,16 +951,18 @@ class Redis
      * // }
      * </pre>
      */
-    public function rPush($key, $value1, $value2 = null, $valueN = null)
+    public function rPush($key, ...$value1)
     {
     }
 
     /**
      * Adds the string value to the head (left) of the list if the list exists.
      *
-     * @param   string  $key
-     * @param   string  $value String, value to push in key
-     * @return  int     The new length of the list in case of success, FALSE in case of Failure.
+     * @param string $key
+     * @param string|mixed $value String, value to push in key
+     *
+     * @return int|bool The new length of the list in case of success, FALSE in case of Failure.
+     *
      * @link    https://redis.io/commands/lpushx
      * @example
      * <pre>
@@ -833,9 +981,11 @@ class Redis
     /**
      * Adds the string value to the tail (right) of the list if the ist exists. FALSE in case of Failure.
      *
-     * @param   string  $key
-     * @param   string  $value String, value to push in key
-     * @return  int     The new length of the list in case of success, FALSE in case of Failure.
+     * @param string $key
+     * @param string|mixed $value String, value to push in key
+     *
+     * @return int|bool The new length of the list in case of success, FALSE in case of Failure.
+     *
      * @link    https://redis.io/commands/rpushx
      * @example
      * <pre>
@@ -855,7 +1005,9 @@ class Redis
      * Returns and removes the first element of the list.
      *
      * @param   string $key
-     * @return  string if command executed successfully BOOL FALSE in case of failure (empty list)
+     *
+     * @return  mixed|bool if command executed successfully BOOL FALSE in case of failure (empty list)
+     *
      * @link    https://redis.io/commands/lpop
      * @example
      * <pre>
@@ -873,7 +1025,9 @@ class Redis
      * Returns and removes the last element of the list.
      *
      * @param   string $key
-     * @return  string if command executed successfully BOOL FALSE in case of failure (empty list)
+     *
+     * @return  mixed|bool if command executed successfully BOOL FALSE in case of failure (empty list)
+     *
      * @link    https://redis.io/commands/rpop
      * @example
      * <pre>
@@ -893,11 +1047,11 @@ class Redis
      * Il all the list identified by the keys passed in arguments are empty, blPop will block
      * during the specified timeout until an element is pushed to one of those lists. This element will be popped.
      *
-     * @param array $keys    Array containing the keys of the lists
-     * Or STRING Key1 STRING Key2 STRING Key3 ... STRING Keyn
-     * @param int   $timeout Timeout
+     * @param string|string[] $keys    String array containing the keys of the lists OR variadic list of strings
+     * @param int             $timeout Timeout is always the required final parameter
      *
-     * @return  array array('listName', 'element')
+     * @return array ['listName', 'element']
+     *
      * @link    https://redis.io/commands/blpop
      * @example
      * <pre>
@@ -905,13 +1059,13 @@ class Redis
      * $redis->lPush('key1', 'A');
      * $redis->del('key2');
      *
-     * $redis->blPop('key1', 'key2', 10); // array('key1', 'A')
+     * $redis->blPop('key1', 'key2', 10);        // array('key1', 'A')
      * // OR
-     * $redis->blPop(array('key1', 'key2'), 10); // array('key1', 'A')
+     * $redis->blPop(['key1', 'key2'], 10);      // array('key1', 'A')
      *
-     * $redis->brPop('key1', 'key2', 10); // array('key1', 'A')
+     * $redis->brPop('key1', 'key2', 10);        // array('key1', 'A')
      * // OR
-     * $redis->brPop(array('key1', 'key2'), 10); // array('key1', 'A')
+     * $redis->brPop(['key1', 'key2'], 10); // array('key1', 'A')
      *
      * // Blocking feature
      *
@@ -927,7 +1081,7 @@ class Redis
      * // array('key1', 'A') is returned
      * </pre>
      */
-    public function blPop(array $keys, $timeout)
+    public function blPop($keys, $timeout)
     {
     }
 
@@ -938,10 +1092,11 @@ class Redis
      * block during the specified timeout until an element is pushed to one of those lists. T
      * his element will be popped.
      *
-     * @param array $keys    Array containing the keys of the lists
-     * Or STRING Key1 STRING Key2 STRING Key3 ... STRING Keyn
-     * @param int   $timeout Timeout
-     * @return  array array('listName', 'element')
+     * @param string|string[] $keys    String array containing the keys of the lists OR variadic list of strings
+     * @param int             $timeout Timeout is always the required final parameter
+     *
+     * @return array ['listName', 'element']
+     *
      * @link    https://redis.io/commands/brpop
      * @example
      * <pre>
@@ -979,15 +1134,17 @@ class Redis
      * Returns the size of a list identified by Key. If the list didn't exist or is empty,
      * the command returns 0. If the data type identified by Key is not a list, the command return FALSE.
      *
-     * @param   string  $key
-     * @return  int     The size of the list identified by Key exists.
+     * @param string $key
+     *
+     * @return int|bool The size of the list identified by Key exists.
      * bool FALSE if the data type identified by Key is not list
+     *
      * @link    https://redis.io/commands/llen
      * @example
      * <pre>
      * $redis->rPush('key1', 'A');
      * $redis->rPush('key1', 'B');
-     * $redis->rPush('key1', 'C');  // key1 => [ 'A', 'B', 'C' ]
+     * $redis->rPush('key1', 'C'); // key1 => [ 'A', 'B', 'C' ]
      * $redis->lLen('key1');       // 3
      * $redis->rPop('key1');
      * $redis->lLen('key1');       // 2
@@ -999,10 +1156,12 @@ class Redis
 
     /**
      * @see lLen()
-     * @link    https://redis.io/commands/llen
+     * @link https://redis.io/commands/llen
      * @deprecated use Redis::lLen()
      *
-     * @param   string    $key
+     * @param string $key
+     *
+     * @return int The size of the list identified by Key exists
      */
     public function lSize($key)
     {
@@ -1012,9 +1171,12 @@ class Redis
      * Return the specified element of the list stored at the specified key.
      * 0 the first element, 1 the second ... -1 the last element, -2 the penultimate ...
      * Return FALSE in case of a bad index or a key that doesn't point to a list.
-     * @param string    $key
-     * @param int       $index
-     * @return String the element at this index
+     *
+     * @param string $key
+     * @param int    $index
+     *
+     * @return mixed|bool the element at this index
+     *
      * Bool FALSE if the key identifies a non-string data type, or no value corresponds to this index in the list Key.
      *
      * @link    https://redis.io/commands/lindex
@@ -1039,6 +1201,7 @@ class Redis
      *
      * @param string $key
      * @param int $index
+     * @return mixed|bool the element at this index
      */
     public function lGet($key, $index)
     {
@@ -1047,17 +1210,19 @@ class Redis
     /**
      * Set the list at index with the new value.
      *
-     * @param string    $key
-     * @param int       $index
-     * @param string    $value
-     * @return BOOL TRUE if the new value is setted. FALSE if the index is out of range, or data type identified by key
-     * is not a list.
+     * @param string $key
+     * @param int    $index
+     * @param string $value
+     *
+     * @return bool TRUE if the new value is setted.
+     * FALSE if the index is out of range, or data type identified by key is not a list.
+     *
      * @link    https://redis.io/commands/lset
      * @example
      * <pre>
      * $redis->rPush('key1', 'A');
      * $redis->rPush('key1', 'B');
-     * $redis->rPush('key1', 'C');  // key1 => [ 'A', 'B', 'C' ]
+     * $redis->rPush('key1', 'C');    // key1 => [ 'A', 'B', 'C' ]
      * $redis->lIndex('key1', 0);     // 'A'
      * $redis->lSet('key1', 0, 'X');
      * $redis->lIndex('key1', 0);     // 'X'
@@ -1071,10 +1236,13 @@ class Redis
      * Returns the specified elements of the list stored at the specified key in
      * the range [start, end]. start and stop are interpretated as indices: 0 the first element,
      * 1 the second ... -1 the last element, -2 the penultimate ...
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
-     * @return  array containing the values in specified range.
+     *
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
+     *
+     * @return array containing the values in specified range.
+     *
      * @link    https://redis.io/commands/lrange
      * @example
      * <pre>
@@ -1096,6 +1264,7 @@ class Redis
      * @param string    $key
      * @param int       $start
      * @param int       $end
+     * @return array
      */
     public function lGetRange($key, $start, $end)
     {
@@ -1104,10 +1273,12 @@ class Redis
     /**
      * Trims an existing list so that it will contain only a specified range of elements.
      *
-     * @param string    $key
-     * @param int       $start
-     * @param int       $stop
-     * @return array    Bool return FALSE if the key identify a non-list value.
+     * @param string $key
+     * @param int    $start
+     * @param int    $stop
+     *
+     * @return array|bool Bool return FALSE if the key identify a non-list value
+     *
      * @link        https://redis.io/commands/ltrim
      * @example
      * <pre>
@@ -1141,11 +1312,13 @@ class Redis
      * If count is zero, all the matching elements are removed. If count is negative,
      * elements are removed from tail to head.
      *
-     * @param   string  $key
-     * @param   string  $value
-     * @param   int     $count
-     * @return  int     the number of elements to remove
+     * @param string $key
+     * @param string $value
+     * @param int    $count
+     *
+     * @return int|bool the number of elements to remove
      * bool FALSE if the value identified by key is not a list.
+     *
      * @link    https://redis.io/commands/lrem
      * @example
      * <pre>
@@ -1182,11 +1355,13 @@ class Redis
      * specify the position of the insert (before or after). If the list didn't exists,
      * or the pivot didn't exists, the value is not inserted.
      *
-     * @param   string  $key
-     * @param   int     $position Redis::BEFORE | Redis::AFTER
-     * @param   string  $pivot
-     * @param   string  $value
-     * @return  int     The number of the elements in the list, -1 if the pivot didn't exists.
+     * @param string       $key
+     * @param int          $position Redis::BEFORE | Redis::AFTER
+     * @param string       $pivot
+     * @param string|mixed $value
+     *
+     * @return int The number of the elements in the list, -1 if the pivot didn't exists.
+     *
      * @link    https://redis.io/commands/linsert
      * @example
      * <pre>
@@ -1212,13 +1387,13 @@ class Redis
 
     /**
      * Adds a values to the set value stored at key.
-     * If this value is already in the set, FALSE is returned.
      *
-     * @param   string  $key        Required key
-     * @param   string  $value1     Required value
-     * @param   string  $value2     Optional value
-     * @param   string  $valueN     Optional value
-     * @return  int     The number of elements added to the set
+     * @param string       $key       Required key
+     * @param string|mixed ...$value1 Variadic list of values
+     *
+     * @return int|bool The number of elements added to the set.
+     * If this value is already in the set, FALSE is returned
+     *
      * @link    https://redis.io/commands/sadd
      * @example
      * <pre>
@@ -1226,18 +1401,18 @@ class Redis
      * $redis->sAdd('k', 'v1', 'v2', 'v3');    // int(2)
      * </pre>
      */
-    public function sAdd($key, $value1, $value2 = null, $valueN = null)
+    public function sAdd($key, ...$value1)
     {
     }
 
     /**
      * Removes the specified members from the set value stored at key.
      *
-     * @param   string  $key
-     * @param   string  $member1
-     * @param   string  $member2
-     * @param   string  $memberN
-     * @return  int     The number of elements removed from the set.
+     * @param   string       $key
+     * @param   string|mixed ...$member1 Variadic list of members
+     *
+     * @return int The number of elements removed from the set
+     *
      * @link    https://redis.io/commands/srem
      * @example
      * <pre>
@@ -1250,7 +1425,7 @@ class Redis
      * // }
      * </pre>
      */
-    public function sRem($key, $member1, $member2 = null, $memberN = null)
+    public function sRem($key, ...$member1)
     {
     }
 
@@ -1260,22 +1435,22 @@ class Redis
      * @deprecated use Redis::sRem()
      *
      * @param   string  $key
-     * @param   string  $member1
-     * @param   string  $member2
-     * @param   string  $memberN
+     * @param   string|mixed  ...$member1
      */
-    public function sRemove($key, $member1, $member2 = null, $memberN = null)
+    public function sRemove($key, ...$member1)
     {
     }
 
     /**
      * Moves the specified member from the set at srcKey to the set at dstKey.
      *
-     * @param   string  $srcKey
-     * @param   string  $dstKey
-     * @param   string  $member
-     * @return  bool    If the operation is successful, return TRUE.
+     * @param string       $srcKey
+     * @param string       $dstKey
+     * @param string|mixed $member
+     *
+     * @return bool If the operation is successful, return TRUE.
      * If the srcKey and/or dstKey didn't exist, and/or the member didn't exist in srcKey, FALSE is returned.
+     *
      * @link    https://redis.io/commands/smove
      * @example
      * <pre>
@@ -1295,9 +1470,11 @@ class Redis
     /**
      * Checks if value is a member of the set stored at the key key.
      *
-     * @param   string  $key
-     * @param   string  $value
-     * @return  bool    TRUE if value is a member of the set at key key, FALSE otherwise.
+     * @param string       $key
+     * @param string|mixed $value
+     *
+     * @return bool TRUE if value is a member of the set at key key, FALSE otherwise
+     *
      * @link    https://redis.io/commands/sismember
      * @example
      * <pre>
@@ -1318,8 +1495,8 @@ class Redis
      * @link    https://redis.io/commands/sismember
      * @deprecated use Redis::sIsMember()
      *
-     * @param   string  $key
-     * @param   string  $value
+     * @param string       $key
+     * @param string|mixed $value
      */
     public function sContains($key, $value)
     {
@@ -1328,8 +1505,10 @@ class Redis
     /**
      * Returns the cardinality of the set identified by key.
      *
-     * @param   string  $key
-     * @return  int     the cardinality of the set identified by key, 0 if the set doesn't exist.
+     * @param string $key
+     *
+     * @return int the cardinality of the set identified by key, 0 if the set doesn't exist.
+     * 
      * @link    https://redis.io/commands/scard
      * @example
      * <pre>
@@ -1347,9 +1526,11 @@ class Redis
     /**
      * Removes and returns a random element from the set value at Key.
      *
-     * @param   string  $key
-     * @return  string  "popped" value
+     * @param string $key
+     *
+     * @return string|mixed|bool "popped" value
      * bool FALSE if set identified by key is empty or doesn't exist.
+     *
      * @link    https://redis.io/commands/spop
      * @example
      * <pre>
@@ -1367,10 +1548,12 @@ class Redis
     /**
      * Returns a random element(s) from the set value at Key, without removing it.
      *
-     * @param   string        $key
-     * @param   int           $count [optional]
-     * @return  string|array  value(s) from the set
+     * @param string $key
+     * @param int    $count [optional]
+     *
+     * @return string|mixed|array|bool value(s) from the set
      * bool FALSE if set identified by key is empty or doesn't exist and count argument isn't passed.
+     *
      * @link    https://redis.io/commands/srandmember
      * @example
      * <pre>
@@ -1390,7 +1573,7 @@ class Redis
      * // }
      * </pre>
      */
-    public function sRandMember($key, $count = null)
+    public function sRandMember($key, $count = 1)
     {
     }
 
@@ -1399,12 +1582,13 @@ class Redis
      * held at the specified keys. If just a single key is specified, then this command
      * produces the members of this set. If one of the keys is missing, FALSE is returned.
      *
-     * @param   string  $key1  keys identifying the different sets on which we will apply the intersection.
-     * @param   string  $key2  ...
-     * @param   string  $keyN  ...
-     * @return  array, contain the result of the intersection between those keys.
+     * @param string $key1         keys identifying the different sets on which we will apply the intersection.
+     * @param string ...$otherKeys variadic list of keys
+     *
+     * @return array contain the result of the intersection between those keys
      * If the intersection between the different sets is empty, the return value will be empty array.
-     * @link    https://redis.io/commands/sinterstore
+     *
+     * @link    https://redis.io/commands/sinter
      * @example
      * <pre>
      * $redis->sAdd('key1', 'val1');
@@ -1428,18 +1612,19 @@ class Redis
      * //}
      * </pre>
      */
-    public function sInter($key1, $key2, $keyN = null)
+    public function sInter($key1, ...$otherKeys)
     {
     }
 
     /**
      * Performs a sInter command and stores the result in a new set.
      *
-     * @param   string  $dstKey the key to store the diff into.
-     * @param   string  $key1 are intersected as in sInter.
-     * @param   string  $key2 ...
-     * @param   string  $keyN ...
-     * @return  int:    The cardinality of the resulting set, or FALSE in case of a missing key.
+     * @param string $dstKey       the key to store the diff into.
+     * @param string $key1         keys identifying the different sets on which we will apply the intersection.
+     * @param string ...$otherKeys variadic list of keys
+     *
+     * @return int|bool The cardinality of the resulting set, or FALSE in case of a missing key
+     *
      * @link    https://redis.io/commands/sinterstore
      * @example
      * <pre>
@@ -1467,22 +1652,21 @@ class Redis
      * //}
      * </pre>
      */
-    public function sInterStore($dstKey, $key1, $key2, $keyN = null)
+    public function sInterStore($dstKey, $key1, ...$otherKeys)
     {
     }
 
     /**
      * Performs the union between N sets and returns it.
      *
-     * @param   string  $key1 Any number of keys corresponding to sets in redis.
-     * @param   string  $key2 ...
-     * @param   string  $keyN ...
-     * @return  array   of strings: The union of all these sets.
+     * @param string $key1         first key for union
+     * @param string ...$otherKeys variadic list of keys corresponding to sets in redis
+     *
+     * @return array string[] The union of all these sets
+     *
      * @link    https://redis.io/commands/sunionstore
      * @example
      * <pre>
-     * $redis->del('s0', 's1', 's2');
-     *
      * $redis->sAdd('s0', '1');
      * $redis->sAdd('s0', '2');
      * $redis->sAdd('s1', '3');
@@ -1504,7 +1688,7 @@ class Redis
      * //}
      * </pre>
      */
-    public function sUnion($key1, $key2, $keyN = null)
+    public function sUnion($key1, ...$otherKeys)
     {
     }
 
@@ -1512,10 +1696,11 @@ class Redis
      * Performs the same action as sUnion, but stores the result in the first key
      *
      * @param   string  $dstKey  the key to store the diff into.
-     * @param   string  $key1    Any number of keys corresponding to sets in redis.
-     * @param   string  $key2    ...
-     * @param   string  $keyN    ...
-     * @return  int     Any number of keys corresponding to sets in redis.
+     * @param string $key1         first key for union
+     * @param string ...$otherKeys variadic list of keys corresponding to sets in redis
+     *
+     * @return int Any number of keys corresponding to sets in redis
+     *
      * @link    https://redis.io/commands/sunionstore
      * @example
      * <pre>
@@ -1544,17 +1729,18 @@ class Redis
      * //}
      * </pre>
      */
-    public function sUnionStore($dstKey, $key1, $key2, $keyN = null)
+    public function sUnionStore($dstKey, $key1, ...$otherKeys)
     {
     }
 
     /**
      * Performs the difference between N sets and returns it.
      *
-     * @param   string  $key1 Any number of keys corresponding to sets in redis.
-     * @param   string  $key2 ...
-     * @param   string  $keyN ...
-     * @return  array   of strings: The difference of the first set will all the others.
+     * @param string $key1         first key for diff
+     * @param string ...$otherKeys variadic list of keys corresponding to sets in redis
+     *
+     * @return array string[] The difference of the first set will all the others
+     *
      * @link    https://redis.io/commands/sdiff
      * @example
      * <pre>
@@ -1578,18 +1764,19 @@ class Redis
      * //}
      * </pre>
      */
-    public function sDiff($key1, $key2, $keyN = null)
+    public function sDiff($key1, ...$otherKeys)
     {
     }
 
     /**
      * Performs the same action as sDiff, but stores the result in the first key
      *
-     * @param   string  $dstKey    the key to store the diff into.
-     * @param   string  $key1      Any number of keys corresponding to sets in redis
-     * @param   string  $key2      ...
-     * @param   string  $keyN      ...
-     * @return  int:    The cardinality of the resulting set, or FALSE in case of a missing key.
+     * @param string $dstKey       the key to store the diff into.
+     * @param string $key1         first key for diff
+     * @param string ...$otherKeys variadic list of keys corresponding to sets in redis
+     *
+     * @return int|bool The cardinality of the resulting set, or FALSE in case of a missing key
+     *
      * @link    https://redis.io/commands/sdiffstore
      * @example
      * <pre>
@@ -1615,15 +1802,17 @@ class Redis
      * //}
      * </pre>
      */
-    public function sDiffStore($dstKey, $key1, $key2, $keyN = null)
+    public function sDiffStore($dstKey, $key1, ...$otherKeys)
     {
     }
 
     /**
      * Returns the contents of a set.
      *
-     * @param   string  $key
-     * @return  array   An array of elements, the contents of the set.
+     * @param string $key
+     *
+     * @return array An array of elements, the contents of the set
+     *
      * @link    https://redis.io/commands/smembers
      * @example
      * <pre>
@@ -1654,20 +1843,23 @@ class Redis
      * @link    https://redis.io/commands/smembers
      * @deprecated use Redis::sMembers()
      *
-     * @return  array   An array of elements, the contents of the set.
-     * @param   string  $key
+     * @param  string  $key
+     * @return array   An array of elements, the contents of the set
      */
     public function sGetMembers($key)
     {
     }
 
     /**
-     * Scan a set for members.
-     * @param   string  $key        The set to search.
-     * @param   int     $iterator   LONG (reference) to the iterator as we go.
-     * @param   null    $pattern    String, optional pattern to match against.
-     * @param   int     $count      How many members to return at a time (Redis might return a different amount).
-     * @return  array   PHPRedis will return an array of keys or FALSE when we're done iterating.
+     * Scan a set for members
+     *
+     * @param string $key      The set to search.
+     * @param int    $iterator LONG (reference) to the iterator as we go.
+     * @param null   $pattern  String, optional pattern to match against.
+     * @param int    $count    How many members to return at a time (Redis might return a different amount)
+     *
+     * @return array|bool PHPRedis will return an array of keys or FALSE when we're done iterating
+     *
      * @link    https://redis.io/commands/sscan
      * @example
      * <pre>
@@ -1686,9 +1878,11 @@ class Redis
     /**
      * Sets a value and returns the previous entry at that key.
      *
-     * @param   string  $key
-     * @param   string  $value
-     * @return  string  A string, the previous value located at this key.
+     * @param string       $key
+     * @param string|mixed $value
+     *
+     * @return string|mixed A string (mixed, if used serializer), the previous value located at this key
+     *
      * @link    https://redis.io/commands/getset
      * @example
      * <pre>
@@ -1702,9 +1896,10 @@ class Redis
     }
 
     /**
-     * Returns a random key.
+     * Returns a random key
      *
-     * @return string an existing key in redis.
+     * @return string an existing key in redis
+     *
      * @link    https://redis.io/commands/randomkey
      * @example
      * <pre>
@@ -1717,10 +1912,12 @@ class Redis
     }
 
     /**
-     * Switches to a given database.
+     * Switches to a given database
      *
-     * @param   int     $dbindex
-     * @return  bool    TRUE in case of success, FALSE in case of failure.
+     * @param int $dbIndex
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/select
      * @example
      * <pre>
@@ -1731,16 +1928,18 @@ class Redis
      * $redis->get('x');        // will return 42
      * </pre>
      */
-    public function select($dbindex)
+    public function select($dbIndex)
     {
     }
 
     /**
      * Moves a key to a different database.
      *
-     * @param   string  $key
-     * @param   int     $dbindex
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $key
+     * @param int    $dbIndex
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/move
      * @example
      * <pre>
@@ -1751,16 +1950,18 @@ class Redis
      * $redis->get('x');        // will return 42
      * </pre>
      */
-    public function move($key, $dbindex)
+    public function move($key, $dbIndex)
     {
     }
 
     /**
-     * Renames a key.
+     * Renames a key
      *
-     * @param   string  $srcKey
-     * @param   string  $dstKey
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $srcKey
+     * @param string $dstKey
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/rename
      * @example
      * <pre>
@@ -1787,14 +1988,16 @@ class Redis
     }
 
     /**
-     * Renames a key.
+     * Renames a key
      *
      * Same as rename, but will not replace a key if the destination already exists.
      * This is the same behaviour as setNx.
      *
-     * @param   string  $srcKey
-     * @param   string  $dstKey
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $srcKey
+     * @param string $dstKey
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/renamenx
      * @example
      * <pre>
@@ -1809,11 +2012,13 @@ class Redis
     }
 
     /**
-     * Sets an expiration date (a timeout) on an item.
+     * Sets an expiration date (a timeout) on an item
      *
-     * @param   string  $key    The key that will disappear.
-     * @param   int     $ttl    The key's remaining Time To Live, in seconds.
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $key The key that will disappear
+     * @param int    $ttl The key's remaining Time To Live, in seconds
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/expire
      * @example
      * <pre>
@@ -1828,11 +2033,13 @@ class Redis
     }
 
     /**
-     * Sets an expiration date (a timeout in milliseconds) on an item.
+     * Sets an expiration date (a timeout in milliseconds) on an item
      *
-     * @param   string  $key    The key that will disappear.
-     * @param   int     $ttl   The key's remaining Time To Live, in milliseconds.
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $key The key that will disappear.
+     * @param int    $ttl The key's remaining Time To Live, in milliseconds
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/pexpire
      * @example
      * <pre>
@@ -1853,6 +2060,7 @@ class Redis
      *
      * @param   string  $key
      * @param   int     $ttl
+     * @return  bool
      */
     public function setTimeout($key, $ttl)
     {
@@ -1861,9 +2069,11 @@ class Redis
     /**
      * Sets an expiration date (a timestamp) on an item.
      *
-     * @param   string  $key        The key that will disappear.
-     * @param   int     $timestamp  Unix timestamp. The key's date of death, in seconds from Epoch time.
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $key       The key that will disappear.
+     * @param int    $timestamp Unix timestamp. The key's date of death, in seconds from Epoch time.
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     * 
      * @link    https://redis.io/commands/expireat
      * @example
      * <pre>
@@ -1881,9 +2091,11 @@ class Redis
     /**
      * Sets an expiration date (a timestamp) on an item. Requires a timestamp in milliseconds
      *
-     * @param   string  $key        The key that will disappear.
-     * @param   int     $timestamp  Unix timestamp. The key's date of death, in seconds from Epoch time.
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $key       The key that will disappear
+     * @param int    $timestamp Unix timestamp. The key's date of death, in seconds from Epoch time
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/pexpireat
      * @example
      * <pre>
@@ -1900,8 +2112,10 @@ class Redis
     /**
      * Returns the keys that match a certain pattern.
      *
-     * @param   string  $pattern pattern, using '*' as a wildcard.
-     * @return  array   of STRING: The keys that match a certain pattern.
+     * @param string $pattern pattern, using '*' as a wildcard
+     *
+     * @return array string[] The keys that match a certain pattern.
+     *
      * @link    https://redis.io/commands/keys
      * @example
      * <pre>
@@ -1917,7 +2131,7 @@ class Redis
      * @see keys()
      * @deprecated use Redis::keys()
      *
-     * @param   string  $pattern
+     * @param string $pattern
      * @link    https://redis.io/commands/keys
      */
     public function getKeys($pattern)
@@ -1925,9 +2139,10 @@ class Redis
     }
 
     /**
-     * Returns the current database's size.
+     * Returns the current database's size
      *
-     * @return int DB size, in number of keys.
+     * @return int DB size, in number of keys
+     *
      * @link    https://redis.io/commands/dbsize
      * @example
      * <pre>
@@ -1943,8 +2158,10 @@ class Redis
      * Authenticate the connection using a password.
      * Warning: The password is sent in plain-text over the network.
      *
-     * @param   string  $password
-     * @return  bool:   TRUE if the connection is authenticated, FALSE otherwise.
+     * @param string $password
+     *
+     * @return bool TRUE if the connection is authenticated, FALSE otherwise
+     *
      * @link    https://redis.io/commands/auth
      * @example $redis->auth('foobared');
      */
@@ -1955,7 +2172,8 @@ class Redis
     /**
      * Starts the background rewrite of AOF (Append-Only File)
      *
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/bgrewriteaof
      * @example $redis->bgrewriteaof();
      */
@@ -1967,9 +2185,11 @@ class Redis
      * Changes the slave status
      * Either host and port, or no parameter to stop being a slave.
      *
-     * @param   string  $host [optional]
-     * @param   int $port [optional]
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @param string $host [optional]
+     * @param int    $port [optional]
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/slaveof
      * @example
      * <pre>
@@ -1985,8 +2205,9 @@ class Redis
     /**
      * Access the Redis slowLog
      *
-     * @param string $operation This can be either GET, LEN, or RESET
-     * @param int|null $length If executing a SLOWLOG GET command, you can pass an optional length.
+     * @param string   $operation This can be either GET, LEN, or RESET
+     * @param int|null $length    If executing a SLOWLOG GET command, you can pass an optional length.
+     *
      * @return mixed The return value of SLOWLOG will depend on which operation was performed.
      * - SLOWLOG GET: Array of slowLog entries, as provided by Redis
      * - SLOGLOG LEN: Integer, the length of the slowLog
@@ -2021,12 +2242,15 @@ class Redis
      * - "refcount"
      * - "idletime"
      *
-     * @param   string  $string
-     * @param   string  $key
-     * @return  string  for "encoding", int for "refcount" and "idletime", FALSE if the key doesn't exist.
+     * @param string $string
+     * @param string $key
+     *
+     * @return string|int|bool for "encoding", int for "refcount" and "idletime", FALSE if the key doesn't exist.
+     *
      * @link    https://redis.io/commands/object
      * @example
      * <pre>
+     * $redis->lPush('l', 'Hello, world!');
      * $redis->object("encoding", "l"); // → ziplist
      * $redis->object("refcount", "l"); // → 1
      * $redis->object("idletime", "l"); // → 400 (in seconds, with a precision of 10 seconds).
@@ -2039,8 +2263,9 @@ class Redis
     /**
      * Performs a synchronous save.
      *
-     * @return  bool:   TRUE in case of success, FALSE in case of failure.
+     * @return bool TRUE in case of success, FALSE in case of failure
      * If a save is already running, this command will fail and return FALSE.
+     *
      * @link    https://redis.io/commands/save
      * @example $redis->save();
      */
@@ -2051,8 +2276,9 @@ class Redis
     /**
      * Performs a background save.
      *
-     * @return bool TRUE in case of success, FALSE in case of failure.
-     * If a save is already running, this command will fail and return FALSE.
+     * @return bool TRUE in case of success, FALSE in case of failure
+     * If a save is already running, this command will fail and return FALSE
+     *
      * @link    https://redis.io/commands/bgsave
      * @example $redis->bgSave();
      */
@@ -2063,7 +2289,8 @@ class Redis
     /**
      * Returns the timestamp of the last disk save.
      *
-     * @return  int:    timestamp.
+     * @return int timestamp
+     *
      * @link    https://redis.io/commands/lastsave
      * @example $redis->lastSave();
      */
@@ -2074,10 +2301,13 @@ class Redis
     /**
      * Blocks the current client until all the previous write commands are successfully transferred and
      * acknowledged by at least the specified number of slaves.
-     * @param   int $numSlaves  Number of slaves that need to acknowledge previous write commands.
-     * @param   int $timeout    Timeout in milliseconds.
+     *
+     * @param int $numSlaves Number of slaves that need to acknowledge previous write commands.
+     * @param int $timeout   Timeout in milliseconds.
+     *
      * @return  int The command returns the number of slaves reached by all the writes performed in the
-     *              context of the current connection.
+     *              context of the current connection
+     *
      * @link    https://redis.io/commands/wait
      * @example $redis->wait(2, 1000);
      */
@@ -2088,9 +2318,9 @@ class Redis
     /**
      * Returns the type of data pointed by a given key.
      *
-     * @param   string  $key
-     * @return  int
+     * @param string $key
      *
+     * @return int
      * Depending on the type of the data pointed by the key,
      * this method will return the following value:
      * - string: Redis::REDIS_STRING
@@ -2099,6 +2329,7 @@ class Redis
      * - zset:  Redis::REDIS_ZSET
      * - hash:  Redis::REDIS_HASH
      * - other: Redis::REDIS_NOT_FOUND
+     *
      * @link    https://redis.io/commands/type
      * @example $redis->type('key');
      */
@@ -2109,9 +2340,11 @@ class Redis
     /**
      * Append specified string to the string stored in specified key.
      *
-     * @param   string  $key
-     * @param   string  $value
-     * @return  int:    Size of the value after the append
+     * @param string       $key
+     * @param string|mixed $value
+     *
+     * @return int Size of the value after the append
+     *
      * @link    https://redis.io/commands/append
      * @example
      * <pre>
@@ -2127,10 +2360,12 @@ class Redis
     /**
      * Return a substring of a larger string
      *
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
-     * @return  string: the substring
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
+     *
+     * @return string the substring
+     *
      * @link    https://redis.io/commands/getrange
      * @example
      * <pre>
@@ -2158,10 +2393,12 @@ class Redis
     /**
      * Changes a substring of a larger string.
      *
-     * @param   string  $key
-     * @param   int     $offset
-     * @param   string  $value
-     * @return  string: the length of the string after it was modified.
+     * @param string $key
+     * @param int    $offset
+     * @param string $value
+     *
+     * @return int the length of the string after it was modified
+     *
      * @link    https://redis.io/commands/setrange
      * @example
      * <pre>
@@ -2177,8 +2414,9 @@ class Redis
     /**
      * Get the length of a string value.
      *
-     * @param   string  $key
-     * @return  int
+     * @param string $key
+     * @return int
+     *
      * @link    https://redis.io/commands/strlen
      * @example
      * <pre>
@@ -2194,20 +2432,23 @@ class Redis
      * Return the position of the first bit set to 1 or 0 in a string. The position is returned, thinking of the
      * string as an array of bits from left to right, where the first byte's most significant bit is at position 0,
      * the second byte's most significant bit is at position 8, and so forth.
-     * @param   string  $key
-     * @param   int     $bit
-     * @param   int     $start
-     * @param   int     $end
-     * @return  int     The command returns the position of the first bit set to 1 or 0 according to the request.
-     *                  If we look for set bits (the bit argument is 1) and the string is empty or composed of just
-     *                  zero bytes, -1 is returned. If we look for clear bits (the bit argument is 0) and the string
-     *                  only contains bit set to 1, the function returns the first bit not part of the string on the
-     *                  right. So if the string is three bytes set to the value 0xff the command BITPOS key 0 will
-     *                  return 24, since up to bit 23 all the bits are 1. Basically, the function considers the right
-     *                  of the string as padded with zeros if you look for clear bits and specify no range or the
-     *                  start argument only. However, this behavior changes if you are looking for clear bits and
-     *                  specify a range with both start and end. If no clear bit is found in the specified range, the
-     *                  function returns -1 as the user specified a clear range and there are no 0 bits in that range.
+     *
+     * @param string $key
+     * @param int    $bit
+     * @param int    $start
+     * @param int    $end
+     *
+     * @return int The command returns the position of the first bit set to 1 or 0 according to the request.
+     * If we look for set bits (the bit argument is 1) and the string is empty or composed of just
+     * zero bytes, -1 is returned. If we look for clear bits (the bit argument is 0) and the string
+     * only contains bit set to 1, the function returns the first bit not part of the string on the
+     * right. So if the string is three bytes set to the value 0xff the command BITPOS key 0 will
+     * return 24, since up to bit 23 all the bits are 1. Basically, the function considers the right
+     * of the string as padded with zeros if you look for clear bits and specify no range or the
+     * start argument only. However, this behavior changes if you are looking for clear bits and
+     * specify a range with both start and end. If no clear bit is found in the specified range, the
+     * function returns -1 as the user specified a clear range and there are no 0 bits in that range.
+     *
      * @link    https://redis.io/commands/bitpos
      * @example
      * <pre>
@@ -2227,9 +2468,11 @@ class Redis
     /**
      * Return a single bit out of a larger string
      *
-     * @param   string  $key
-     * @param   int     $offset
-     * @return  int:    the bit value (0 or 1)
+     * @param string $key
+     * @param int    $offset
+     *
+     * @return int the bit value (0 or 1)
+     *
      * @link    https://redis.io/commands/getbit
      * @example
      * <pre>
@@ -2245,10 +2488,12 @@ class Redis
     /**
      * Changes a single bit of a string.
      *
-     * @param   string  $key
-     * @param   int     $offset
-     * @param   bool|int $value bool or int (1 or 0)
-     * @return  int:    0 or 1, the value of the bit before it was set.
+     * @param string   $key
+     * @param int      $offset
+     * @param bool|int $value  bool or int (1 or 0)
+     *
+     * @return int 0 or 1, the value of the bit before it was set
+     *
      * @link    https://redis.io/commands/setbit
      * @example
      * <pre>
@@ -2263,10 +2508,12 @@ class Redis
     }
 
     /**
-     * Count bits in a string.
+     * Count bits in a string
      *
-     * @param   string  $key
-     * @return  int     The number of bits set to 1 in the value behind the input key.
+     * @param string $key
+     *
+     * @return int The number of bits set to 1 in the value behind the input key
+     *
      * @link    https://redis.io/commands/bitcount
      * @example
      * <pre>
@@ -2284,12 +2531,13 @@ class Redis
     /**
      * Bitwise operation on multiple keys.
      *
-     * @param   string  $operation  either "AND", "OR", "NOT", "XOR"
-     * @param   string  $retKey     return key
-     * @param   string  $key1
-     * @param   string  $key2
-     * @param   string  $key3
-     * @return  int     The size of the string stored in the destination key.
+     * @param string $operation    either "AND", "OR", "NOT", "XOR"
+     * @param string $retKey       return key
+     * @param string $key1         first key
+     * @param string ...$otherKeys variadic list of keys
+     *
+     * @return int The size of the string stored in the destination key
+     *
      * @link    https://redis.io/commands/bitop
      * @example
      * <pre>
@@ -2302,14 +2550,14 @@ class Redis
      * $redis->bitOp('XOR', 'bit', 'bit1', 'bit2'); // bit = 11
      * </pre>
      */
-    public function bitOp($operation, $retKey, $key1, $key2, $key3 = null)
+    public function bitOp($operation, $retKey, $key1, ...$otherKeys)
     {
     }
 
     /**
      * Removes all entries from the current database.
      *
-     * @return  bool: Always TRUE.
+     * @return bool Always TRUE
      * @link    https://redis.io/commands/flushdb
      * @example $redis->flushDB();
      */
@@ -2320,7 +2568,8 @@ class Redis
     /**
      * Removes all entries from all databases.
      *
-     * @return  bool: Always TRUE.
+     * @return bool Always TRUE
+     *
      * @link    https://redis.io/commands/flushall
      * @example $redis->flushAll();
      */
@@ -2331,16 +2580,18 @@ class Redis
     /**
      * Sort
      *
-     * @param   string  $key
-     * @param   array   $option array(key => value, ...) - optional, with the following keys and values:
+     * @param string $key
+     * @param array  $option array(key => value, ...) - optional, with the following keys and values:
      * - 'by' => 'some_pattern_*',
      * - 'limit' => array(0, 1),
      * - 'get' => 'some_other_pattern_*' or an array of patterns,
      * - 'sort' => 'asc' or 'desc',
      * - 'alpha' => TRUE,
      * - 'store' => 'external-key'
-     * @return  array
-     * An array of values, or a number corresponding to the number of elements stored if that was used.
+     *
+     * @return array
+     * An array of values, or a number corresponding to the number of elements stored if that was used
+     *
      * @link    https://redis.io/commands/sort
      * @example
      * <pre>
@@ -2362,7 +2613,8 @@ class Redis
 
     /**
      * Returns an associative array of strings and integers
-     * @param   string   $option    Optional. The option to provide redis.
+     *
+     * @param string $option Optional. The option to provide redis.
      * SERVER | CLIENTS | MEMORY | PERSISTENCE | STATS | REPLICATION | CPU | CLASTER | KEYSPACE | COMANDSTATS
      *
      * Returns an associative array of strings and integers, with the following keys:
@@ -2408,8 +2660,10 @@ class Redis
      * - latest_fork_usec
      * - vm_enabled
      * - role
-     * @link    https://redis.io/commands/info
+     *
      * @return string
+     *
+     * @link    https://redis.io/commands/info
      * @example
      * <pre>
      * $redis->info();
@@ -2434,6 +2688,7 @@ class Redis
      *      - Number of expired keys
      *
      * @return bool `TRUE` in case of success, `FALSE` in case of failure.
+     *
      * @example $redis->resetStat();
      * @link https://redis.io/commands/config-resetstat
      */
@@ -2444,10 +2699,16 @@ class Redis
     /**
      * Returns the time to live left for a given key, in seconds. If the key doesn't exist, FALSE is returned.
      *
-     * @param   string  $key
-     * @return  int,    the time left to live in seconds.
+     * @param string $key
+     *
+     * @return int|bool the time left to live in seconds
+     *
      * @link    https://redis.io/commands/ttl
-     * @example $redis->ttl('key');
+     * @example
+     * <pre>
+     * $redis->setex('key', 123, 'test');
+     * $redis->ttl('key'); // int(123)
+     * </pre>
      */
     public function ttl($key)
     {
@@ -2458,10 +2719,16 @@ class Redis
      *
      * If the key doesn't exist, FALSE is returned.
      *
-     * @param   string  $key
-     * @return  int     the time left to live in milliseconds.
+     * @param string $key
+     *
+     * @return int|bool the time left to live in milliseconds
+     *
      * @link    https://redis.io/commands/pttl
-     * @example $redis->pttl('key');
+     * @example
+     * <pre>
+     * $redis->setex('key', 123, 'test');
+     * $redis->pttl('key'); // int(122999)
+     * </pre>
      */
     public function pttl($key)
     {
@@ -2470,8 +2737,10 @@ class Redis
     /**
      * Remove the expiration timer from a key.
      *
-     * @param   string  $key
-     * @return  bool:   TRUE if a timeout was removed, FALSE if the key didn’t exist or didn’t have an expiration timer.
+     * @param string $key
+     *
+     * @return bool TRUE if a timeout was removed, FALSE if the key didn’t exist or didn’t have an expiration timer.
+     *
      * @link    https://redis.io/commands/persist
      * @example $redis->persist('key');
      */
@@ -2483,8 +2752,10 @@ class Redis
      * Sets multiple key-value pairs in one atomic command.
      * MSETNX only returns TRUE if all the keys were set (see SETNX).
      *
-     * @param   array(key => value) $array Pairs: array(key => value, ...)
-     * @return  bool    TRUE in case of success, FALSE in case of failure.
+     * @param array $array Pairs: array(key => value, ...)
+     *
+     * @return bool TRUE in case of success, FALSE in case of failure
+     *
      * @link    https://redis.io/commands/mset
      * @example
      * <pre>
@@ -2505,6 +2776,7 @@ class Redis
      * If one or more keys dont exist, the array will contain FALSE at the position of the key.
      *
      * @param array $keys Array containing the list of the keys
+     *
      * @return array Array containing the values related to keys in argument
      *
      * @deprecated use Redis::mGet()
@@ -2528,6 +2800,7 @@ class Redis
      * the special value false is returned. Because of this, the operation never fails.
      *
      * @param array $array
+     *
      * @return array
      *
      * @link https://redis.io/commands/mget
@@ -2552,8 +2825,9 @@ class Redis
 
     /**
      * @see mset()
-     * @param   array $array
-     * @return  int 1 (if the keys were set) or 0 (no key was set)
+     * @param array $array
+     * @return int 1 (if the keys were set) or 0 (no key was set)
+     *
      * @link    https://redis.io/commands/msetnx
      */
     public function msetnx(array $array)
@@ -2565,9 +2839,12 @@ class Redis
      * Also return this value.
      *
      * @since   redis >= 1.1
-     * @param   string  $srcKey
-     * @param   string  $dstKey
-     * @return  string  The element that was moved in case of success, FALSE in case of failure.
+     *
+     * @param string $srcKey
+     * @param string $dstKey
+     *
+     * @return string|mixed|bool The element that was moved in case of success, FALSE in case of failure.
+     *
      * @link    https://redis.io/commands/rpoplpush
      * @example
      * <pre>
@@ -2607,10 +2884,12 @@ class Redis
     /**
      * A blocking version of rpoplpush, with an integral timeout in the third parameter.
      *
-     * @param   string  $srcKey
-     * @param   string  $dstKey
-     * @param   int     $timeout
-     * @return  string  The element that was moved in case of success, FALSE in case of timeout.
+     * @param string $srcKey
+     * @param string $dstKey
+     * @param int    $timeout
+     *
+     * @return  string|mixed|bool  The element that was moved in case of success, FALSE in case of timeout
+     *
      * @link    https://redis.io/commands/brpoplpush
      */
     public function brpoplpush($srcKey, $dstKey, $timeout)
@@ -2618,32 +2897,50 @@ class Redis
     }
 
     /**
-     * Adds the specified member with a given score to the sorted set stored at key.
+     * Adds the specified member with a given score to the sorted set stored at key
      *
-     * @param   string  $key    Required key
-     * @param   float   $score1 Required score
-     * @param   string  $value1 Required value
-     * @param   float   $score2 Optional score
-     * @param   string  $value2 Optional value
-     * @param   float   $scoreN Optional score
-     * @param   string  $valueN Optional value
-     * @return  int     Number of values added
+     * @param string       $key     Required key
+     * @param array        $options Options if needed
+     * @param float        $score1  Required score
+     * @param string|mixed $value1  Required value
+     * @param float        $score2  Optional score
+     * @param string|mixed $value2  Optional value
+     * @param float        $scoreN  Optional score
+     * @param string|mixed $valueN  Optional value
+     *
+     * @return int Number of values added
+     *
      * @link    https://redis.io/commands/zadd
      * @example
      * <pre>
      * <pre>
      * $redis->zAdd('z', 1, 'v1', 2, 'v2', 3, 'v3', 4, 'v4' );  // int(2)
      * $redis->zRem('z', 'v2', 'v3');                           // int(2)
+     * $redis->zAdd('z', ['NX'], 5, 'v5');                      // int(1)
+     * $redis->zAdd('z', ['NX'], 6, 'v5');                      // int(0)
+     * $redis->zAdd('z', 7, 'v6');                              // int(1)
+     * $redis->zAdd('z', 8, 'v6');                              // int(0)
+     *
      * var_dump( $redis->zRange('z', 0, -1) );
-     * //// Output:
-     * // array(2) {
+     * // Output:
+     * // array(4) {
      * //   [0]=> string(2) "v1"
      * //   [1]=> string(2) "v4"
+     * //   [2]=> string(2) "v5"
+     * //   [3]=> string(2) "v8"
      * // }
+     *
+     * var_dump( $redis->zRange('z', 0, -1, true) );
+     * // Output:
+     * // array(4) {
+     * //   ["v1"]=> float(1)
+     * //   ["v4"]=> float(4)
+     * //   ["v5"]=> float(5)
+     * //   ["v6"]=> float(8)
      * </pre>
      * </pre>
      */
-    public function zAdd($key, $score1, $value1, $score2 = null, $value2 = null, $scoreN = null, $valueN = null)
+    public function zAdd($key, $options, $score1, $value1, $score2 = null, $value2 = null, $scoreN = null, $valueN = null)
     {
     }
 
@@ -2655,11 +2952,13 @@ class Redis
      * -1 the last element,
      * -2 the penultimate ...
      *
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
-     * @param   bool    $withscores
-     * @return  array   Array containing the values in specified range.
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
+     * @param bool   $withscores
+     *
+     * @return array Array containing the values in specified range.
+     *
      * @link    https://redis.io/commands/zrange
      * @example
      * <pre>
@@ -2678,11 +2977,12 @@ class Redis
     /**
      * Deletes a specified member from the ordered set.
      *
-     * @param   string  $key
-     * @param   string  $member1
-     * @param   string  $member2
-     * @param   string  $memberN
-     * @return  int     Number of deleted values
+     * @param string       $key
+     * @param string|mixed $member1
+     * @param string|mixed ...$otherMembers
+     *
+     * @return int Number of deleted values
+     *
      * @link    https://redis.io/commands/zrem
      * @example
      * <pre>
@@ -2696,7 +2996,7 @@ class Redis
      * // }
      * </pre>
      */
-    public function zRem($key, $member1, $member2 = null, $memberN = null)
+    public function zRem($key, $member1, ...$otherMembers)
     {
     }
 
@@ -2705,13 +3005,13 @@ class Redis
      * @link https://redis.io/commands/zrem
      * @deprecated use Redis::zRem()
      *
-     * @param   string  $key
-     * @param   string  $member1
-     * @param   string  $member2
-     * @param   string  $memberN
-     * @return  int     Number of deleted values
+     * @param string       $key
+     * @param string|mixed $member1
+     * @param string|mixed ...$otherMembers
+     *
+     * @return int Number of deleted values
      */
-    public function zDelete($key, $member1, $member2 = null, $memberN = null)
+    public function zDelete($key, $member1, ...$otherMembers)
     {
     }
 
@@ -2723,11 +3023,13 @@ class Redis
      * -1 the last element,
      * -2 the penultimate ...
      *
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
-     * @param   bool    $withscore
-     * @return  array   Array containing the values in specified range.
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
+     * @param bool   $withscore
+     *
+     * @return array Array containing the values in specified range.
+     *
      * @link    https://redis.io/commands/zrevrange
      * @example
      * <pre>
@@ -2751,13 +3053,15 @@ class Redis
      *
      * zRevRangeByScore returns the same items in reverse order, when the start and end parameters are swapped.
      *
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
-     * @param   array   $options Two options are available:
-     *                      - withscores => TRUE,
-     *                      - and limit => array($offset, $count)
-     * @return  array   Array containing the values in specified range.
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
+     * @param array  $options Two options are available:
+     *  - withscores => TRUE,
+     *  - and limit => array($offset, $count)
+     *
+     * @return array Array containing the values in specified range.
+     *
      * @link    https://redis.io/commands/zrangebyscore
      * @example
      * <pre>
@@ -2766,7 +3070,6 @@ class Redis
      * $redis->zAdd('key', 10, 'val10');
      * $redis->zRangeByScore('key', 0, 3);                                          // array('val0', 'val2')
      * $redis->zRangeByScore('key', 0, 3, array('withscores' => TRUE);              // array('val0' => 0, 'val2' => 2)
-     * $redis->zRangeByScore('key', 0, 3, array('limit' => array(1, 1));                        // array('val2' => 2)
      * $redis->zRangeByScore('key', 0, 3, array('limit' => array(1, 1));                        // array('val2')
      * $redis->zRangeByScore('key', 0, 3, array('withscores' => TRUE, 'limit' => array(1, 1));  // array('val2' => 2)
      * </pre>
@@ -2777,12 +3080,12 @@ class Redis
 
     /**
      * @see zRangeByScore()
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
-     * @param   array   $options
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
+     * @param array  $options
      *
-     * @return  array
+     * @return array
      */
     public function zRevRangeByScore($key, $start, $end, array $options = array())
     {
@@ -2793,12 +3096,15 @@ class Redis
      * min and max values are required to start with '(' (exclusive), '[' (inclusive), or be exactly the values
      * '-' (negative inf) or '+' (positive inf).  The command must be called with either three *or* five
      * arguments or will return FALSE.
-     * @param   string  $key    The ZSET you wish to run against.
-     * @param   int     $min    The minimum alphanumeric value you wish to get.
-     * @param   int     $max    The maximum alphanumeric value you wish to get.
-     * @param   int     $offset Optional argument if you wish to start somewhere other than the first element.
-     * @param   int     $limit  Optional argument if you wish to limit the number of elements returned.
-     * @return  array   Array containing the values in the specified range.
+     *
+     * @param string $key    The ZSET you wish to run against.
+     * @param int    $min    The minimum alphanumeric value you wish to get.
+     * @param int    $max    The maximum alphanumeric value you wish to get.
+     * @param int    $offset Optional argument if you wish to start somewhere other than the first element.
+     * @param int    $limit  Optional argument if you wish to limit the number of elements returned.
+     *
+     * @return array|bool Array containing the values in the specified range.
+     *
      * @link    https://redis.io/commands/zrangebylex
      * @example
      * <pre>
@@ -2817,12 +3123,14 @@ class Redis
 
     /**
      * @see zRangeByLex()
-     * @param   string  $key
-     * @param   int     $min
-     * @param   int     $max
-     * @param   int     $offset
-     * @param   int     $limit
-     * @return  array
+     * @param string $key
+     * @param int    $min
+     * @param int    $max
+     * @param int    $offset
+     * @param int    $limit
+     *
+     * @return array
+     *
      * @link    https://redis.io/commands/zrevrangebylex
      */
     public function zRevRangeByLex($key, $min, $max, $offset = null, $limit = null)
@@ -2834,10 +3142,12 @@ class Redis
      * scores in the range [start,end]. Adding a parenthesis before start or end excludes it
      * from the range. +inf and -inf are also valid limits.
      *
-     * @param   string  $key
-     * @param   string  $start
-     * @param   string  $end
-     * @return  int     the size of a corresponding zRangeByScore.
+     * @param string $key
+     * @param string $start
+     * @param string $end
+     *
+     * @return int the size of a corresponding zRangeByScore
+     *
      * @link    https://redis.io/commands/zcount
      * @example
      * <pre>
@@ -2854,10 +3164,12 @@ class Redis
     /**
      * Deletes the elements of the sorted set stored at the specified key which have scores in the range [start,end].
      *
-     * @param   string          $key
-     * @param   float|string    $start double or "+inf" or "-inf" string
-     * @param   float|string    $end double or "+inf" or "-inf" string
-     * @return  int             The number of values deleted from the sorted set
+     * @param string       $key
+     * @param float|string $start double or "+inf" or "-inf" string
+     * @param float|string $end double or "+inf" or "-inf" string
+     *
+     * @return int The number of values deleted from the sorted set
+     *
      * @link    https://redis.io/commands/zremrangebyscore
      * @example
      * <pre>
@@ -2875,9 +3187,9 @@ class Redis
      * @see zRemRangeByScore()
      * @deprecated use Redis::zRemRangeByScore()
      *
-     * @param string    $key
-     * @param float     $start
-     * @param float     $end
+     * @param string $key
+     * @param float  $start
+     * @param float  $end
      */
     public function zDeleteRangeByScore($key, $start, $end)
     {
@@ -2886,10 +3198,12 @@ class Redis
     /**
      * Deletes the elements of the sorted set stored at the specified key which have rank in the range [start,end].
      *
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
-     * @return  int     The number of values deleted from the sorted set
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
+     *
+     * @return int The number of values deleted from the sorted set
+     *
      * @link    https://redis.io/commands/zremrangebyrank
      * @example
      * <pre>
@@ -2909,9 +3223,9 @@ class Redis
      * @link    https://redis.io/commands/zremrangebyscore
      * @deprecated use Redis::zRemRangeByRank()
      *
-     * @param   string  $key
-     * @param   int     $start
-     * @param   int     $end
+     * @param string $key
+     * @param int    $start
+     * @param int    $end
      */
     public function zDeleteRangeByRank($key, $start, $end)
     {
@@ -2920,8 +3234,9 @@ class Redis
     /**
      * Returns the cardinality of an ordered set.
      *
-     * @param   string  $key
-     * @return  int     the set's cardinality
+     * @param string $key
+     *
+     * @return int the set's cardinality
      *
      * @link    https://redis.io/commands/zsize
      * @example
@@ -2941,6 +3256,7 @@ class Redis
      * @deprecated use Redis::zCard()
      *
      * @param string $key
+     * @return int
      */
     public function zSize($key)
     {
@@ -2949,9 +3265,11 @@ class Redis
     /**
      * Returns the score of a given member in the specified sorted set.
      *
-     * @param   string  $key
-     * @param   string  $member
-     * @return  float
+     * @param string       $key
+     * @param string|mixed $member
+     *
+     * @return float|bool false if member or key not exists
+     *
      * @link    https://redis.io/commands/zscore
      * @example
      * <pre>
@@ -2967,9 +3285,11 @@ class Redis
      * Returns the rank of a given member in the specified sorted set, starting at 0 for the item
      * with the smallest score. zRevRank starts at 0 for the item with the largest score.
      *
-     * @param   string  $key
-     * @param   string  $member
-     * @return  int     the item's score.
+     * @param string       $key
+     * @param string|mixed $member
+     *
+     * @return int|bool the item's score, or false if key or member is not exists
+     *
      * @link    https://redis.io/commands/zrank
      * @example
      * <pre>
@@ -2988,9 +3308,11 @@ class Redis
 
     /**
      * @see zRank()
-     * @param  string $key
-     * @param  string $member
-     * @return int    the item's score
+     * @param string       $key
+     * @param string|mixed $member
+     *
+     * @return int|bool the item's score, false - if key or member is not exists
+     *
      * @link   https://redis.io/commands/zrevrank
      */
     public function zRevRank($key, $member)
@@ -3000,10 +3322,12 @@ class Redis
     /**
      * Increments the score of a member from a sorted set by a given amount.
      *
-     * @param   string  $key
-     * @param   float   $value (double) value that will be added to the member's score
-     * @param   string  $member
-     * @return  float   the new value
+     * @param string $key
+     * @param float  $value (double) value that will be added to the member's score
+     * @param string $member
+     *
+     * @return float the new value
+     *
      * @link    https://redis.io/commands/zincrby
      * @example
      * <pre>
@@ -3025,12 +3349,14 @@ class Redis
      * before applying the aggregation. The forth argument defines the AGGREGATE option which
      * specify how the results of the union are aggregated.
      *
-     * @param string    $Output
-     * @param array     $ZSetKeys
-     * @param array     $Weights
-     * @param string    $aggregateFunction  Either "SUM", "MIN", or "MAX": defines the behaviour to use on
+     * @param string $output
+     * @param array  $zSetKeys
+     * @param array  $weights
+     * @param string $aggregateFunction  Either "SUM", "MIN", or "MAX": defines the behaviour to use on
      * duplicate entries during the zUnionStore
-     * @return int The number of values in the new sorted set.
+     *
+     * @return int The number of values in the new sorted set
+     *
      * @link    https://redis.io/commands/zunionstore
      * @example
      * <pre>
@@ -3054,7 +3380,7 @@ class Redis
      * $redis->zUnionStore('ko3', array('k1', 'k2'), array(5, 1)); // 4, 'ko3' => array('val0', 'val2', 'val3', 'val1')
      * </pre>
      */
-    public function zUnionStore($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM')
+    public function zUnionStore($output, $zSetKeys, array $weights = null, $aggregateFunction = 'SUM')
     {
     }
 
@@ -3079,12 +3405,14 @@ class Redis
      * before applying the aggregation. The forth argument defines the AGGREGATE option which
      * specify how the results of the union are aggregated.
      *
-     * @param   string  $Output
-     * @param   array   $ZSetKeys
-     * @param   array   $Weights
-     * @param   string  $aggregateFunction Either "SUM", "MIN", or "MAX":
+     * @param string $output
+     * @param array  $zSetKeys
+     * @param array  $weights
+     * @param string $aggregateFunction Either "SUM", "MIN", or "MAX":
      * defines the behaviour to use on duplicate entries during the zInterStore.
-     * @return  int     The number of values in the new sorted set.
+     *
+     * @return int The number of values in the new sorted set.
+     *
      * @link    https://redis.io/commands/zinterstore
      * @example
      * <pre>
@@ -3112,7 +3440,7 @@ class Redis
      * $redis->zInterStore('ko4', array('k1', 'k2'), array(1, 5), 'max'); // 2, 'ko4' => array('val3', 'val1')
      * </pre>
      */
-    public function zInterStore($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM')
+    public function zInterStore($output, $zSetKeys, array $weights = null, $aggregateFunction = 'SUM')
     {
     }
 
@@ -3130,12 +3458,14 @@ class Redis
     }
 
     /**
-     * Scan a sorted set for members, with optional pattern and count.
-     * @param   string  $key        String, the set to scan.
-     * @param   int     $iterator   Long (reference), initialized to NULL.
-     * @param   string  $pattern    String (optional), the pattern to match.
-     * @param   int     $count      How many keys to return per iteration (Redis might return a different number).
-     * @return  array   PHPRedis will return matching keys from Redis, or FALSE when iteration is complete.
+     * Scan a sorted set for members, with optional pattern and count
+     *
+     * @param string $key      String, the set to scan.
+     * @param int    $iterator Long (reference), initialized to NULL.
+     * @param string $pattern  String (optional), the pattern to match.
+     * @param int    $count    How many keys to return per iteration (Redis might return a different number).
+     *
+     * @return array|bool PHPRedis will return matching keys from Redis, or FALSE when iteration is complete
      *
      * @link    https://redis.io/commands/zscan
      * @example
@@ -3159,6 +3489,7 @@ class Redis
      * @param string|array $key1
      * @param string|array $key2 ...
      * @param int $timeout
+     *
      * @return array Either an array with the key member and score of the higest or lowest element or an empty array
      * if the timeout was reached without an element to pop.
      *
@@ -3183,6 +3514,7 @@ class Redis
      * @param string|array $key1
      * @param string|array $key2 ...
      * @param int $timeout
+     *
      * @return array Either an array with the key member and score of the higest or lowest element or an empty array
      * if the timeout was reached without an element to pop.
      *
@@ -3200,7 +3532,8 @@ class Redis
      * @param string $key
      * @param string $hashKey
      * @param string $value
-     * @return int
+     *
+     * @return int|bool
      * - 1 if value didn't exist and was added successfully,
      * - 0 if the value was already present and was replaced, FALSE if there was an error.
      *
@@ -3222,10 +3555,11 @@ class Redis
     /**
      * Adds a value to the hash stored at key only if this field isn't already in the hash.
      *
-     * @param   string  $key
-     * @param   string  $hashKey
-     * @param   string  $value
-     * @return  bool    TRUE if the field was set, FALSE if it was already present.
+     * @param string $key
+     * @param string $hashKey
+     * @param string $value
+     *
+     * @return  bool TRUE if the field was set, FALSE if it was already present.
      *
      * @link    https://redis.io/commands/hsetnx
      * @example
@@ -3244,9 +3578,10 @@ class Redis
      * Gets a value from the hash stored at key.
      * If the hash table doesn't exist, or the key doesn't exist, FALSE is returned.
      *
-     * @param   string  $key
-     * @param   string  $hashKey
-     * @return  string  The value, if the command executed successfully BOOL FALSE in case of failure
+     * @param string $key
+     * @param string $hashKey
+     *
+     * @return string The value, if the command executed successfully BOOL FALSE in case of failure
      *
      * @link    https://redis.io/commands/hget
      */
@@ -3257,8 +3592,9 @@ class Redis
     /**
      * Returns the length of a hash, in number of items
      *
-     * @param   string  $key
-     * @return  int     the number of items in a hash, FALSE if the key doesn't exist or isn't a hash.
+     * @param string $key
+     *
+     * @return int the number of items in a hash, FALSE if the key doesn't exist or isn't a hash
      *
      * @link    https://redis.io/commands/hlen
      * @example
@@ -3277,11 +3613,11 @@ class Redis
      * Removes a values from the hash stored at key.
      * If the hash table doesn't exist, or the key doesn't exist, FALSE is returned.
      *
-     * @param   string  $key
-     * @param   string  $hashKey1
-     * @param   string  $hashKey2
-     * @param   string  $hashKeyN
-     * @return  int     Number of deleted fields
+     * @param string $key
+     * @param string $hashKey1
+     * @param string ...$otherHashKeys
+     *
+     * @return int Number of deleted fields
      *
      * @link    https://redis.io/commands/hdel
      * @example
@@ -3304,15 +3640,16 @@ class Redis
      * //  }
      * </pre>
      */
-    public function hDel($key, $hashKey1, $hashKey2 = null, $hashKeyN = null)
+    public function hDel($key, $hashKey1, ...$otherHashKeys)
     {
     }
 
     /**
      * Returns the keys in a hash, as an array of strings.
      *
-     * @param   string  $key
-     * @return  array   An array of elements, the keys of the hash. This works like PHP's array_keys().
+     * @param string $key
+     *
+     * @return array An array of elements, the keys of the hash. This works like PHP's array_keys().
      *
      * @link    https://redis.io/commands/hkeys
      * @example
@@ -3345,8 +3682,9 @@ class Redis
     /**
      * Returns the values in a hash, as an array of strings.
      *
-     * @param   string  $key
-     * @return  array   An array of elements, the values of the hash. This works like PHP's array_values().
+     * @param string $key
+     *
+     * @return array An array of elements, the values of the hash. This works like PHP's array_values().
      *
      * @link    https://redis.io/commands/hvals
      * @example
@@ -3379,8 +3717,9 @@ class Redis
     /**
      * Returns the whole hash, as an array of strings indexed by strings.
      *
-     * @param   string  $key
-     * @return  array   An array of elements, the contents of the hash.
+     * @param string $key
+     *
+     * @return array An array of elements, the contents of the hash.
      *
      * @link    https://redis.io/commands/hgetall
      * @example
@@ -3413,9 +3752,10 @@ class Redis
     /**
      * Verify if the specified member exists in a key.
      *
-     * @param   string  $key
-     * @param   string  $hashKey
-     * @return  bool:   If the member exists in the hash table, return TRUE, otherwise return FALSE.
+     * @param string $key
+     * @param string $hashKey
+     *
+     * @return bool If the member exists in the hash table, return TRUE, otherwise return FALSE.
      *
      * @link    https://redis.io/commands/hexists
      * @example
@@ -3432,10 +3772,11 @@ class Redis
     /**
      * Increments the value of a member from a hash by a given amount.
      *
-     * @param   string  $key
-     * @param   string  $hashKey
-     * @param   int     $value (integer) value that will be added to the member's value
-     * @return  int     the new value
+     * @param string $key
+     * @param string $hashKey
+     * @param int    $value (integer) value that will be added to the member's value
+     *
+     * @return int the new value
      *
      * @link    https://redis.io/commands/hincrby
      * @example
@@ -3452,10 +3793,11 @@ class Redis
     /**
      * Increment the float value of a hash field by the given amount
      *
-     * @param   string  $key
-     * @param   string  $field
-     * @param   float   $increment
-     * @return  float
+     * @param string $key
+     * @param string $field
+     * @param float  $increment
+     *
+     * @return float
      *
      * @link    https://redis.io/commands/hincrbyfloat
      * @example
@@ -3485,9 +3827,10 @@ class Redis
      * Fills in a whole hash. Non-string values are converted to string, using the standard (string) cast.
      * NULL values are stored as empty strings
      *
-     * @param   string  $key
-     * @param   array   $hashKeys key → value array
-     * @return  bool
+     * @param string $key
+     * @param array  $hashKeys key → value array
+     *
+     * @return bool
      *
      * @link    https://redis.io/commands/hmset
      * @example
@@ -3504,9 +3847,10 @@ class Redis
     /**
      * Retirieve the values associated to the specified fields in the hash.
      *
-     * @param   string  $key
-     * @param   array   $hashKeys
-     * @return  array   Array An array of elements, the values of the specified fields in the hash,
+     * @param string $key
+     * @param array  $hashKeys
+     *
+     * @return array Array An array of elements, the values of the specified fields in the hash,
      * with the hash keys as array keys.
      *
      * @link    https://redis.io/commands/hmget
@@ -3525,11 +3869,12 @@ class Redis
     /**
      * Scan a HASH value for members, with an optional pattern and count.
      *
-     * @param   string    $key
-     * @param   int       $iterator
-     * @param   string    $pattern    Optional pattern to match against.
-     * @param   int       $count      How many keys to return in a go (only a sugestion to Redis).
-     * @return  array     An array of members that match our pattern.
+     * @param string $key
+     * @param int    $iterator
+     * @param string $pattern    Optional pattern to match against.
+     * @param int    $count      How many keys to return in a go (only a sugestion to Redis).
+     *
+     * @return array An array of members that match our pattern.
      *
      * @link    https://redis.io/commands/hscan
      * @example
@@ -3551,6 +3896,7 @@ class Redis
      *
      * @param string $key
      * @param string $field
+     *
      * @return int the string length of the value associated with field, or zero when field is not present in the hash
      * or key does not exist at all.
      *
@@ -3566,9 +3912,10 @@ class Redis
      * This function must be called with at least one longitude, latitude, member triplet.
      *
      * @param string $key
-     * @param float $longitude
-     * @param float $latitude
-     * @param string string $member
+     * @param float  $longitude
+     * @param float  $latitude
+     * @param string $member
+     *
      * @return int The number of elements added to the geospatial key
      *
      * @link https://redis.io/commands/geoadd
@@ -3594,7 +3941,8 @@ class Redis
      * Retrieve Geohash strings for one or more elements of a geospatial index.
 
      * @param string $key
-     * @param string $member ...
+     * @param string ...$member variadic list of members
+     *
      * @return array One or more Redis Geohash encoded strings
      *
      * @link https://redis.io/commands/geohash
@@ -3663,6 +4011,7 @@ class Redis
      * @param string $member1
      * @param string $member2
      * @param string|null $unit
+     *
      * @return float The distance between the two passed members in the units requested (meters by default)
      *
      * @link https://redis.io/commands/geodist
@@ -3704,23 +4053,25 @@ class Redis
 
     /**
      * Return members of a set with geospatial information that are within the radius specified by the caller.
-     * 
+     *
      * @param $key
      * @param $longitude
      * @param $latitude
      * @param $radius
      * @param $unit
      * @param array|null $options
-     * |Key	        |Value	        |Description                                        |
+     * <pre>
+     * |Key         |Value          |Description                                        |
      * |------------|---------------|---------------------------------------------------|
-     * |COUNT	    |integer > 0	|Limit how many results are returned                |
-     * |            |WITHCOORD	    |Return longitude and latitude of matching members  |
-     * |            |WITHDIST	    |Return the distance from the center                |
-     * |            |WITHHASH	    |Return the raw geohash-encoded score               |
-     * |            |ASC	        |Sort results in ascending order                    |
-     * |            |DESC	        |Sort results in descending order                   |
-     * |STORE	    |key	        |Store results in key                               |
-     * |STOREDIST	|key	        |Store the results as distances in key              |
+     * |COUNT       |integer > 0    |Limit how many results are returned                |
+     * |            |WITHCOORD      |Return longitude and latitude of matching members  |
+     * |            |WITHDIST       |Return the distance from the center                |
+     * |            |WITHHASH       |Return the raw geohash-encoded score               |
+     * |            |ASC            |Sort results in ascending order                    |
+     * |            |DESC           |Sort results in descending order                   |
+     * |STORE       |key            |Store results in key                               |
+     * |STOREDIST   |key            |Store the results as distances in key              |
+     * </pre>
      * Note: It doesn't make sense to pass both ASC and DESC options but if both are passed
      * the last one passed will be used.
      * Note: When using STORE[DIST] in Redis Cluster, the store key must has to the same slot as
@@ -3804,12 +4155,14 @@ class Redis
 
     /**
      * This method is identical to geoRadius except that instead of passing a longitude and latitude as the "source"
-     * you pass an existing member in the geospatial set.
+     * you pass an existing member in the geospatial set
+     *
      * @param string $key
      * @param string $member
      * @param $radius
      * @param $units
      * @param array|null $options see georadius
+     *
      * @return array The zero or more entries that are close enough to the member given the distance and radius specified
      *
      * @link https://redis.io/commands/georadiusbymember
@@ -3845,12 +4198,13 @@ class Redis
     /**
      * Get or Set the redis config keys.
      *
-     * @param   string  $operation  either `GET` or `SET`
-     * @param   string  $key        for `SET`, glob-pattern for `GET`. See https://redis.io/commands/config-get for examples.
-     * @param   string  $value      optional string (only for `SET`)
-     * @return  array   Associative array for `GET`, key -> value
+     * @param string       $operation either `GET` or `SET`
+     * @param string       $key       for `SET`, glob-pattern for `GET`
+     * @param string|mixed $value     optional string (only for `SET`)
+     *
+     * @return array Associative array for `GET`, key -> value
+     *
      * @link    https://redis.io/commands/config-get
-     * @link    https://redis.io/commands/config-set
      * @example
      * <pre>
      * $redis->config("GET", "*max-*-entries*");
@@ -3862,25 +4216,28 @@ class Redis
     }
 
     /**
-     *  Evaluate a LUA script serverside
-     *  @param  string  $script
-     *  @param  array   $args
-     *  @param  int     $numKeys
-     *  @return mixed   What is returned depends on what the LUA script itself returns, which could be a scalar value
-     *  (int/string), or an array. Arrays that are returned can also contain other arrays, if that's how it was set up in
-     *  your LUA script.  If there is an error executing the LUA script, the getLastError() function can tell you the
-     *  message that came back from Redis (e.g. compile error).
-     *  @link   https://redis.io/commands/eval
-     *  @example
-     *  <pre>
-     *  $redis->eval("return 1"); // Returns an integer: 1
-     *  $redis->eval("return {1,2,3}"); // Returns Array(1,2,3)
-     *  $redis->del('mylist');
-     *  $redis->rpush('mylist','a');
-     *  $redis->rpush('mylist','b');
-     *  $redis->rpush('mylist','c');
-     *  // Nested response:  Array(1,2,3,Array('a','b','c'));
-     *  $redis->eval("return {1,2,3,redis.call('lrange','mylist',0,-1)}}");
+     * Evaluate a LUA script serverside
+     *
+     * @param string $script
+     * @param array  $args
+     * @param int    $numKeys
+     *
+     * @return mixed What is returned depends on what the LUA script itself returns, which could be a scalar value
+     * (int/string), or an array. Arrays that are returned can also contain other arrays, if that's how it was set up in
+     * your LUA script.  If there is an error executing the LUA script, the getLastError() function can tell you the
+     * message that came back from Redis (e.g. compile error).
+     *
+     * @link   https://redis.io/commands/eval
+     * @example
+     * <pre>
+     * $redis->eval("return 1"); // Returns an integer: 1
+     * $redis->eval("return {1,2,3}"); // Returns Array(1,2,3)
+     * $redis->del('mylist');
+     * $redis->rpush('mylist','a');
+     * $redis->rpush('mylist','b');
+     * $redis->rpush('mylist','c');
+     * // Nested response:  Array(1,2,3,Array('a','b','c'));
+     * $redis->eval("return {1,2,3,redis.call('lrange','mylist',0,-1)}}");
      * </pre>
      */
     public function eval($script, $args = array(), $numKeys = 0)
@@ -3904,10 +4261,13 @@ class Redis
      * Evaluate a LUA script serverside, from the SHA1 hash of the script instead of the script itself.
      * In order to run this command Redis will have to have already loaded the script, either by running it or via
      * the SCRIPT LOAD command.
-     * @param   string  $scriptSha
-     * @param   array   $args
-     * @param   int     $numKeys
-     * @return  mixed   @see eval()
+     *
+     * @param string $scriptSha
+     * @param array  $args
+     * @param int    $numKeys
+     *
+     * @return mixed @see eval()
+     *
      * @see     eval()
      * @link    https://redis.io/commands/evalsha
      * @example
@@ -3935,8 +4295,9 @@ class Redis
 
     /**
      * Execute the Redis SCRIPT command to perform various operations on the scripting subsystem.
-     * @param   string  $command load | flush | kill | exists
-     * @param   string  $script
+     * @param string $command load | flush | kill | exists
+     * @param string $script
+     *
      * @return  mixed
      *
      * @link    https://redis.io/commands/script-load
@@ -3962,7 +4323,8 @@ class Redis
 
     /**
      * The last error message (if any)
-     * @return  string  A string with the last returned script based error message, or NULL if there is no error
+     *
+     * @return string|null A string with the last returned script based error message, or NULL if there is no error
      *
      * @example
      * <pre>
@@ -4032,8 +4394,12 @@ class Redis
 
     /**
      * A utility method to prefix the value with the prefix setting for phpredis.
-     * @param   mixed   $value  The value you wish to prefix
-     * @return  string  If a prefix is set up, the value now prefixed.  If there is no prefix, the value will be returned unchanged.
+     *
+     * @param mixed $value The value you wish to prefix
+     *
+     * @return string If a prefix is set up, the value now prefixed.
+     * If there is no prefix, the value will be returned unchanged.
+     *
      * @example
      * <pre>
      * $redis->setOption(Redis::OPT_PREFIX, 'my-prefix:');
@@ -4049,7 +4415,9 @@ class Redis
      * value will be returned unchanged.  If there is a serializer set up, and the data passed in is malformed, an
      * exception will be thrown. This can be useful if phpredis is serializing values, and you return something from
      * redis in a LUA script that is serialized.
-     * @param   string  $value  The value to be unserialized
+     *
+     * @param string $value The value to be unserialized
+     *
      * @return mixed
      * @example
      * <pre>
@@ -4066,7 +4434,9 @@ class Redis
      * serializer is configured, manually. This can be useful for serialization/unserialization of data going in
      * and out of EVAL commands as phpredis can't automatically do this itself.  Note that if no serializer is
      * set, phpredis will change Array values to 'Array', and Objects to 'Object'.
-     * @param   mixed   $value  The value to be serialized.
+     *
+     * @param mixed $value The value to be serialized.
+     *
      * @return  mixed
      * @example
      * <pre>
@@ -4086,8 +4456,10 @@ class Redis
     /**
      * Dump a key out of a redis database, the value of which can later be passed into redis using the RESTORE command.
      * The data that comes out of DUMP is a binary representation of the key as Redis stores it.
-     * @param   string  $key
-     * @return  string  The Redis encoded value of the key, or FALSE if the key doesn't exist
+     * @param string $key
+     *
+     * @return string|bool The Redis encoded value of the key, or FALSE if the key doesn't exist
+     *
      * @link    https://redis.io/commands/dump
      * @example
      * <pre>
@@ -4102,10 +4474,12 @@ class Redis
     /**
      * Restore a key from the result of a DUMP operation.
      *
-     * @param   string  $key    The key name
-     * @param   int     $ttl    How long the key should live (if zero, no expire will be set on the key)
-     * @param   string  $value  (binary).  The Redis encoded key value (from DUMP)
-     * @return  bool
+     * @param string $key   The key name
+     * @param int    $ttl   How long the key should live (if zero, no expire will be set on the key)
+     * @param string $value (binary).  The Redis encoded key value (from DUMP)
+     *
+     * @return bool
+     *
      * @link    https://redis.io/commands/restore
      * @example
      * <pre>
@@ -4121,14 +4495,16 @@ class Redis
     /**
      * Migrates a key to a different Redis instance.
      *
-     * @param   string  $host       The destination host
-     * @param   int     $port       The TCP port to connect to.
-     * @param   string  $key        The key to migrate.
-     * @param   int     $db         The target DB.
-     * @param   int     $timeout    The maximum amount of time given to this transfer.
-     * @param   bool    $copy       Should we send the COPY flag to redis.
-     * @param   bool    $replace    Should we send the REPLACE flag to redis.
-     * @return  bool
+     * @param string $host    The destination host
+     * @param int    $port    The TCP port to connect to.
+     * @param string $key     The key to migrate.
+     * @param int    $db      The target DB.
+     * @param int    $timeout The maximum amount of time given to this transfer.
+     * @param bool   $copy    Should we send the COPY flag to redis.
+     * @param bool   $replace Should we send the REPLACE flag to redis.
+     *
+     * @return bool
+     *
      * @link    https://redis.io/commands/migrate
      * @example
      * <pre>
@@ -4141,8 +4517,10 @@ class Redis
 
     /**
      * Return the current Redis server time.
-     * @return  array If successfull, the time will come back as an associative array with element zero being the
+     *
+     * @return array If successfull, the time will come back as an associative array with element zero being the
      * unix timestamp, and element one being microseconds.
+     *
      * @link    https://redis.io/commands/time
      * @example
      * <pre>
@@ -4158,11 +4536,14 @@ class Redis
     }
 
     /**
-     * Scan the keyspace for keys.
-     * @param  int    $iterator Iterator, initialized to NULL.
-     * @param  string $pattern  Pattern to match.
-     * @param  int    $count    Count of keys per iteration (only a suggestion to Redis).
-     * @return array            This function will return an array of keys or FALSE if there are no more keys.
+     * Scan the keyspace for keys
+     *
+     * @param int    $iterator Iterator, initialized to NULL.
+     * @param string $pattern  Pattern to match.
+     * @param int    $count    Count of keys per iteration (only a suggestion to Redis).
+     *
+     * @return array|bool This function will return an array of keys or FALSE if there are no more keys.
+     *
      * @link   https://redis.io/commands/scan
      * @example
      * <pre>
@@ -4180,9 +4561,12 @@ class Redis
 
     /**
      * Adds all the element arguments to the HyperLogLog data structure stored at the key.
-     * @param   string  $key
-     * @param   array   $elements
-     * @return  bool
+     *
+     * @param string $key
+     * @param array  $elements
+     *
+     * @return bool
+     *
      * @link    https://redis.io/commands/pfadd
      * @example $redis->pfAdd('key', array('elem1', 'elem2'))
      */
@@ -4193,8 +4577,11 @@ class Redis
     /**
      * When called with a single key, returns the approximated cardinality computed by the HyperLogLog data
      * structure stored at the specified variable, which is 0 if the variable does not exist.
-     * @param   string|array    $key
-     * @return  int
+     *
+     * @param string|array $key
+     *
+     * @return int
+     * 
      * @link    https://redis.io/commands/pfcount
      * @example
      * <pre>
@@ -4210,9 +4597,12 @@ class Redis
     /**
      * Merge multiple HyperLogLog values into an unique value that will approximate the cardinality
      * of the union of the observed Sets of the source HyperLogLog structures.
-     * @param   string  $destkey
-     * @param   array   $sourcekeys
-     * @return  bool
+     *
+     * @param string $destKey
+     * @param array  $sourceKeys
+     *
+     * @return bool
+     *
      * @link    https://redis.io/commands/pfmerge
      * @example
      * <pre>
@@ -4221,15 +4611,18 @@ class Redis
      * $redis->pfMerge('key3', array('key1', 'key2'));
      * $redis->pfCount('key3'); // int(3)
      */
-    public function pfMerge($destkey, array $sourcekeys)
+    public function pfMerge($destKey, array $sourceKeys)
     {
     }
 
     /**
      * Send arbitrary things to the redis server.
-     * @param   string      $command    Required command to send to the server.
-     * @param   mixed,...   $arguments  Optional variable amount of arguments to send to the server.
-     * @return  mixed
+     *
+     * @param string $command   Required command to send to the server.
+     * @param mixed  $arguments Optional variable amount of arguments to send to the server.
+     *
+     * @return mixed
+     *
      * @example
      * <pre>
      * $redis->rawCommand('SET', 'key', 'value'); // bool(true)
@@ -4242,7 +4635,9 @@ class Redis
 
     /**
      * Detect whether we're in ATOMIC/MULTI/PIPELINE mode.
-     * @return  int     Either Redis::ATOMIC, Redis::MULTI or Redis::PIPELINE
+     *
+     * @return int Either Redis::ATOMIC, Redis::MULTI or Redis::PIPELINE
+     *
      * @example $redis->getMode();
      */
     public function getMode()
@@ -4251,59 +4646,69 @@ class Redis
 
     /**
      * Acknowledge one or more messages on behalf of a consumer group.
-     * @param   string  $stream
-     * @param   string  $group
-     * @param   array   $arr_messages
-     * @return  int     The number of messages Redis reports as acknowledged.
+     *
+     * @param string $stream
+     * @param string $group
+     * @param array  $messages
+     *
+     * @return int The number of messages Redis reports as acknowledged.
+     *
      * @link    https://redis.io/commands/xack
      * @example
      * <pre>
-     * $obj_redis->xAck('stream', 'group1', ['1530063064286-0', '1530063064286-1']);
+     * $redis->xAck('stream', 'group1', ['1530063064286-0', '1530063064286-1']);
      * </pre>
      */
-    public function xAck($stream, $group, $arr_messages)
+    public function xAck($stream, $group, $messages)
     {
     }
 
     /**
-     * Add a message to a stream.
-     * @param   string  $str_key
-     * @param   string  $str_id
-     * @param   array   $arr_message
-     * @param   int     $i_maxlen
-     * @param   bool    $boo_approximate
-     * @return  string  The added message ID.
+     * Add a message to a stream
+     *
+     * @param string $key
+     * @param string $id
+     * @param array  $messages
+     * @param int    $maxLen
+     * @param bool   $isApproximate
+     *
+     * @return string The added message ID.
+     *
      * @link    https://redis.io/commands/xadd
      * @example
      * <pre>
-     * $obj_redis->xAdd('mystream', "*", ['field' => 'value']);
-     * $obj_redis->xAdd('mystream', "*", ['field' => 'value'], 10);
-     * $obj_redis->xAdd('mystream', "*", ['field' => 'value'], 10, true);
+     * $redis->xAdd('mystream', "*", ['field' => 'value']);
+     * $redis->xAdd('mystream', "*", ['field' => 'value'], 10);
+     * $redis->xAdd('mystream', "*", ['field' => 'value'], 10, true);
      * </pre>
      */
-    public function xAdd($str_key, $str_id, $arr_message, $i_maxlen = 0, $boo_approximate = false)
+    public function xAdd($key, $id, $messages, $maxLen = 0, $isApproximate = false)
     {
     }
 
     /**
-     * Claim ownership of one or more pending messages.
-     * @param   string  $str_key
-     * @param   string  $str_group
-     * @param   string  $str_consumer
-     * @param   int     $min_idle_time
-     * @param   array   $arr_ids
-     * @param   array   $arr_options ['IDLE' => $value, 'TIME' => $value, 'RETRYCOUNT' => $value, 'FORCE', 'JUSTID']
-     * @return  array   Either an array of message IDs along with corresponding data, or just an array of IDs (if the 'JUSTID' option was passed).
+     * Claim ownership of one or more pending messages
+     *
+     * @param string $key
+     * @param string $group
+     * @param string $consumer
+     * @param int    $minIdleTime
+     * @param array  $ids
+     * @param array  $options ['IDLE' => $value, 'TIME' => $value, 'RETRYCOUNT' => $value, 'FORCE', 'JUSTID']
+     *
+     * @return array Either an array of message IDs along with corresponding data, or just an array of IDs
+     * (if the 'JUSTID' option was passed).
+     *
      * @link    https://redis.io/commands/xclaim
      * @example
      * <pre>
      * $ids = ['1530113681011-0', '1530113681011-1', '1530113681011-2'];
      *
      * // Without any options
-     * $obj_redis->xClaim('mystream', 'group1', 'myconsumer1', 0, $ids);
+     * $redis->xClaim('mystream', 'group1', 'myconsumer1', 0, $ids);
      *
      * // With options
-     * $obj_redis->xClaim(
+     * $redis->xClaim(
      *     'mystream', 'group1', 'myconsumer2', 0, $ids,
      *     [
      *         'IDLE' => time() * 1000,
@@ -4314,200 +4719,236 @@ class Redis
      * );
      * </pre>
      */
-    public function xClaim($str_key, $str_group, $str_consumer, $min_idle_time, $arr_ids, $arr_options = [])
+    public function xClaim($key, $group, $consumer, $minIdleTime, $ids, $options = [])
     {
     }
 
     /**
-     * Delete one or more messages from a stream.
-     * @param   string  $str_key
-     * @param   array   $arr_ids
-     * @return  int     The number of messages removed.
+     * Delete one or more messages from a stream
+     *
+     * @param string $key
+     * @param array  $ids
+     *
+     * @return int The number of messages removed
+     *
      * @link    https://redis.io/commands/xdel
      * @example
      * <pre>
-     * $obj_redis->xDel('mystream', ['1530115304877-0', '1530115305731-0']);
+     * $redis->xDel('mystream', ['1530115304877-0', '1530115305731-0']);
      * </pre>
      */
-    public function xDel($str_key, $arr_ids)
+    public function xDel($key, $ids)
     {
     }
 
     /**
-     * @param   string  $operation  e.g.: 'HELP', 'SETID', 'DELGROUP', 'CREATE', 'DELCONSUMER'
-     * @param   string  $str_key
-     * @param   string  $str_group
-     * @param   string  $str_msg_id
-     * @param   bool    $boo_mkstream
-     * @return  mixed   This command returns different types depending on the specific XGROUP command executed.
+     * @param string $operation  e.g.: 'HELP', 'SETID', 'DELGROUP', 'CREATE', 'DELCONSUMER'
+     * @param string $key
+     * @param string $group
+     * @param string $msgId
+     * @param bool   $mkStream
+     *
+     * @return mixed This command returns different types depending on the specific XGROUP command executed.
+     *
      * @link    https://redis.io/commands/xgroup
      * @example
      * <pre>
-     * $obj_redis->xGroup('CREATE', 'mystream', 'mygroup', 0);
-     * $obj_redis->xGroup('CREATE', 'mystream', 'mygroup', 0, true); // create stream
-     * $obj_redis->xGroup('DESTROY', 'mystream', 'mygroup');
+     * $redis->xGroup('CREATE', 'mystream', 'mygroup', 0);
+     * $redis->xGroup('CREATE', 'mystream', 'mygroup', 0, true); // create stream
+     * $redis->xGroup('DESTROY', 'mystream', 'mygroup');
      * </pre>
      */
-    public function xGroup($operation, $str_key, $str_group, $str_msg_id = '', $boo_mkstream = false)
+    public function xGroup($operation, $key, $group, $msgId = '', $mkStream = false)
     {
     }
 
     /**
-     * Get information about a stream or consumer groups.
-     * @param   string  $operation  e.g.: 'CONSUMERS', 'GROUPS', 'STREAM', 'HELP'
-     * @param   string  $str_stream
-     * @param   string  $str_group
-     * @return  mixed   This command returns different types depending on which subcommand is used.
+     * Get information about a stream or consumer groups
+     *
+     * @param string $operation  e.g.: 'CONSUMERS', 'GROUPS', 'STREAM', 'HELP'
+     * @param string $stream
+     * @param string $group
+     *
+     * @return mixed This command returns different types depending on which subcommand is used.
+     *
      * @link    https://redis.io/commands/xinfo
      * @example
      * <pre>
-     * $obj_redis->xInfo('STREAM', 'mystream');
+     * $redis->xInfo('STREAM', 'mystream');
      * </pre>
      */
-    public function xInfo($operation, $str_stream, $str_group)
+    public function xInfo($operation, $stream, $group)
     {
     }
 
     /**
      * Get the length of a given stream.
-     * @param   string  $str_stream
-     * @return  int     The number of messages in the stream.
+     *
+     * @param string $stream
+     *
+     * @return int The number of messages in the stream.
+     *
      * @link    https://redis.io/commands/xlen
      * @example
      * <pre>
-     * $obj_redis->xLen('mystream');
+     * $redis->xLen('mystream');
      * </pre>
      */
-    public function xLen($str_stream)
+    public function xLen($stream)
     {
     }
 
     /**
-     * Get information about pending messages in a given stream.
-     * @param   string      $str_stream
-     * @param   string      $str_group
-     * @param   string      $str_start
-     * @param   string      $str_end
-     * @param   int         $i_count
-     * @param   string      $str_consumer
-     * @return  array       Information about the pending messages, in various forms depending on the specific invocation of XPENDING.
-     * @link    https://redis.io/commands/xpending
+     * Get information about pending messages in a given stream
+     *
+     * @param string $stream
+     * @param string $group
+     * @param string $start
+     * @param string $end
+     * @param int    $count
+     * @param string $consumer
+     *
+     * @return array Information about the pending messages, in various forms depending on
+     * the specific invocation of XPENDING.
+     *
+     * @link https://redis.io/commands/xpending
      * @example
      * <pre>
-     * $obj_redis->xPending('mystream', 'mygroup');
-     * $obj_redis->xPending('mystream', 'mygroup', '-', '+', 1, 'consumer-1');
+     * $redis->xPending('mystream', 'mygroup');
+     * $redis->xPending('mystream', 'mygroup', '-', '+', 1, 'consumer-1');
      * </pre>
      */
-    public function xPending($str_stream, $str_group, $str_start = null, $str_end = null, $i_count = null, $str_consumer = null)
+    public function xPending($stream, $group, $start = null, $end = null, $count = null, $consumer = null)
     {
     }
 
     /**
-     * Get a range of messages from a given stream.
-     * @param   string  $str_stream
-     * @param   string  $str_start
-     * @param   string  $str_end
-     * @param   int     $i_count
-     * @return  array   The messages in the stream within the requested range.
+     * Get a range of messages from a given stream
+     *
+     * @param string $stream
+     * @param string $start
+     * @param string $end
+     * @param int    $count
+     *
+     * @return array The messages in the stream within the requested range.
+     *
      * @link    https://redis.io/commands/xrange
      * @example
      * <pre>
      * // Get everything in this stream
-     * $obj_redis->xRange('mystream', '-', '+');
+     * $redis->xRange('mystream', '-', '+');
      * // Only the first two messages
-     * $obj_redis->xRange('mystream', '-', '+', 2);
+     * $redis->xRange('mystream', '-', '+', 2);
      * </pre>
      */
-    public function xRange($str_stream, $str_start, $str_end, $i_count = null)
+    public function xRange($stream, $start, $end, $count = null)
     {
     }
 
     /**
      * Read data from one or more streams and only return IDs greater than sent in the command.
-     * @param   array       $arr_streams
-     * @param   int|string  $i_count
-     * @param   int|string  $i_block
-     * @return  array       The messages in the stream newer than the IDs passed to Redis (if any).
+     *
+     * @param array      $streams
+     * @param int|string $count
+     * @param int|string $block
+     *
+     * @return array The messages in the stream newer than the IDs passed to Redis (if any)
+     *
      * @link    https://redis.io/commands/xread
      * @example
      * <pre>
-     * $obj_redis->xRead(['stream1' => '1535222584555-0', 'stream2' => '1535222584555-0']);
+     * $redis->xRead(['stream1' => '1535222584555-0', 'stream2' => '1535222584555-0']);
      * </pre>
      */
-    public function xRead($arr_streams, $i_count = null, $i_block = null)
+    public function xRead($streams, $count = null, $block = null)
     {
     }
 
     /**
      * This method is similar to xRead except that it supports reading messages for a specific consumer group.
-     * @param   string      $str_group
-     * @param   string      $str_consumer
-     * @param   array       $arr_streams
-     * @param   int|null    $i_count
-     * @param   int|null    $i_block
-     * @return  array       The messages delivered to this consumer group (if any).
+     *
+     * @param string   $group
+     * @param string   $consumer
+     * @param array    $streams
+     * @param int|null $count
+     * @param int|null $block
+     *
+     * @return array The messages delivered to this consumer group (if any).
+     *
      * @link    https://redis.io/commands/xreadgroup
      * @example
      * <pre>
      * // Consume messages for 'mygroup', 'consumer1'
-     * $obj_redis->xReadGroup('mygroup', 'consumer1', ['s1' => 0, 's2' => 0]);
+     * $redis->xReadGroup('mygroup', 'consumer1', ['s1' => 0, 's2' => 0]);
      * // Read a single message as 'consumer2' for up to a second until a message arrives.
-     * $obj_redis->xReadGroup('mygroup', 'consumer2', ['s1' => 0, 's2' => 0], 1, 1000);
+     * $redis->xReadGroup('mygroup', 'consumer2', ['s1' => 0, 's2' => 0], 1, 1000);
      * </pre>
      */
-    public function xReadGroup($str_group, $str_consumer, $arr_streams, $i_count = null, $i_block = null)
+    public function xReadGroup($group, $consumer, $streams, $count = null, $block = null)
     {
     }
 
     /**
-     * This is identical to xRange except the results come back in reverse order. Also note that Redis reverses the order of "start" and "end".
-     * @param   string      $str_stream
-     * @param   string      $str_end
-     * @param   string      $str_start
-     * @param   int         $i_count
-     * @return  array       The messages in the range specified.
+     * This is identical to xRange except the results come back in reverse order.
+     * Also note that Redis reverses the order of "start" and "end".
+     *
+     * @param string $stream
+     * @param string $end
+     * @param string $start
+     * @param int    $count
+     *
+     * @return array The messages in the range specified
+     *
      * @link    https://redis.io/commands/xrevrange
      * @example
      * <pre>
-     * $obj_redis->xRevRange('mystream', '+', '-');
+     * $redis->xRevRange('mystream', '+', '-');
      * </pre>
      */
-    public function xRevRange($str_stream, $str_end, $str_start, $i_count = null)
+    public function xRevRange($stream, $end, $start, $count = null)
     {
     }
 
     /**
-     * Trim the stream length to a given maximum. If the "approximate" flag is pasesed, Redis will use your size as a hint but only trim trees in whole nodes (this is more efficient)..
-     * @param   string  $str_stream
-     * @param   int     $i_max_len
-     * @param   bool    $boo_approximate
-     * @return  int     The number of messages trimed from the stream.
+     * Trim the stream length to a given maximum.
+     * If the "approximate" flag is pasesed, Redis will use your size as a hint but only trim trees in whole nodes
+     * (this is more efficient)
+     *
+     * @param string $stream
+     * @param int    $maxLen
+     * @param bool   $isApproximate
+     *
+     * @return int The number of messages trimed from the stream.
+     *
      * @link    https://redis.io/commands/xtrim
      * @example
      * <pre>
      * // Trim to exactly 100 messages
-     * $obj_redis->xTrim('mystream', 100);
+     * $redis->xTrim('mystream', 100);
      * // Let Redis approximate the trimming
-     * $obj_redis->xTrim('mystream', 100, true);
+     * $redis->xTrim('mystream', 100, true);
      * </pre>
      */
-    public function xTrim($str_stream, $i_max_len, $boo_approximate)
+    public function xTrim($stream, $maxLen, $isApproximate)
     {
     }
-
 }
 
 class RedisException extends Exception
 {
 }
 
+/**
+ * @mixin \Redis
+ */
 class RedisArray
 {
     /**
      * Constructor
      *
-     * @param   string|array   $hosts  Name of the redis array from redis.ini or array of hosts to construct the array with
-     * @param   array          $opts   Array of options
+     * @param string|array $hosts Name of the redis array from redis.ini or array of hosts to construct the array with
+     * @param array        $opts  Array of options
+     *
      * @link    https://github.com/nicolasff/phpredis/blob/master/arrays.markdown
      */
     public function __construct($hosts, array $opts = null)
@@ -4515,21 +4956,22 @@ class RedisArray
     }
 
     /**
-     * @return  array   list of hosts for the selected array
+     * @return array list of hosts for the selected array
      */
     public function _hosts()
     {
     }
 
     /**
-     * @return  string  the name of the function used to extract key parts during consistent hashing
+     * @return string the name of the function used to extract key parts during consistent hashing
      */
     public function _function()
     {
     }
 
     /**
-     * @param   string  $key The key for which you want to lookup the host
+     * @param string $key The key for which you want to lookup the host
+     *
      * @return  string  the host to be used for a certain key
      */
     public function _target($key)
