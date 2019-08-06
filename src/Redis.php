@@ -3617,7 +3617,7 @@ class Redis
      * @param string $hashKey1
      * @param string ...$otherHashKeys
      *
-     * @return int Number of deleted fields
+     * @return int|false Number of deleted fields
      *
      * @link    https://redis.io/commands/hdel
      * @example
