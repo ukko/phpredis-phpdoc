@@ -3388,10 +3388,10 @@ class Redis
      * @see zUnionStore
      * @deprecated use Redis::zUnionStore()
      *
-     * @param $Output
-     * @param $ZSetKeys
+     * @param string     $Output
+     * @param array      $ZSetKeys
      * @param array|null $Weights
-     * @param string $aggregateFunction
+     * @param string     $aggregateFunction
      */
     public function zUnion($Output, $ZSetKeys, array $Weights = null, $aggregateFunction = 'SUM')
     {
