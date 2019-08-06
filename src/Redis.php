@@ -777,7 +777,7 @@ class Redis
      *
      * @param string|string[] $key
      *
-     * @return bool The number of keys tested that do exist
+     * @return int|bool The number of keys tested that do exist
      *
      * @link https://redis.io/commands/exists
      * @link https://github.com/phpredis/phpredis#exists
