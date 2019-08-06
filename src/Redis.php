@@ -4388,7 +4388,7 @@ class Redis
      * $redis->client('kill', <ip:port>); // Kill the process at ip:port
      * </pre>
      */
-    public function client($command, $value)
+    public function client($command, $value = '')
     {
     }
 
