@@ -3594,7 +3594,7 @@ class Redis
      *
      * @param string $key
      *
-     * @return int the number of items in a hash, FALSE if the key doesn't exist or isn't a hash
+     * @return int|false the number of items in a hash, FALSE if the key doesn't exist or isn't a hash
      *
      * @link    https://redis.io/commands/hlen
      * @example
