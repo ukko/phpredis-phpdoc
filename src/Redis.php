@@ -4548,7 +4548,7 @@ class Redis
      * @example
      * <pre>
      * $iterator = null;
-     * while($keys = $redis->scan($iterator)) {
+     * while(false !== ($keys = $redis->scan($iterator))) {
      *     foreach($keys as $key) {
      *         echo $key . PHP_EOL;
      *     }
