@@ -571,7 +571,7 @@ class Redis
      * a Redis::PIPELINE block is simply transmitted faster to the server, but without any guarantee of atomicity.
      * discard cancels a transaction.
      *
-     * @return resource Redis returns the Redis instance and enters multi-mode.
+     * @return Redis returns the Redis instance and enters multi-mode.
      * Once in multi-mode, all subsequent method calls return the same object until exec() is called.
      *
      * @link    https://redis.io/commands/multi
