@@ -3594,7 +3594,7 @@ class Redis
      *
      * @param string $key
      *
-     * @return int|false the number of items in a hash, FALSE if the key doesn't exist or isn't a hash
+     * @return int|bool the number of items in a hash, FALSE if the key doesn't exist or isn't a hash
      *
      * @link    https://redis.io/commands/hlen
      * @example
@@ -3617,7 +3617,7 @@ class Redis
      * @param string $hashKey1
      * @param string ...$otherHashKeys
      *
-     * @return int|false Number of deleted fields
+     * @return int|bool Number of deleted fields
      *
      * @link    https://redis.io/commands/hdel
      * @example
