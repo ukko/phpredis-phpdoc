@@ -1527,8 +1527,9 @@ class Redis
      * Removes and returns a random element from the set value at Key.
      *
      * @param string $key
+     * @param int    $count [optional]
      *
-     * @return string|mixed|bool "popped" value
+     * @return string|mixed|array|bool "popped" values
      * bool FALSE if set identified by key is empty or doesn't exist.
      *
      * @link    https://redis.io/commands/spop
@@ -1539,9 +1540,19 @@ class Redis
      * $redis->sAdd('key1' , 'set3');   // 'key1' => {'set3', 'set1', 'set2'}
      * $redis->sPop('key1');            // 'set1', 'key1' => {'set3', 'set2'}
      * $redis->sPop('key1');            // 'set3', 'key1' => {'set2'}
+     *
+     * // With count
+     * $redis->sAdd('key2', 'set1', 'set2', 'set3');
+     * var_dump( $redis->sPop('key2', 3) ); // Will return all members but in no particular order
+     *
+     * // array(3) {
+     * //   [0]=> string(4) "set2"
+     * //   [1]=> string(4) "set3"
+     * //   [2]=> string(4) "set1"
+     * // }
      * </pre>
      */
-    public function sPop($key)
+    public function sPop($key, $count = 1)
     {
     }
 
