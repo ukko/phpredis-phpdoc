@@ -1580,7 +1580,7 @@ class Redis
      *
      * // array(2) {
      * //   [0]=> string(2) "one"
-     * //   [1]=> string(2) "three"
+     * //   [1]=> string(5) "three"
      * // }
      * </pre>
      */
