@@ -3538,6 +3538,52 @@ class Redis
     }
 
     /**
+     * Can pop the highest scoring members from one ZSET.
+     *
+     * @param string $key
+     * @param int $count
+     *
+     * @return array Either an array with the key member and score of the highest element or an empty array
+     * if there is no element to pop.
+     *
+     * @since >= 5.0
+     * @link https://redis.io/commands/zpopmax
+     * @example
+     * <pre>
+     * // Pop the *lowest* scoring member from set `zs1`.
+     * $redis->zPopMax('zs1');
+     * // Pop the *lowest* 3 scoring member from set `zs1`.
+     * $redis->zPopMax('zs1', 3);
+     * </pre>
+     */
+    public function zPopMax($key, $count = 1)
+    {
+    }
+
+    /**
+     * Can pop the lowest scoring members from one ZSET.
+     *
+     * @param string $key
+     * @param int $count
+     *
+     * @return array Either an array with the key member and score of the lowest element or an empty array
+     * if there is no element to pop.
+     *
+     * @since >= 5.0
+     * @link https://redis.io/commands/zpopmin
+     * @example
+     * <pre>
+     * // Pop the *lowest* scoring member from set `zs1`.
+     * $redis->zPopMin('zs1');
+     * // Pop the *lowest* 3 scoring member from set `zs1`.
+     * $redis->zPopMin('zs1', 3);
+     * </pre>
+     */
+    public function zPopMin($key, $count = 1)
+    {
+    }
+
+    /**
      * Adds a value to the hash stored at key. If this value is already in the hash, FALSE is returned.
      *
      * @param string $key
