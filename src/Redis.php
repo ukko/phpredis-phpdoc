@@ -19,6 +19,10 @@ class Redis
     const OPT_READ_TIMEOUT      = 3;
     const OPT_SCAN              = 4;
     const OPT_SLAVE_FAILOVER    = 5;
+    const OPT_TCP_KEEPALIVE     = 6;
+    const OPT_COMPRESSION       = 7;
+    const OPT_REPLY_LITERAL     = 8;
+    const OPT_COMPRESSION_LEVEL = 9;
 
     /**
      * Cluster options
@@ -43,6 +47,20 @@ class Redis
     const SERIALIZER_JSON       = 4;
 
     /**
+     * Compressions
+     */
+    const COMPRESSION_NONE      = 0;
+    const COMPRESSION_LZF       = 1;
+    const COMPRESSION_ZSTD      = 2;
+
+    /**
+     * Compression ZSTD levels
+     */
+    const COMPRESSION_ZSTD_MIN = 1;
+    const COMPRESSION_ZSTD_DEFAULT = 3;
+    const COMPRESSION_ZSTD_MAX = 22;
+
+    /**
      * Multi
      */
     const ATOMIC                = 0;
@@ -58,6 +76,7 @@ class Redis
     const REDIS_LIST            = 3;
     const REDIS_ZSET            = 4;
     const REDIS_HASH            = 5;
+    const REDIS_STREAM          = 6;
 
     /**
      * Creates a Redis client
