@@ -36,6 +36,8 @@ class Redis
      */
     const SCAN_NORETRY          = 0;
     const SCAN_RETRY            = 1;
+    const SCAN_PREFIX           = 2;
+    const SCAN_NOPREFIX         = 3;
 
     /**
      * Serializers
