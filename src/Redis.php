@@ -2188,15 +2188,19 @@ class Redis
     }
 
     /**
-     * Authenticate the connection using a password.
+     * Authenticate the connection using a password or a username and password..
      * Warning: The password is sent in plain-text over the network.
      *
-     * @param string $password
+     * @param mixed $password
      *
      * @return bool TRUE if the connection is authenticated, FALSE otherwise
      *
      * @link    https://redis.io/commands/auth
-     * @example $redis->auth('foobared');
+     * @example
+     * <pre>
+     * $redis->auth('bar'); // Authenticate with the password 'bar'
+     * $redis->auth(['user' => 'foo', 'pass' => 'bar]); // Authenticate with the username 'foo', and password 'bar' 
+     * </pre>
      */
     public function auth($password)
     {
