@@ -2594,23 +2594,30 @@ class Redis
     /**
      * Removes all entries from the current database.
      *
+     * @param bool $async
+     *
      * @return bool Always TRUE
+     *
+     * @since   phpredis 4.1 The $async option was added
      * @link    https://redis.io/commands/flushdb
      * @example $redis->flushDB();
      */
-    public function flushDB()
+    public function flushDB($async)
     {
     }
 
     /**
      * Removes all entries from all databases.
      *
+     * @param bool $async
+     *
      * @return bool Always TRUE
      *
+     * @since   phpredis 4.1 The $async option was added
      * @link    https://redis.io/commands/flushall
      * @example $redis->flushAll();
      */
-    public function flushAll()
+    public function flushAll($async)
     {
     }
 
